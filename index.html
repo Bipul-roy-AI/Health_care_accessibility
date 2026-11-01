@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#126751">
+  <meta name="description" content="Find hospitals, clinics, diagnostic centres and pharmacies in Bangladesh with an open, free healthcare map.">
+  <title>ShasthoPath — Healthcare, closer to you</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./vendor/leaflet/leaflet.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#explore">Skip to facility search</a>
+  <header class="header">
+    <a class="brand" href="./" aria-label="ShasthoPath home"><span class="brand-icon" aria-hidden="true">✚</span><span>Shastho<span class="brand-light">Path</span><small>স্বাস্থ্যপথ · BANGLADESH</small></span></a>
+    <nav aria-label="Main navigation"><a class="active" href="#explore" data-i18n="explore">Find care</a><a href="#about" data-i18n="about">About the data</a><button id="language" class="language" type="button">বাংলা</button></nav>
+  </header>
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow"><span></span><span data-i18n="eyebrow">OPEN HEALTHCARE MAP OF BANGLADESH</span></p><h1 data-i18n="headline">The right care.<br>A little closer.</h1><p class="intro-copy" data-i18n="intro">Find hospitals, clinics and diagnostic centres in your area.<br>Free to explore. Built on open data.</p></div>
+      <div class="intro-note"><span class="note-symbol" aria-hidden="true">↗</span><p data-i18n="note">A starting point for your healthcare journey.</p><small data-i18n="noteSmall">Check services and opening hours with the facility before visiting.</small></div>
+    </section>
+    <section id="explore" class="explorer" aria-label="Healthcare facility explorer">
+      <aside class="sidebar">
+        <div class="search-controls">
+          <div class="section-title"><h2 data-i18n="findNearby">Find care nearby</h2><span class="free-badge" data-i18n="free">FREE & OPEN</span></div>
+          <label for="city" data-i18n="chooseArea">Start with an area</label>
+          <div class="area-row"><select id="city"><option value="dhaka">Dhaka / ঢাকা</option><option value="chattogram">Chattogram / চট্টগ্রাম</option><option value="sylhet">Sylhet / সিলেট</option><option value="rajshahi">Rajshahi / রাজশাহী</option><option value="khulna">Khulna / খুলনা</option><option value="barishal">Barishal / বরিশাল</option><option value="rangpur">Rangpur / রংপুর</option><option value="mymensingh">Mymensingh / ময়মনসিংহ</option></select><button type="button" class="location-button" id="locate" aria-label="Use my location" title="Use my location">⌖</button></div>
+          <label class="sr-only" for="search">Search loaded facilities</label><div class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search loaded facilities…" autocomplete="off"></div>
+          <div class="filters" role="group" aria-label="Facility type">
+            <button type="button" class="filter selected" data-type="all" aria-pressed="true" data-i18n="all">All facilities</button><button type="button" class="filter" data-type="hospital" aria-pressed="false" data-i18n="hospital">Hospitals</button><button type="button" class="filter" data-type="clinic" aria-pressed="false" data-i18n="clinic">Clinics</button><button type="button" class="filter" data-type="diagnostic" aria-pressed="false" data-i18n="diagnostic">Diagnostics</button><button type="button" class="filter" data-type="pharmacy" aria-pressed="false" data-i18n="pharmacy">Pharmacies</button><button type="button" class="filter" data-type="other" aria-pressed="false" data-i18n="other">Other care</button>
+          </div>
+          <label class="access-filter"><input id="wheelchair" type="checkbox"><span data-i18n="wheelchairFilter">Reported wheelchair access only</span></label>
+        </div>
+        <div class="results-heading"><span id="result-count" aria-live="polite">Loading facilities…</span><button id="refresh" type="button" data-i18n="refresh">Refresh</button></div>
+        <p id="status" role="status" class="status">Connecting to OpenStreetMap…</p>
+        <div id="results" class="results" aria-label="Healthcare facilities"></div>
+        <div class="sidebar-footer"><span class="live-dot"></span><span data-i18n="sourceLabel">Community mapped · OpenStreetMap</span></div>
+      </aside>
+      <div class="map-panel"><div id="map" aria-label="Map of healthcare facilities in Bangladesh"></div><button type="button" id="search-area" class="search-area" data-i18n="searchArea">Search this map area</button><p class="map-hint" data-i18n="mapHint">Move the map to explore another neighbourhood</p><div class="map-warning" id="map-warning" hidden>Map tiles could not load. Facility search is still available.</div></div>
+    </section>
+    <section id="about" class="about-grid">
+      <article><span class="about-number">01 / OPEN DATA</span><h2 data-i18n="openTitle">A map, not a complete directory.</h2><p data-i18n="openBody">Locations come from OpenStreetMap contributors, not an official DGHS registry. Some facilities are missing, outdated or incorrectly tagged. Results cover the searched map area only.</p></article>
+      <article><span class="about-number">02 / PLAN YOUR VISIT</span><h2 data-i18n="accessTitle">Accessibility starts with information.</h2><p data-i18n="accessBody">Wheelchair access and hours appear only when recorded. Unknown does not mean inaccessible. Distances, when shown, are straight-line estimates, not travel times.</p></article>
+      <article><span class="about-number">03 / COMMUNITY POWERED</span><h2 data-i18n="helpTitle">Know a place we're missing?</h2><p data-i18n="helpBody">Help improve the underlying map by adding or correcting a facility on OpenStreetMap. Updates appear here when the data service catches up and you refresh.</p><a href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer" data-i18n="contribute">Contribute to OpenStreetMap ↗</a></article>
+    </section>
+    <div class="medical-note" data-i18n="medicalNote">This is a location directory, not medical advice or an emergency service. For an emergency in Bangladesh, call 999.</div>
+  </main>
+  <footer><span>ShasthoPath <span class="footer-bn">স্বাস্থ্যপথ</span></span><span>Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · ODbL</span><a href="https://github.com/Bipul-roy-AI/Health_care_accessibility" target="_blank" rel="noopener noreferrer">Source code ↗</a></footer>
+</body>
+</html>
