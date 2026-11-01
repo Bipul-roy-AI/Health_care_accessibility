@@ -8,6 +8,8 @@
   };
   const en = { loading: 'Finding facilities…', loadingDetail: 'Fetching OpenStreetMap data. This may take a moment.', count: 'facilities', noResults: 'No matching facilities', tryAgain: 'Try another filter, or move the map and search again.', unknown: 'Wheelchair access: unknown', accessible: 'Wheelchair access reported', limited: 'Wheelchair access: limited', inaccessible: 'Wheelchair access: no', directions: 'Directions ↗', source: 'Data source ↗', unnamed: 'Unnamed healthcare facility', addressUnknown: 'Detailed address not recorded', hours: 'Hours', phone: 'Phone', error: 'Could not load facilities. Check your connection and try Refresh.', stale: 'Showing the last successful search. These results may be outside the current map area.', zoom: 'Zoom in to a city or neighbourhood, then search again.', locationDenied: 'Location unavailable. Choose an area or move the map instead.', outside: 'Your location appears outside Bangladesh. Choose an area in Bangladesh.', locate: 'Use my location', searchPlaceholder: 'Search loaded facilities…', tileError: 'Map tiles could not load. Facility search is still available.', fetched: 'Queried', subset: 'in the searched map area', moved: 'Map moved. Choose “Search this map area” to update facilities.', privacy: 'Distances are straight-line estimates from your location.', missingMap: 'The map could not load. Please refresh this page.' };
   document.querySelectorAll('[data-i18n]').forEach((el) => { en[el.dataset.i18n] = el.innerText; });
+  Object.assign(en, window.CareMapTools.translations.en);
+  Object.assign(bn, window.CareMapTools.translations.bn, { accessBody: 'শুরুর স্থান ও প্রতিষ্ঠান বেছে নিয়ে গাড়ি চলার পথ, সড়কপথের দূরত্ব ও আনুমানিক সময় দেখুন। কার্ডের দূরত্ব সরলরেখায়। হুইলচেয়ার প্রবেশ ও খোলার সময় কেবল তথ্য থাকলেই দেখানো হয়।' });
   let language = 'en';
   const t = (key) => (language === 'bn' ? bn[key] : en[key]) || en[key] || key;
   const textElement = (tag, className, text) => { const el = document.createElement(tag); el.className = className; el.textContent = text; return el; };
@@ -18,10 +20,6 @@
   if (!window.L) { status('missingMap', true); $('#result-count').textContent = '—'; return; }
   const map = L.map('map', { zoomControl: false, minZoom: 7, maxBounds: [[19.8, 86.8], [27.5, 94]], maxBoundsViscosity: 0.8 }).setView(cities.dhaka, 13);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
-  const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
-  let tileErrors = 0;
-  tiles.on('tileerror', () => { if (++tileErrors >= 3) { $('#map-warning').textContent = t('tileError'); $('#map-warning').hidden = false; } });
-  tiles.on('tileload', () => { tileErrors = 0; $('#map-warning').hidden = true; });
   const markerLayer = L.layerGroup().addTo(map);
   const symbols = { hospital: '✚', clinic: '+', diagnostic: '◈', pharmacy: '℞', other: '+' };
   const category = (tags) => {
@@ -34,6 +32,7 @@
   };
   const name = (f) => language === 'bn' ? f.tags['name:bn'] || f.tags.name || f.tags['name:en'] || t('unnamed') : f.tags['name:en'] || f.tags.name || f.tags['name:bn'] || t('unnamed');
   const address = (tags) => tags['addr:full'] || [tags['addr:housenumber'], tags['addr:street'], tags['addr:suburb'], tags['addr:city']].filter(Boolean).join(', ') || t('addressUnknown');
+  const tools = new CareMapTools(map, { t, getName: name, onOriginChange: (point) => { userLocation = point; render(); } });
   const distance = (f) => userLocation ? map.distance(userLocation, [f.lat, f.lon]) / 1000 : null;
   const sourceURL = (f) => `https://www.openstreetmap.org/${f.osmType}/${f.osmId}`;
   const directionsURL = (f) => `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${f.lat},${f.lon}`)}`;
@@ -58,14 +57,16 @@
       const top = textElement('div', 'facility-top', ''); top.append(textElement('span', 'facility-icon', symbols[f.category]));
       const copy = textElement('div', 'facility-copy', '');
       const title = textElement('button', 'facility-name', name(f)); title.type = 'button'; title.addEventListener('click', () => showFacility(f));
-      copy.append(title, textElement('p', 'facility-type', t(f.category) + (userLocation ? ` · ${distance(f).toFixed(1)} km` : ''))); top.append(copy); card.append(top);
+      copy.append(title, textElement('p', 'facility-type', t(f.category) + (userLocation ? ` · ${distance(f).toFixed(1)} km ${t('straightShort')}` : ''))); top.append(copy); card.append(top);
       card.append(textElement('p', 'facility-address', address(f.tags)));
       if (f.tags.opening_hours) card.append(textElement('p', 'facility-details', `${t('hours')}: ${f.tags.opening_hours}`));
       const phone = f.tags.phone || f.tags['contact:phone'];
       if (phone) card.append(textElement('p', 'facility-details', `${t('phone')}: ${phone}`));
       const access = wheelchair(f.tags); card.append(textElement('span', `tag ${access === 'accessible' ? 'positive' : ''}`, t(access)));
-      const actions = textElement('div', 'facility-actions', ''); actions.append(link(t('directions'), directionsURL(f)), link(t('source'), sourceURL(f))); card.append(actions); fragment.append(card);
-      const popup = document.createElement('div'); popup.append(textElement('strong', '', name(f)), textElement('div', '', t(f.category)), textElement('div', '', t(access)), link(t('directions'), directionsURL(f)));
+      const routeButton = textElement('button', 'route-here', t('routeHere')); routeButton.type = 'button'; routeButton.addEventListener('click', () => tools.selectDestination(f, true));
+      const actions = textElement('div', 'facility-actions', ''); actions.append(routeButton, link(t('directions'), directionsURL(f)), link(t('source'), sourceURL(f))); card.append(actions); fragment.append(card);
+      const popupRoute = textElement('button', '', t('routeHere')); popupRoute.type = 'button'; popupRoute.addEventListener('click', () => tools.selectDestination(f, true));
+      const popup = document.createElement('div'); popup.append(textElement('strong', '', name(f)), textElement('div', '', t(f.category)), textElement('div', '', t(access)), popupRoute, document.createElement('br'), link(t('directions'), directionsURL(f)));
       const marker = L.marker([f.lat, f.lon], { title: name(f), keyboard: true, icon: L.divIcon({ className: '', html: `<div class="map-pin ${f.category}"><span>${symbols[f.category]}</span></div>`, iconSize: [30, 30], iconAnchor: [15, 30] }) }).bindPopup(popup).addTo(markerLayer);
       marker.on('click', () => { selected = f.id; document.querySelectorAll('.facility').forEach((el) => { el.classList.toggle('selected', el.dataset.id === f.id); if (el.dataset.id === f.id) el.scrollIntoView({ block: 'nearest', behavior: 'auto' }); }); });
       markers.set(f.id, marker);
@@ -99,7 +100,10 @@
         const id = `${el.type}/${el.id}`; if (seen.has(id)) return []; seen.add(id);
         return [{ id, osmType: el.type, osmId: el.id, lat, lon, tags: el.tags, category: category(el.tags) }];
       });
-      fetchedAt = new Date(); selected = null; status('');
+      fetchedAt = new Date(); selected = null; tools.setFacilities(facilities);
+      const current = map.getBounds();
+      const currentBbox = [current.getSouth(), current.getWest(), current.getNorth(), current.getEast()].map((n) => n.toFixed(5)).join(',');
+      status(currentBbox === bbox ? '' : 'moved');
     } catch (error) {
       if (number !== requestNumber) return;
       preserveStatus = true; status('error', true);
@@ -108,7 +112,7 @@
       if (number === requestNumber) { setLoading(false); render(); if (preserveStatus && fetchedAt) $('#status').textContent += ` ${t('stale')}`; }
     }
   }
-  $('#city').addEventListener('change', () => { map.setView(cities[$('#city').value], 13); loadFacilities(); });
+  $('#city').addEventListener('change', () => { map.setView(cities[$('#city').value], 13, { animate: false }); loadFacilities(); });
   $('#search').addEventListener('input', render);
   $('#wheelchair').addEventListener('change', render);
   document.querySelectorAll('.filter').forEach((button) => button.addEventListener('click', () => {
@@ -118,17 +122,14 @@
   $('#refresh').addEventListener('click', loadFacilities);
   $('#search-area').addEventListener('click', loadFacilities);
   map.on('moveend', () => { if (!loading && !statusError && fetchedAt) status('moved'); });
-  let userMarker;
   $('#locate').addEventListener('click', () => {
     if (!navigator.geolocation) { status('locationDenied', true); return; }
     $('#locate').disabled = true;
     navigator.geolocation.getCurrentPosition(({ coords }) => {
       $('#locate').disabled = false;
       if (coords.latitude < 20.5 || coords.latitude > 26.7 || coords.longitude < 88 || coords.longitude > 92.7) { status('outside', true); return; }
-      userLocation = [coords.latitude, coords.longitude];
-      if (userMarker) map.removeLayer(userMarker);
-      userMarker = L.circleMarker(userLocation, { radius: 8, color: '#fff', weight: 3, fillColor: '#3478cb', fillOpacity: 1 }).addTo(map).bindTooltip(t('locate'));
-      map.setView(userLocation, 14); loadFacilities();
+      tools.setOrigin([coords.latitude, coords.longitude]);
+      map.setView(userLocation, 14, { animate: false }); loadFacilities();
     }, () => { $('#locate').disabled = false; status('locationDenied', true); }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 60000 });
   });
   $('#language').addEventListener('click', () => {
@@ -140,7 +141,7 @@
     $('#locate').title = t('locate'); $('#locate').setAttribute('aria-label', t('locate'));
     $('#map-warning').textContent = t('tileError');
     status(statusKey, statusError); if (preserveStatus && fetchedAt) $('#status').textContent += ` ${t('stale')}`;
-    $('#search-area').textContent = loading ? t('loading') : t('searchArea'); render();
+    $('#search-area').textContent = loading ? t('loading') : t('searchArea'); tools.translate(); render();
   });
   // Plain text is used for all external tags to prevent stored HTML injection.
   // No cookies, analytics, account, or persistent location storage.
