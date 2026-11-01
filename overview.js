@@ -1,0 +1,69 @@
+'use strict';
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const dictionaries = { en: { ...RegistryDirectory.translations.en, ...FacilityDetails.translations.en, routeHere: 'Open facility & directions', layersLoading: 'Loading the directory and division boundaries…', pointsNote: 'Each small coloured point is one mapped institution. Numbered green circles group nearby points; zoom in to separate them.', totalsNote: 'Division shading shows counts, not population-adjusted rates. Select a division to explore its institutions.', overviewFailed: 'The national dataset could not load. Reload this page or return to Find care.', snapshotLabel: 'Dataset snapshot', unspecified: 'Unspecified division', divisionSelected: 'Selected division', of: 'of', nationalOverview: 'National overview' }, bn: { ...RegistryDirectory.translations.bn, ...FacilityDetails.translations.bn, findCare: 'চিকিৎসা খুঁজুন', nationalOverview: 'সারাদেশের চিত্র', overviewEyebrow: 'বাংলাদেশ · প্রতিষ্ঠানের বিস্তার', overviewTitle: 'আমাদের প্রতিষ্ঠান কোথায়।', overviewIntro: 'বাংলাদেশের আট বিভাগে প্রতিষ্ঠানের অবস্থান ও ঘনত্ব দেখুন।', viewData: 'GitHub-এ তথ্য ও আমদানির ইতিহাস →', matchingInstitutions: 'মিল পাওয়া প্রতিষ্ঠান', usablePoints: 'প্রকাশিত মানচিত্রের স্থান আছে', unusablePoints: 'ব্যবহারযোগ্য স্থানাঙ্ক নেই', reportedDivisions: 'রেকর্ডে থাকা বিভাগ', divisionLabel: 'বিভাগ', allDivisions: 'সব বিভাগ', typeLabel: 'প্রতিষ্ঠানের ধরন', allTypes: 'সব ধরন', hospital: 'হাসপাতাল / স্বাস্থ্য কমপ্লেক্স', clinic: 'ক্লিনিক / স্বাস্থ্যকেন্দ্র', diagnostic: 'ডায়াগনস্টিক / ল্যাবরেটরি', pharmacy: 'ফার্মেসি', other: 'অন্যান্য প্রতিষ্ঠান / কার্যালয়', viewMode: 'মানচিত্রের ধরন', pointsMode: 'প্রতিষ্ঠানের স্থান', totalsMode: 'বিভাগ অনুযায়ী মোট', resetView: 'মানচিত্র রিসেট', pointLegend: 'পয়েন্টের চিহ্ন', divisionComparison: 'বিভাগের তুলনা', divisionComparisonNote: 'সংখ্যা DGHS-এ লেখা প্রশাসনিক বিভাগ অনুযায়ী; স্থানাঙ্ক দেখে নতুন বিভাগ নির্ধারণ করা হয়নি।', totalLabel: 'মোট', mappedLabel: 'মানচিত্রে', downloadIndex: 'প্রতিষ্ঠানের তালিকা ডাউনলোড (JSON)', distributionCaveat: 'এগুলো প্রতিষ্ঠানের সংখ্যা, জনসংখ্যা অনুযায়ী সেবাপ্রাপ্তির হার নয়। ব্যবহারযোগ্য স্থানাঙ্ক না থাকলেও মোট সংখ্যায় প্রতিষ্ঠান থাকে। প্রশাসনিক দপ্তর ও নিষ্ক্রিয় রেকর্ডও অন্তর্ভুক্ত; রেকর্ড থাকা মানেই বর্তমানে চিকিৎসা দেয় এমন নয়।', boundaryCaveat: 'বিভাগের সীমানা: সরলীকৃত geoBoundaries gbOpen ADM1, উৎসের বছর ২০১৫, তৈরি ২০২৩, CC0। পুরোনো বানানের নাম সমন্বয় করা হয়েছে। জমির সীমানা নির্ধারণে ব্যবহারযোগ্য নয়। DGHS-এর স্থানাঙ্ক ভুল হতে পারে।', routeHere: 'প্রতিষ্ঠান ও পথনির্দেশ খুলুন', layersLoading: 'প্রতিষ্ঠান ও বিভাগের সীমানা লোড হচ্ছে…', pointsNote: 'প্রতিটি ছোট রঙিন পয়েন্ট একটি প্রতিষ্ঠান। সংখ্যাসহ সবুজ বৃত্ত কাছাকাছি স্থানগুলো একত্র করে; আলাদা দেখতে জুম করুন।', totalsNote: 'বিভাগের রং প্রতিষ্ঠানের সংখ্যা বোঝায়, জনসংখ্যা অনুযায়ী হার নয়। একটি বিভাগ বেছে নিন।', overviewFailed: 'সারাদেশের তথ্য লোড হয়নি। পৃষ্ঠাটি রিফ্রেশ করুন বা চিকিৎসা অনুসন্ধানে ফিরুন।', snapshotLabel: 'তথ্য আনার সময়', unspecified: 'বিভাগ দেওয়া নেই', divisionSelected: 'বাছাই করা বিভাগ', of: 'এর মধ্যে' } };
+  document.querySelectorAll('[data-i18n]').forEach((e) => { dictionaries.en[e.dataset.i18n] = e.innerText; });
+  let language = 'en', selectedDivision = 'all', selectedType = 'all', mode = 'points';
+  const t = (key) => dictionaries[language][key] || dictionaries.en[key] || key;
+  const text = (tag, value, className = '') => { const e = document.createElement(tag); e.textContent = value; e.className = className; return e; };
+  const number = (n) => n.toLocaleString(language === 'bn' ? 'bn-BD' : 'en');
+  const aliases = { barisal: 'Barishal', barishal: 'Barishal', chittagong: 'Chattogram', chattogram: 'Chattogram', dhaka: 'Dhaka', khulna: 'Khulna', mymensingh: 'Mymensingh', rajshahi: 'Rajshahi', rajshani: 'Rajshahi', rangpur: 'Rangpur', sylhet: 'Sylhet' };
+  const namesBn = { Barishal: 'বরিশাল', Chattogram: 'চট্টগ্রাম', Dhaka: 'ঢাকা', Khulna: 'খুলনা', Mymensingh: 'ময়মনসিংহ', Rajshahi: 'রাজশাহী', Rangpur: 'রংপুর', Sylhet: 'সিলেট' };
+  const canonical = (value) => aliases[String(value).trim().toLowerCase()] || 'unspecified';
+  const divisionName = (name) => name === 'unspecified' ? t('unspecified') : language === 'bn' ? namesBn[name] || name : name;
+  const types = ['hospital', 'clinic', 'diagnostic', 'pharmacy', 'other'];
+  const map = L.map('national-map', { minZoom: 6, maxZoom: 19, zoomControl: false }).fitBounds([[20.6, 88], [26.65, 92.7]]);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  const street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution }).addTo(map);
+  const light = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution, className: 'light-basemap-tiles' });
+  L.control.layers({ 'OpenStreetMap': street, 'Light (OpenStreetMap)': light }, {}, { position: 'topright' }).addTo(map);
+  const registry = new RegistryDirectory();
+  const clusters = L.markerClusterGroup({ maxClusterRadius: 46, disableClusteringAtZoom: 17, showCoverageOnHover: false, animate: false }).addTo(map);
+  const markerById = new Map(); let institutions = [], boundaries, geojson, ready = false;
+  const getName = (f) => language === 'bn' ? f.tags['name:bn'] || f.tags.name : f.tags.name;
+  const details = new FacilityDetails({ t, getName, enrich: (f) => registry.enrich(f), onMap: (f) => { const marker = markerById.get(f.id); if (marker) clusters.zoomToShowLayer(marker, () => marker.openPopup()); else map.setView([f.lat, f.lon], 16); }, onRoute: (f) => { location.href = `./?source=dghs&institution=${encodeURIComponent(f.registry.id)}`; } });
+  const shade = (count) => count >= 10000 ? '#07503d' : count >= 5000 ? '#238060' : count >= 3000 ? '#64a183' : count >= 1000 ? '#a3c8a8' : count > 0 ? '#dbe9cc' : '#f0f1eb';
+  function selectDivision(value, fit = true) {
+    selectedDivision = value; $('#overview-division').value = value; render();
+    if (fit) { const layer = boundaries.getLayers().find((l) => canonical(l.feature.properties.shapeName) === value); if (layer) map.fitBounds(layer.getBounds(), { padding: [25, 25], animate: false }); else map.fitBounds([[20.6, 88], [26.65, 92.7]], { animate: false }); }
+  }
+  function render() {
+    if (!ready) return;
+    const matchingType = institutions.filter((f) => selectedType === 'all' || f.category === selectedType);
+    const selected = matchingType.filter((f) => selectedDivision === 'all' || canonical(f.registry.division) === selectedDivision);
+    const mapped = selected.filter(FacilityDetails.hasCoordinates);
+    $('#overview-total').textContent = number(selected.length); $('#overview-mapped').textContent = number(mapped.length); $('#overview-unmapped').textContent = number(selected.length - mapped.length);
+    $('#overview-divisions').textContent = number(new Set(selected.map((f) => canonical(f.registry.division)).filter((name) => name !== 'unspecified')).size);
+    const counts = new Map(Object.values(aliases).map((name) => [name, { total: 0, mapped: 0 }]));
+    for (const f of matchingType) { const name = canonical(f.registry.division); if (!counts.has(name)) counts.set(name, { total: 0, mapped: 0 }); const c = counts.get(name); c.total++; if (FacilityDetails.hasCoordinates(f)) c.mapped++; }
+    boundaries.eachLayer((layer) => { const name = canonical(layer.feature.properties.shapeName), count = counts.get(name)?.total || 0; layer.setStyle({ color: selectedDivision === name ? '#ce8c30' : '#496f59', weight: selectedDivision === name ? 3 : 1.3, fillColor: mode === 'totals' ? shade(count) : '#c8dcc0', fillOpacity: mode === 'totals' ? 0.8 : 0.12 }); layer.unbindTooltip(); layer.bindTooltip(text('span', `${divisionName(name)} · ${number(count)} ${t('directoryCount')}`), { sticky: true }); });
+    clusters.clearLayers(); markerById.clear();
+    if (mode === 'points') {
+      const markers = mapped.map((f) => { const marker = L.marker([f.lat, f.lon], { title: getName(f), icon: L.divIcon({ className: '', html: `<span class="overview-dot ${f.category}"></span>`, iconSize: [12, 12], iconAnchor: [6, 6] }) }).bindPopup(() => details.popup(f), { maxWidth: 330, maxHeight: 350 }); markerById.set(f.id, marker); return marker; });
+      clusters.addLayers(markers);
+    }
+    const tbody = document.createDocumentFragment();
+    [...counts].sort((a, b) => b[1].total - a[1].total).forEach(([name, count]) => { const tr = document.createElement('tr'); tr.classList.toggle('selected', name === selectedDivision); const td = document.createElement('td'); const button = text('button', divisionName(name)); button.type = 'button'; button.addEventListener('click', () => selectDivision(name)); td.append(button); tr.append(td, text('td', number(count.total)), text('td', number(count.mapped))); tbody.append(tr); });
+    $('#division-table-body').replaceChildren(tbody);
+    $('#legend-title').textContent = t(mode === 'points' ? 'pointLegend' : 'totalsMode');
+    const legend = document.createDocumentFragment();
+    if (mode === 'points') for (const type of types) { const row = text('div', '', 'legend-row'); const swatch = text('span', '', `legend-dot ${type}`); row.append(swatch, text('span', t(type)), text('strong', number(mapped.filter((f) => f.category === type).length))); legend.append(row); }
+    else for (const [label, count] of [['0', 0], ['1–999', 1], ['1,000–2,999', 1000], ['3,000–4,999', 3000], ['5,000–9,999', 5000], ['10,000+', 10000]]) { const row = text('div', '', 'legend-row'); const swatch = text('span', '', 'legend-shade'); swatch.style.background = shade(count); row.append(swatch, text('span', label)); legend.append(row); }
+    $('#point-legend').replaceChildren(legend); $('#legend-note').textContent = t(mode === 'points' ? 'pointsNote' : 'totalsNote');
+    $('#overview-snapshot').textContent = `${t('snapshotLabel')}: ${new Date(registry.metadata.generatedAt).toLocaleString()}`;
+  }
+  function populateDivisions() { const selected = $('#overview-division').value; $('#overview-division').replaceChildren(new Option(t('allDivisions'), 'all'), ...[...new Set(institutions.map((f) => canonical(f.registry.division)))].sort().map((name) => new Option(divisionName(name), name))); $('#overview-division').value = selected || 'all'; }
+  $('#overview-division').addEventListener('change', () => selectDivision($('#overview-division').value));
+  $('#overview-type').addEventListener('change', () => { selectedType = $('#overview-type').value; render(); });
+  document.querySelectorAll('[name="overview-mode"]').forEach((radio) => radio.addEventListener('change', () => { mode = radio.value; render(); }));
+  $('#overview-reset').addEventListener('click', () => { selectedType = 'all'; $('#overview-type').value = 'all'; selectDivision('all'); });
+  $('#language').addEventListener('click', () => { language = language === 'en' ? 'bn' : 'en'; document.documentElement.lang = language; document.querySelectorAll('[data-i18n]').forEach((e) => { e.textContent = t(e.dataset.i18n); }); $('#language').textContent = language === 'en' ? 'বাংলা' : 'English'; populateDivisions(); details.translate(); render(); });
+  $('#overview-status').textContent = t('layersLoading');
+  Promise.all([registry.load(), fetch('./data/boundaries/bangladesh-divisions.geojson').then((r) => { if (!r.ok) throw new Error('Boundary file unavailable'); return r.json(); })]).then(([records, geometry]) => {
+    if (geometry.type !== 'FeatureCollection' || geometry.features?.length !== 8 || new Set(geometry.features.map((f) => canonical(f.properties?.shapeName))).size !== 8 || geometry.features.some((f) => canonical(f.properties?.shapeName) === 'unspecified')) throw new Error('Invalid division boundaries');
+    institutions = records; geojson = geometry;
+    boundaries = L.geoJSON(geojson, { onEachFeature: (feature, layer) => layer.on('click', () => selectDivision(canonical(feature.properties.shapeName))) }).addTo(map);
+    populateDivisions(); ready = true; $('#overview-status').textContent = ''; render();
+  }).catch(() => { $('#overview-status').textContent = t('overviewFailed'); $('#overview-status').classList.add('error'); });
+})();

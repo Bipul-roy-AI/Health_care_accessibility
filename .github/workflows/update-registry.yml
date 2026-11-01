@@ -1,0 +1,60 @@
+name: Update DGHS detailed profiles
+on:
+  schedule:
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Profiles to enrich (1–1000)'
+        default: '500'
+        type: string
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: dghs-data-update
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - name: Install import dependency
+        run: python3 -m pip install -r scripts/requirements.txt
+      - name: Resume the next profile batch
+        env:
+          BATCH_SIZE: ${{ inputs.batch_size || '500' }}
+        run: python3 scripts/update_profile_batch.py --limit "$BATCH_SIZE" --delay 1 --max-seconds 1200
+      - name: Validate all extracted data
+        run: python3 scripts/validate_dghs.py
+      - name: Commit extracted institutional data
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/dghs
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update DGHS detailed institution profiles'
+            git pull --rebase origin main
+            git push origin main
+          fi
+      # GITHUB_TOKEN pushes do not trigger the separate Pages workflow.
+      - name: Prepare the updated site
+        run: |
+          mkdir _site
+          cp index.html overview.html app.js overview.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
+          cp -r vendor data _site/
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Publish updated data
+        id: deployment
+        uses: actions/deploy-pages@v4

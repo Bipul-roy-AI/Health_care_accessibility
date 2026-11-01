@@ -1,6 +1,7 @@
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const appURL = new URL(process.env.BASE_URL || 'http://127.0.0.1:8000'); appURL.searchParams.set('source','osm');
 
 // Deliberately fictional test fixtures; never included in the deployed website.
 const elements = [
@@ -41,7 +42,7 @@ const elements = [
     });
     const page=await context.newPage(); const errors=[];
     page.on('pageerror',err=>errors.push(err.message));
-    await page.goto(process.env.BASE_URL || 'http://127.0.0.1:8000');
+    await page.goto(appURL.href);
     await page.waitForFunction(()=>document.querySelector('#result-count').textContent==='5 facilities');
     assert.match(lastQuery,/ISO3166-1/); assert.match(lastQuery,/out center tags/);
     assert.equal(await page.locator('.facility').count(),5);
@@ -55,6 +56,7 @@ const elements = [
     await page.locator('#search').fill('');
     const directions=await page.locator('.facility-actions a').first().getAttribute('href'); assert.match(directions,/destination=23.8103%2C90.4125/);
     await page.locator('.facility-name').first().click(); await page.waitForSelector('.leaflet-popup-content'); assert.match(await page.locator('.leaflet-popup-content').innerText(),/Test Hospital/);
+    await page.locator('.facility').first().locator('.view-details').click(); await page.waitForSelector('.facility-dialog[open]'); assert.match(await page.locator('.details-body').innerText(),/Wheelchair access/); assert.match(await page.locator('.details-body').innerText(),/Not recorded/); await page.keyboard.press('Escape'); assert.equal(await page.locator('.facility-dialog').isVisible(),false);
     await page.locator('#language').click(); assert.equal(await page.locator('html').getAttribute('lang'),'bn'); assert.match(await page.locator('.facility-name').first().innerText(),/পরীক্ষা/);
     await page.locator('#language').click(); assert.equal(await page.locator('h1 br').count(),1);
     await page.locator('#locate').click(); await page.waitForFunction(()=>document.querySelector('.facility-type').textContent.includes('km'));
@@ -92,8 +94,8 @@ const elements = [
     await page.locator('#get-route').click(); await page.waitForFunction(()=>!document.querySelector('#route-summary').hidden);
     // Independent basemaps and OSM geometry overlays.
     await page.locator('.leaflet-control-layers').hover();
-    await page.locator('.leaflet-control-layers-base label').filter({hasText:'CARTO'}).locator('input').check();
-    await page.waitForFunction(()=>document.querySelector('.leaflet-control-attribution').textContent.includes('CARTO')); await page.waitForTimeout(100); assert.equal(cartoTiles>0,true);
+    await page.locator('.leaflet-control-layers-base label').filter({hasText:'Light map'}).locator('input').check();
+    await page.waitForSelector('.light-basemap-tiles img.leaflet-tile-loaded'); assert.match(await page.locator('.light-basemap-tiles').evaluate(e=>getComputedStyle(e).filter),/grayscale/);
     await page.locator('.facility-name').filter({hasText:'Test Hospital'}).click(); await page.waitForTimeout(350);
     await page.locator('.leaflet-control-layers').hover();
     const roads=page.locator('.leaflet-control-layers-overlays label').filter({hasText:'Road network'}).locator('input');
@@ -115,8 +117,8 @@ const elements = [
     await page.screenshot({path:'/tmp/shasthopath-desktop.png',fullPage:true});
     assert.deepEqual(errors,[]);
     console.log('PASS: 18 browser checks — map/list, categories, wheelchair filter, text search, empty search, safe external tags, directions, popups, Bangla/English, geolocation/distances, rate-limit retention, partial-response rejection, empty response, recovery, cancellation, zoom guard, mobile layout, no JavaScript errors. Live data was mocked.');
-    console.log('PASS: driving geometry, road/straight distances, ETA, directions and safe instructions, coordinate order, no-route/unavailable/invalid responses, stale route cancellation, map-picked and coordinate origins, clear journey, bilingual routes, CARTO basemap, road/building overlays and service errors. External services were mocked.');
+    console.log('PASS: driving geometry, road/straight distances, ETA, directions and safe instructions, coordinate order, no-route/unavailable/invalid responses, stale route cancellation, map-picked and coordinate origins, clear journey, bilingual routes, free light basemap, road/building overlays and service errors. External services were mocked.');
     // Fresh load failures must show a recoverable error instead of an endless spinner.
-    mode='failure'; const fresh=await context.newPage(); await fresh.goto(process.env.BASE_URL || 'http://127.0.0.1:8000'); await fresh.waitForSelector('#status.error'); assert.equal(await fresh.locator('#refresh').isEnabled(),true); console.log('PASS: initial data failure is recoverable.');
+    mode='failure'; const fresh=await context.newPage(); await fresh.goto(appURL.href); await fresh.waitForSelector('#status.error'); assert.equal(await fresh.locator('#refresh').isEnabled(),true); console.log('PASS: initial data failure is recoverable.');
   } finally {await browser.close();}
 })().catch(err=>{console.error(err);process.exitCode=1;});
