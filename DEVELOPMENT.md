@@ -71,6 +71,8 @@ use **GitHub Actions** as its source. The daily data workflow validates, commits
 and deploys its own data update because GITHUB_TOKEN-generated pushes do not
 trigger the separate Pages workflow. If automatic commits are denied, check the
 repository's Actions policy permits the workflow's `contents: write` permission.
+Generated HTML includes content-hash versions on CSS/JavaScript references so
+returning visitors receive the latest map code and styles after deployment.
 
 Street and light basemaps use OpenStreetMap tiles; light is a local colour style.
 CARTO was removed after its tile service returned API-key-required images.

@@ -55,6 +55,7 @@ jobs:
           cp -r vendor _site/vendor
           cp -r data _site/data
           touch _site/.nojekyll
+          python3 scripts/version_assets.py --directory _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
