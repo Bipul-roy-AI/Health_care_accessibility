@@ -48,7 +48,7 @@ jobs:
       - name: Prepare the updated site
         run: |
           mkdir _site
-          cp index.html overview.html app.js overview.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
+          cp index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
           cp -r vendor data _site/
           touch _site/.nojekyll
           python3 scripts/version_assets.py --directory _site

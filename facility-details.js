@@ -7,7 +7,7 @@
   };
   const create = (tag, text, className = '') => { const element = document.createElement(tag); if (text != null) element.textContent = String(text); element.className = className; return element; };
   const registryURL = 'https://hrm.dghs.gov.bd/index.php/public/facility-registry';
-  const hasCoordinates = (f) => Number.isFinite(f.lat) && Number.isFinite(f.lon) && Math.abs(f.lat) <= 90 && Math.abs(f.lon) <= 180;
+  const hasCoordinates = (f) => Number.isFinite(f.lat) && Number.isFinite(f.lon) && Math.abs(f.lat) <= 90 && Math.abs(f.lon) <= 180 && (!f.registry || (f.registry.coordinateStatus === 'published' && f.registry.boundaryValidated === true));
   function safeURL(value) {
     if (typeof value !== 'string' || !value.trim()) return null;
     if (/^[a-z][a-z0-9+.-]*:/i.test(value) && !/^https?:\/\//i.test(value)) return null;
@@ -49,12 +49,13 @@
       if (hasCoordinates(f)) {
         const mapButton = create('button', this.t('showOnMap')); mapButton.type = 'button'; mapButton.addEventListener('click', () => { this.dialog.close(); this.options.onMap(f); });
         const routeButton = create('button', this.t('routeHere')); routeButton.type = 'button'; routeButton.addEventListener('click', () => { this.dialog.close(); this.options.onRoute(f); }); buttons.append(mapButton, routeButton);
-      } else content.append(create('p', this.t('noCoordinates'), 'details-warning'));
+      } else content.append(create('p', this.t(f.registry?.coordinateStatus === 'outside' ? 'outsideBoundaryDetails' : 'noCoordinates'), 'details-warning'));
       buttons.append(externalLink(this.t('originalRecord'), this.sourceLink(f))); content.append(buttons);
       content.append(this.section('basicDetails', [['nameLabel', tags.name || this.options.getName(f)], ['nameBn', tags['name:bn']], ['nameEn', tags['name:en']], ['typeLabel', tags.healthcare || tags.amenity || f.registry?.type], ['ownership', tags.ownership], ['operator', tags.operator], ['operatorType', tags['operator:type']], ['institutionCode', f.registry?.code || tags['ref:DGHS'] || tags['ref:moh']]]));
       const address = tags['addr:full'] || [tags['addr:housenumber'], tags['addr:street'], tags['addr:suburb'], tags['addr:city']].filter(Boolean).join(', ');
       const website = tags.website || tags['contact:website'];
       content.append(this.section('contactDetails', [['addressLabel', address], ['districtLabel', tags['addr:district']], ['cityLabel', tags['addr:city']], ['phoneLabel', tags.phone || tags['contact:phone']], ['emailLabel', tags.email || tags['contact:email']], ['websiteLabel', website, safeURL(website)], ['coordinates', hasCoordinates(f) ? `${f.lat.toFixed(6)}, ${f.lon.toFixed(6)}` : null]]));
+      if (f.registry?.reportedPoint) content.append(this.section('coordinateReview', [['reportedCoordinates', f.registry.reportedPoint.map((n) => n.toFixed(6)).join(', ')]]));
       content.append(this.section('careDetails', [['level', tags['healthcare:level']], ['specialty', tags['healthcare:speciality'] || tags['healthcare:specialty']], ['emergency', tags.emergency], ['beds', tags.beds], ['openingHours', tags.opening_hours], ['wheelchairLabel', tags.wheelchair], ['wheelchairDescription', tags['wheelchair:description']], ['toiletsWheelchair', tags['toilets:wheelchair']], ['fee', tags.fee]]));
       if (f.registry?.fields) {
         if (!f.registry.detailsLoaded) { const state = create('p', this.t(this.loadError ? 'fullDetailsError' : 'fullDetailsLoading'), 'details-load-state'); state.setAttribute('role', 'status'); content.append(state); }

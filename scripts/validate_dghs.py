@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from sync_dghs import ROOT, coordinates
+from country_boundary import COUNTRY, SHA256
 
 
 def validate(directory=ROOT / "data" / "dghs"):
@@ -16,7 +17,8 @@ def validate(directory=ROOT / "data" / "dghs"):
     assert len(set(ids)) == len(ids)
     assert all(identifier.isdigit() and int(identifier) > 0 for identifier in ids)
     indexed = {record["id"]: record for record in records}
-    coverage = {"published": 0, "missing": 0, "invalid": 0}
+    coverage = {"published": 0, "missing": 0, "invalid": 0, "outside": 0}
+    assert index["coordinateValidation"]["boundarySHA256"] == SHA256
     extracted_ids, completed = set(), 0
     allowed = set(index["fields"]) | {"_profile"}
     for path in sorted((directory / "profiles").glob("*.json")):
@@ -31,6 +33,11 @@ def validate(directory=ROOT / "data" / "dghs"):
             lat, lon, status = coordinates(row.get("latitude"), row.get("longitude"))
             assert (record["lat"], record["lon"], record["coordinateStatus"]) == (lat, lon, status)
             coverage[status] += 1
+            if status == "published":
+                assert COUNTRY.contains(lat, lon), "A plotted point is outside Bangladesh"
+            if status == "outside":
+                assert record["reportedLatitude"] == row.get("latitude")
+                assert record["reportedLongitude"] == row.get("longitude")
             if row.get("_profile"):
                 profile = row["_profile"]
                 assert profile["facilityId"] == identifier and profile["fields"].get("Organaization Name")
@@ -41,6 +48,9 @@ def validate(directory=ROOT / "data" / "dghs"):
     assert extracted_ids == set(ids), "Index and profile chunks contain different institutions"
     assert coverage == index["coordinateCoverage"]
     assert completed == index.get("profileProgress", {}).get("completed", 0)
+    review = json.loads((directory / "coordinate-review.json").read_text(encoding="utf-8"))
+    assert review["boundarySHA256"] == SHA256 and review["count"] == coverage["outside"]
+    assert {row["id"] for row in review["records"]} == {row["id"] for row in records if row["coordinateStatus"] == "outside"}
     print(f"PASS: {len(records):,} unique institutions, {len(index['fields'])} report fields, {coverage['published']:,} usable points, {completed} detailed profiles; every chunk and coordinate checked.")
 
 

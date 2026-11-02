@@ -13,7 +13,7 @@ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base.href);
   await page.waitForFunction(count=>document.querySelector('#result-count').textContent===`${count.toLocaleString('en')} facilities`,index.count,{timeout:60000});
-  assert.equal(await page.locator('.facility').count(),75);assert.equal(await page.locator('.marker-cluster').count()>0,true);
+  assert.equal(await page.locator('.facility').count(),75);assert.equal(await page.locator('.leaflet-overlay-pane canvas').count()>0,true);
   assert.match(await page.locator('#directory-info').innerText(),/with map points/);
   const first=await page.locator('.facility').first().getAttribute('data-id');await page.locator('#next-page').click();assert.notEqual(await page.locator('.facility').first().getAttribute('data-id'),first);
   const example=index.records.find(r=>r.id==='2');await page.locator('#search').fill(example.code);
@@ -24,6 +24,7 @@ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42
   assert.equal(await page.locator('.details-profile-text').count(),1);await page.locator('.details-profile-text summary').click();assert.match(await page.locator('.details-profile-text pre').innerText(),/Basic Information/);
   const source=await page.locator('.details-actions a').first().getAttribute('href');assert.match(source,/facilities\/2\/profile\?tab=detailed-information/);
   await page.keyboard.press('Escape');await card.locator('.facility-name').click();await page.waitForSelector('.leaflet-popup-content');assert.match(await page.locator('.leaflet-popup-content').innerText(),/23\.78087, 90\.39900/);
+  const excluded=index.records.find(r=>r.coordinateStatus==='outside' && r.code);await page.locator('#search').fill(excluded.code);const outside=page.locator(`.facility[data-id="dghs/${excluded.id}"]`);await outside.waitFor();assert.equal(await outside.locator('.route-here').count(),0);assert.match(await outside.innerText(),/outside the Bangladesh boundary/);
   const missing=index.records.find(r=>r.coordinateStatus==='missing' && r.code);await page.locator('#search').fill(missing.code);const absent=page.locator(`.facility[data-id="dghs/${missing.id}"]`);await absent.waitFor();assert.equal(await absent.locator('.route-here').count(),0);assert.match(await absent.innerText(),/No published coordinates/);
   await absent.locator('.view-details').click();await page.waitForSelector('.facility-dialog[open]');assert.equal(await page.locator('.facility-dialog .details-actions button').count(),0);await page.keyboard.press('Escape');
   await page.locator('#search').fill(example.code);await card.waitFor();await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('lang'),'bn');assert.match(await card.innerText(),/স্বাস্থ্য/);await page.locator('#language').click();
@@ -32,18 +33,21 @@ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42
   await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'/tmp/directory-desktop.png',fullPage:true});
   await page.goto(new URL('overview.html',base).href);await page.waitForFunction(count=>document.querySelector('#overview-total').textContent===count.toLocaleString('en'),index.count,{timeout:60000});
   assert.equal(await page.locator('#overview-mapped').innerText(),index.coordinateCoverage.published.toLocaleString('en'));
-  assert.equal(await page.locator('.leaflet-overlay-pane path').count(),8);
+  assert.equal(await page.locator('.leaflet-overlay-pane path.leaflet-interactive').count(),8);
+  assert.match(await page.locator('#boundary-summary').innerText(),/outside-boundary/);
+  assert.equal(await page.evaluate(async()=>{const c=await CountryBoundary.load();const r=new RegistryDirectory();const records=await r.load();return records.every(f=>!Number.isFinite(f.lat)||c.contains(f.lat,f.lon));}),true);
+  assert.equal(await page.evaluate(async()=>{const c=await CountryBoundary.load();return !c.contains(23.8315,91.2868)&&c.contains(20.627,92.322);}),true);
   const totals=await page.locator('#division-table-body tr').evaluateAll(rows=>rows.reduce((sum,row)=>sum+Number(row.children[1].textContent.replaceAll(',','')),0));assert.equal(totals,index.count);
   const pointLegend=await page.locator('#point-legend strong').evaluateAll(nodes=>nodes.reduce((sum,node)=>sum+Number(node.textContent.replaceAll(',','')),0));assert.equal(pointLegend,index.coordinateCoverage.published);
   await page.locator('[name="overview-mode"][value="totals"]').check();assert.equal(await page.locator('.legend-shade').count(),6);assert.equal(await page.locator('#legend-title').innerText(),'Division totals');
   await page.locator('#overview-division').selectOption('Dhaka');const dhaka=index.records.filter(r=>r.division_name==='Dhaka');assert.equal(await page.locator('#overview-total').innerText(),dhaka.length.toLocaleString('en'));
   await page.locator('#overview-reset').click();assert.equal(await page.locator('#overview-total').innerText(),index.count.toLocaleString('en'));
-  await page.locator('.leaflet-overlay-pane path').first().dispatchEvent('click');assert.notEqual(await page.locator('#overview-division').inputValue(),'all');await page.locator('#overview-reset').click();
+  await page.locator('.leaflet-overlay-pane path.leaflet-interactive').first().dispatchEvent('click');assert.notEqual(await page.locator('#overview-division').inputValue(),'all');await page.locator('#overview-reset').click();
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('lang'),'bn');assert.match(await page.locator('#legend-title').innerText(),/বিভাগ/);await page.locator('#language').click();
   await page.locator('[name="overview-mode"][value="points"]').check();await page.screenshot({path:'/tmp/overview-desktop.png',fullPage:true});
   await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.screenshot({path:'/tmp/overview-mobile.png',fullPage:true});
   const deep=new URL(base);deep.searchParams.set('institution','2');await page.goto(deep.href);await page.waitForSelector('.facility-dialog[open]',{timeout:60000});assert.match(await page.locator('#details-title').innerText(),/Directorate General/);
   assert.deepEqual(errors,[]);
-  console.log(`PASS: real ${index.count.toLocaleString()}-record DGHS snapshot, pagination, institution-code search, full profile/chunk loading, exact source coordinates/links, no guessed map points for missing coordinates, Bangla, map-area filter, deep links, eight division polygons, clustered points, legends, division totals, filters and mobile layouts. Basemap tiles were mocked.`);
+  console.log(`PASS: real ${index.count.toLocaleString()}-record DGHS snapshot, pagination, institution-code search, full profile/chunk loading, exact source coordinates/links, no guessed map points for missing coordinates, Bangla, map-area filter, deep links, eight division polygons, boundary-checked points, legends, division totals, filters and mobile layouts. Basemap tiles were mocked.`);
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

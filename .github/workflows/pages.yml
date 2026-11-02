@@ -29,6 +29,8 @@ jobs:
           node --check facility-details.js
           node --check registry-directory.js
           node --check overview.js
+          node --check country-boundary.js
+          node --check helplines.js
           python3 scripts/validate_dghs.py
           python3 -m unittest discover -s tests -p 'test_*.py'
           python3 -m http.server 8000 --bind 127.0.0.1 > "$RUNNER_TEMP/shastho-http.log" 2>&1 &
@@ -40,6 +42,7 @@ jobs:
           done
           NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/smoke.cjs
           NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/directory.cjs
+          NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/helplines.cjs
   deploy:
     needs: test
     runs-on: ubuntu-24.04
@@ -51,7 +54,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir _site
-          cp index.html overview.html app.js overview.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
+          cp index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
           cp -r vendor _site/vendor
           cp -r data _site/data
           touch _site/.nojekyll

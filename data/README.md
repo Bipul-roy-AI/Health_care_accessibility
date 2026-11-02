@@ -11,12 +11,12 @@ All extracted institutional values used by the site are committed here.
   division geometries, from geoBoundaries gbOpen BGD ADM1.
 - `boundaries/source-metadata.json`: the boundary source and CC0 licence metadata.
 
-The initial DGHS import covers all **39,442 IDs** in the public registry, including
-four inactive entries. Initially **29,379** had usable published coordinates,
-**10,061** had blank coordinates and **2** had invalid coordinates. Missing and
-invalid points are not guessed, swapped or replaced with district centres.
-Subsequent dated profile batches may improve these fields; current counts are in
-`dghs/index.json` and on the site.
+The complete DGHS import covers all **39,442 IDs** in the public registry, including
+four inactive entries. Currently **28,464** coordinates pass the national polygon
+check, **915** are outside that boundary, **10,061** are missing and **2** are invalid.
+All institution records and original source fields are retained. No coordinates
+are guessed, swapped or replaced with district centres. Current counts and dated
+profile-batch progress are recorded in `dghs/index.json`.
 
 DGHS source: <https://hrm.dghs.gov.bd/index.php/public/facility-registry>.
 Each record links to its own detailed-information profile. The report source URL
@@ -33,3 +33,27 @@ label Rajshani→Rajshahi. The original source labels remain in the GeoJSON.
 These are orientation boundaries, not cadastral survey geometry.
 
 See [development and data updates](../DEVELOPMENT.md) for import/validation commands.
+
+## National boundary checks
+
+Country geometry is stored in `boundaries/bangladesh-country.geojson` with its
+source, timestamp, licence and checksum in `country-source-metadata.json`. It is
+derived from OpenStreetMap Bangladesh relation 184640, includes offshore islands,
+and is licensed under ODbL. This is separate from the CC0 division outlines.
+
+A polygon test (not a bounding rectangle) is applied during imports, daily updates
+and browser loading. Currently 28,464 points pass; 915 reported coordinates lie
+outside the stored national boundary and are withheld from maps and routing.
+Their original coordinates and institution details are preserved in profile chunks
+and `dghs/coordinate-review.json`. Missing/invalid coordinates are also retained
+without inventing replacement points. Individual points are drawn directly, so
+cluster averages cannot appear across the border. Boundary checks do not establish
+that a point identifies the correct building or entrance.
+
+## Emergency and helpline contacts
+
+`helplines.json` contains 16 national service contacts, categories, source URLs and
+source-check status. Fourteen numbers were checked against government or official
+service publications. Child and legal-aid entries are labelled as references
+because their agency websites were unavailable during this update. Call charges,
+opening hours and response availability are controlled by the service provider.

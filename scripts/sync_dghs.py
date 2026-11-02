@@ -23,6 +23,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from openpyxl import load_workbook
+from country_boundary import COUNTRY, SHA256 as COUNTRY_SHA256, write_coordinate_review
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = "https://hrm.dghs.gov.bd/index.php/public/facility-registry/reports/organization-list"
@@ -112,6 +113,8 @@ def coordinates(lat, lon):
         return None, None, "invalid"
     if not math.isfinite(a) or not math.isfinite(b) or not (20.5 <= a <= 26.7 and 88 <= b <= 92.7):
         return None, None, "invalid"
+    if not COUNTRY.contains(a, b):
+        return None, None, "outside"
     return a, b, "published"
 
 
@@ -155,13 +158,15 @@ def write_directory(records, fields, output, source_url, source_total=None):
     try:
         (staging / "profiles").mkdir()
         index_records, chunks = [], {}
-        coverage = {"published": 0, "missing": 0, "invalid": 0}
+        coverage = {"published": 0, "missing": 0, "invalid": 0, "outside": 0}
         for row in records:
             identifier = row["id"]
             lat, lon, quality = coordinates(row.get("latitude"), row.get("longitude"))
             coverage[quality] += 1
             summary = {key: row.get(key, "") for key in SUMMARY_FIELDS if row.get(key, "")}
             summary.update(id=identifier, lat=lat, lon=lon, coordinateStatus=quality, retrievedAt=generated)
+            if quality == "outside":
+                summary.update(reportedLatitude=row.get("latitude"), reportedLongitude=row.get("longitude"))
             summary.pop("latitude", None)
             summary.pop("longitude", None)
             index_records.append(summary)
@@ -178,6 +183,7 @@ def write_directory(records, fields, output, source_url, source_total=None):
                         row["_profile"] = previous_profile
             (staging / "profiles" / f"{chunk_id}.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         metadata = {"schemaVersion": 1, "source": "DGHS facility registry", "sourceUrl": source_url, "profileUrlTemplate": PROFILE, "generatedAt": generated, "count": len(records), "sourceTotal": source_total, "coordinateCoverage": coverage, "chunkSize": CHUNK_SIZE, "fields": fields, "records": index_records}
+        metadata["coordinateValidation"] = {"method": "point-in-polygon", "boundarySHA256": COUNTRY_SHA256, "boundary": "OpenStreetMap Bangladesh relation 184640"}
         enriched = {identifier for chunk in chunks.values() for identifier, row in chunk.items() if row.get("_profile")}
         if enriched:
             previous_progress = (previous_index or {}).get("profileProgress", {})
@@ -185,6 +191,7 @@ def write_directory(records, fields, output, source_url, source_total=None):
             record_ids = {row["id"] for row in index_records}
             metadata["profileProgress"] = {**previous_progress, "completed": len(enriched), "total": len(index_records), "nextOffset": next_offset, "retryIds": [identifier for identifier in previous_progress.get("retryIds", []) if identifier in record_ids]}
         (staging / "index.json").write_text(json.dumps(metadata, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        write_coordinate_review(staging, index_records)
         backup = output.with_name(output.name + ".previous")
         if backup.exists():
             raise ValueError(f"Preserved snapshot already exists at {backup}; inspect it before importing")

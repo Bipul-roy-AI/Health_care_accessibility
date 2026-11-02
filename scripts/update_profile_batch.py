@@ -9,6 +9,7 @@ import time
 from urllib.request import Request, urlopen
 
 from sync_dghs import ROOT, PROFILE, PublicProfileParser, SUMMARY_FIELDS, coordinates
+from country_boundary import write_coordinate_review
 
 
 def atomic_json(path, data):
@@ -70,6 +71,11 @@ def main():
                     else:
                         summary.pop(key, None)
             summary["lat"], summary["lon"], summary["coordinateStatus"] = coordinates(row.get("latitude"), row.get("longitude"))
+            if summary["coordinateStatus"] == "outside":
+                summary.update(reportedLatitude=row.get("latitude"), reportedLongitude=row.get("longitude"))
+            else:
+                summary.pop("reportedLatitude", None)
+                summary.pop("reportedLongitude", None)
             summary["retrievedAt"] = retrieved
             updated += 1
         except Exception as error:
@@ -91,10 +97,11 @@ def main():
     now = datetime.now(timezone.utc).isoformat()
     index.setdefault("reportExportedAt", index["generatedAt"])
     index["generatedAt"] = now
-    coverage = {"published": 0, "missing": 0, "invalid": 0}
+    coverage = {"published": 0, "missing": 0, "invalid": 0, "outside": 0}
     for record in records:
         coverage[record["coordinateStatus"]] += 1
     index["coordinateCoverage"] = coverage
+    write_coordinate_review(args.directory, records)
     remaining_retries = [identifier for identifier in retry_ids if identifier not in queue[:processed]]
     index["profileProgress"] = {"completed": completed, "total": len(records), "nextOffset": next_offset, "retryIds": list(dict.fromkeys(remaining_retries + failures)), "lastBatchAt": now, "lastBatchSize": updated}
     atomic_json(index_path, index)

@@ -19,6 +19,6 @@ def version(match):
     return f"{match[1]}{match[2]}?v={digest}{match[3]}"
 
 
-for name in ("index.html", "overview.html"):
+for name in ("index.html", "overview.html", "helplines.html"):
     path = root / name
     path.write_text(pattern.sub(version, path.read_text(encoding="utf-8")), encoding="utf-8")

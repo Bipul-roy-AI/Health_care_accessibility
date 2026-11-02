@@ -1,6 +1,6 @@
 # Development and data updates
 
-This is a static website. Leaflet and its marker-clustering plugin are bundled
+This is a static website. Leaflet is bundled
 with their licences. No production package installation, database or paid API key
 is needed. Use the existing checkout; do not create a worktree unless requested.
 
@@ -55,9 +55,12 @@ node --check map-tools.js
 node --check facility-details.js
 node --check registry-directory.js
 node --check overview.js
+node --check country-boundary.js
+node --check helplines.js
 python3 scripts/validate_dghs.py
 NODE_PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules node tests/smoke.cjs
 NODE_PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules node tests/directory.cjs
+NODE_PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules node tests/helplines.cjs
 ```
 
 Browser checks require Playwright and Chromium, and a running local HTTP server.
@@ -85,3 +88,18 @@ The driving estimate excludes live traffic and wheelchair-safety certification.
 Relevant cloud network hosts: `hrm.dghs.gov.bd`, `tile.openstreetmap.org`,
 `overpass-api.de`, `router.project-osrm.org`, and `bipul-roy-ai.github.io`.
 Cloud network changes must be applied before live checks can use them.
+
+## Geographic quality
+
+The country outline uses complete outer member ways of OpenStreetMap relation
+184640. The national geometry is pinned by SHA-256 in both country-boundary.js and
+scripts/country_boundary.py. Latitude-band edge indexing keeps point-in-polygon
+checks fast without simplifying the stored boundary. Holes and multiple polygons
+are handled. A border geometry change requires source verification, revalidation
+of the index and review file, refreshed screenshots, and the full test suite.
+
+Every import and profile batch preserves source coordinates and writes the
+excluded-coordinate review. Neither records nor coordinates are silently moved to
+a nearby district centre. The browser independently checks all plotted DGHS points
+and withholds routes to rejected points. Canvas dots retain actual point locations;
+no averaged cluster centres are displayed.

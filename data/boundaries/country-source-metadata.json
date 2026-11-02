@@ -1,0 +1,13 @@
+{
+  "name": "Bangladesh national administrative boundary",
+  "source": "OpenStreetMap contributors",
+  "license": "ODbL 1.0",
+  "licenseURL": "https://www.openstreetmap.org/copyright",
+  "relationId": 184640,
+  "sourceURL": "https://www.openstreetmap.org/relation/184640",
+  "downloadURL": "https://api.openstreetmap.org/api/0.6/relation/184640/full.json",
+  "sourceTimestamp": "2026-11-01T23:41:06Z",
+  "sha256": "3b912c05ccbfd16bfe3e9ea6d1db76d63cdb3a590d4045e0fead1329aa362fb9",
+  "method": "Joined complete outer member ways into closed GeoJSON rings; no invented closing segments",
+  "includes": "Mainland, offshore islands and national administrative territory"
+}

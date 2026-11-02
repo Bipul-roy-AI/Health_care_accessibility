@@ -28,7 +28,8 @@
   const map = L.map('map', { zoomControl: false, minZoom: 7, maxZoom: 19, maxBounds: [[19.8, 86.8], [27.5, 94]], maxBoundsViscosity: 0.8 }).setView(cities.dhaka, 13);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   const markerLayer = L.layerGroup().addTo(map);
-  const registryLayer = L.markerClusterGroup({ maxClusterRadius: 48, disableClusteringAtZoom: 17, showCoverageOnHover: false, animate: false }).addTo(map);
+  const registryLayer = L.layerGroup().addTo(map);
+  const registryRenderer = L.canvas({ padding: 0.2 });
   const symbols = { hospital: '✚', clinic: '+', diagnostic: '◈', pharmacy: '℞', other: '+' };
   const category = (tags) => {
     const value = tags.healthcare || tags.amenity || '';
@@ -54,8 +55,7 @@
     document.querySelectorAll('.facility').forEach((el) => el.classList.toggle('selected', el.dataset.id === f.id));
     map.setView([f.lat, f.lon], Math.max(map.getZoom(), 15));
     const marker = markers.get(f.id);
-    if (f.registry && marker && registryLayer.hasLayer(marker)) registryLayer.zoomToShowLayer(marker, () => marker.openPopup());
-    else marker?.openPopup();
+    marker?.openPopup();
   }
   function updateSourceUI() {
     $('#data-source').value = sourceMode;
@@ -93,20 +93,20 @@
       const access = wheelchair(f.tags); card.append(textElement('span', `tag ${access === 'accessible' ? 'positive' : ''}`, t(access)));
       if (f.registry && !f.registry.active) card.append(textElement('p', 'facility-details inactive-record', t('inactiveRegistry')));
       if (f.registry) card.append(textElement('p', 'facility-details', `DGHS · ${f.registry.code || f.registry.id}`));
-      if (!hasPoint(f)) card.append(textElement('p', 'facility-details', t('noCoordinates')));
+      if (!hasPoint(f)) card.append(textElement('p', 'facility-details', t(f.registry?.coordinateStatus === 'outside' ? 'outsideBoundaryDetails' : 'noCoordinates')));
       const routeButton = textElement('button', 'route-here', t('routeHere')); routeButton.type = 'button'; routeButton.addEventListener('click', () => tools.selectDestination(f, true));
       const detailButton = textElement('button', 'view-details', t('viewDetails')); detailButton.type = 'button'; detailButton.addEventListener('click', () => details.open(f));
       const actions = textElement('div', 'facility-actions', ''); actions.append(detailButton); if (hasPoint(f)) actions.append(routeButton, link(t('directions'), directionsURL(f))); actions.append(link(t('source'), sourceURL(f))); card.append(actions); fragment.append(card);
     }
-    const clustered = [];
     for (const f of shown) {
       if (!hasPoint(f)) continue;
-      const marker = L.marker([f.lat, f.lon], { title: name(f), keyboard: true, icon: L.divIcon({ className: '', html: `<div class="map-pin ${f.category}"><span>${symbols[f.category]}</span></div>`, iconSize: [30, 30], iconAnchor: [15, 30] }) }).bindPopup(() => details.popup(f), { maxWidth: 330, maxHeight: 350 });
-      if (f.registry) clustered.push(marker); else marker.addTo(markerLayer);
+      const colour = { hospital: '#126751', clinic: '#398da0', diagnostic: '#c88b23', pharmacy: '#8a61ad', other: '#747f80' }[f.category];
+      const marker = f.registry ? L.circleMarker([f.lat, f.lon], { renderer: registryRenderer, radius: 4, color: '#fff', weight: 0.5, fillColor: colour, fillOpacity: 0.85 }) : L.marker([f.lat, f.lon], { title: name(f), keyboard: true, icon: L.divIcon({ className: '', html: `<div class="map-pin ${f.category}"><span>${symbols[f.category]}</span></div>`, iconSize: [30, 30], iconAnchor: [15, 30] }) });
+      marker.bindPopup(() => details.popup(f), { maxWidth: 330, maxHeight: 350 });
+      if (f.registry) marker.addTo(registryLayer); else marker.addTo(markerLayer);
       marker.on('click', () => { selected = f.id; document.querySelectorAll('.facility').forEach((el) => { el.classList.toggle('selected', el.dataset.id === f.id); if (el.dataset.id === f.id) el.scrollIntoView({ block: 'nearest', behavior: 'auto' }); }); });
       markers.set(f.id, marker);
     }
-    registryLayer.addLayers(clustered);
     if (!shown.length && !loading) { const empty = textElement('div', 'empty', ''); empty.append(textElement('strong', '', t('noResults')), document.createTextNode(t('tryAgain'))); fragment.append(empty); }
     $('#results').replaceChildren(fragment);
     tools.setFacilities(onPage.filter(hasPoint));

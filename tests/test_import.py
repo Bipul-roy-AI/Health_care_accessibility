@@ -61,7 +61,7 @@ class ImportChecks(unittest.TestCase):
             result = write_directory(rows, FIELDS, output, "https://hrm.dghs.gov.bd/", 1)
             self.assertEqual(json.loads(chunk_path.read_text())["1"]["_profile"]["text"], "Test snapshot")
             self.assertEqual(result["profileProgress"]["completed"], 1)
-            self.assertEqual(result["coordinateCoverage"], {"published": 1, "missing": 0, "invalid": 0})
+            self.assertEqual(result["coordinateCoverage"], {"published": 1, "missing": 0, "invalid": 0, "outside": 0})
 
 
 if __name__ == "__main__":
