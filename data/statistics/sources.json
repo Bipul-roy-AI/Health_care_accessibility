@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-04",
+  "publisher": "Bangladesh Bureau of Statistics (BBS)",
+  "title": "Bangladesh Statistical Yearbook 2025, 45th edition",
+  "published": "June 2026",
+  "url": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2026/7/49661c30-24aa-4c70-b22f-c5600836eacc.pdf",
+  "sha256": "b931f05311e997f4c3d15f6b3ce53e18d4b1d853ee03836110f728129e13fe46",
+  "population": {
+    "year": 2022,
+    "basis": "Post-enumeration-check adjusted census population",
+    "table": "2.03",
+    "printedPage": 56,
+    "pdfPage": 84,
+    "note": "Division estimates are subject to rounding. The national denominator below is the sum of these eight rows, not a 2026 population estimate.",
+    "divisions": {
+      "Barishal": 9325820,
+      "Chattogram": 34178612,
+      "Dhaka": 45644586,
+      "Khulna": 17813218,
+      "Mymensingh": 12637472,
+      "Rajshahi": 20794019,
+      "Rangpur": 18020071,
+      "Sylhet": 11415113
+    }
+  },
+  "health": {
+    "year": 2025,
+    "table": "13.01",
+    "printedPages": [
+      501,
+      502
+    ],
+    "pdfPages": [
+      530,
+      531
+    ],
+    "originalSource": "Directorate General of Health Services (DGHS)",
+    "governmentHospitalsUnderDGHS": 652,
+    "privateRegisteredHospitalsClinics": 2898,
+    "privateRegisteredDiagnosticCentres": 5592,
+    "functionalBedsUnderDGHS": 71962,
+    "privateRegisteredHospitalBeds": 126353,
+    "doctorsUnderDGHS": {
+      "existing": 29150,
+      "sanctioned": 37662
+    },
+    "medicalTechnologistsUnderDGHS": {
+      "existing": 6608,
+      "sanctioned": 9420
+    },
+    "note": "Published national indicators retain their source definitions. Registry listings are a different universe and must not be treated as a time series of these totals. No blood-bank total is given in this table."
+  },
+  "research": [
+    {
+      "title": "Availability and accessibility of Primary Health Care services in a district of Bangladesh with lower health outcomes: a study based on consumer perceptions",
+      "journal": "Primary Health Care Research & Development",
+      "year": 2026,
+      "published": "29 September 2026",
+      "doi": "10.1017/S1463423626101662",
+      "url": "https://doi.org/10.1017/S1463423626101662",
+      "scope": "417 adult healthcare consumers attending primary-care facilities in Moulvibazar; purposive sampling.",
+      "finding": "Participants reported gaps in services and differences in access by gender, location and income. A nearby facility alone does not guarantee that the needed service is available.",
+      "limit": "Local, self-reported findings; not a national estimate and not a measurement of this directory."
+    },
+    {
+      "title": "Understanding inequalities in spatial accessibility to multi-tier healthcare for older adults in rapidly aging Bangladesh",
+      "journal": "Journal of Transport & Health",
+      "year": 2025,
+      "published": "October 2025",
+      "doi": "10.1016/j.jth.2025.102121",
+      "url": "https://doi.org/10.1016/j.jth.2025.102121",
+      "scope": "Older adults; 2011 census demand, 2020 DGHS hospital capacity and 2014–2020 roads; seven-division geography.",
+      "finding": "The study combines travel, population and bed capacity using an enhanced two-step floating catchment area method. It reports greater barriers in rural and remote areas, particularly for higher-tier care.",
+      "limit": "Publication date is newer than the underlying data. Its historical accessibility results are not current travel-time estimates."
+    }
+  ]
+}

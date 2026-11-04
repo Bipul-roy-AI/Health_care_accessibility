@@ -4,6 +4,7 @@ A free map and directory for finding healthcare institutions across Bangladesh.
 
 **[Open the website](https://bipul-roy-ai.github.io/Health_care_accessibility/)** ·
 **[National overview map](https://bipul-roy-ai.github.io/Health_care_accessibility/overview.html)** ·
+**[Healthcare statistics](https://bipul-roy-ai.github.io/Health_care_accessibility/statistics.html)** ·
 **[Emergency & helplines](https://bipul-roy-ai.github.io/Health_care_accessibility/helplines.html)**
 
 ## What you can find
@@ -17,7 +18,8 @@ A free map and directory for finding healthcare institutions across Bangladesh.
   estimated time and directions.
 - Switch between street and free light-style maps, and show open road/building layers.
 - Find national emergency and helpline contacts with tap-to-call links and source references.
-- Use English or Bangla.
+- Explore hospital, private-clinic and blood-bank statistics; compare eight divisions per 100,000 residents, inspect published beds and staffing, and download CSV. Sources and simple explanations are on the separate Statistics page.
+- Use English or Bangla for the directory, overview and helplines; Statistics is currently in English.
 
 ## Website screenshots
 
@@ -26,6 +28,10 @@ A free map and directory for finding healthcare institutions across Bangladesh.
 ![National institution distribution by division](docs/images/overview.png)
 
 ![Emergency and national helplines](docs/images/helplines.png)
+
+![Healthcare statistics using DGHS and BBS data](docs/images/statistics.png)
+
+Statistics use the adjusted **2022 census population** as a baseline. Facility availability is not the same as travel-time access or quality of care. See [sources, definitions and reproducibility](docs/STATISTICS.md).
 
 ## Information and sources
 

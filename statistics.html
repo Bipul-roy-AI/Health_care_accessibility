@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#356f64">
+  <meta name="description" content="Bangladesh healthcare statistics from DGHS and BBS: hospitals, private clinics, blood banks, population-normalized facility availability, beds and staffing, with transparent methods and recent research.">
+  <title>Healthcare Statistics — ShasthoPath</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./statistics.css">
+  <script defer src="./statistics.js"></script>
+</head>
+<body class="statistics-page">
+  <a class="skip" href="#statistics-main">Skip to statistics</a>
+  <header class="header"><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">✚</span><span>Shastho<span class="brand-light">Path</span><small>স্বাস্থ্যপথ · BANGLADESH</small></span></a><nav aria-label="Main navigation"><a href="./">Find care</a><a href="./overview.html">National overview</a><a class="active statistics-nav" aria-current="page" href="./statistics.html">Statistics</a><a class="emergency-nav" href="./helplines.html">Helplines</a></nav></header>
+  <main id="statistics-main" class="statistics-main">
+    <section class="stats-hero">
+      <div><p class="eyebrow">BANGLADESH · HEALTHCARE IN NUMBERS</p><h1>Count facilities.<br>Understand access.</h1><p class="hero-copy">Hospitals, blood banks and the people they serve.<br>Explore official data, with the meaning behind each number.</p></div>
+      <aside class="source-card"><span class="source-tag">OFFICIAL DATA · CLEAR METHODS</span><h2>Two sources. Different questions.</h2><p>Published DGHS indicators describe the national health system. Registry records show the institutions listed in this directory. Their totals are not interchangeable.</p><a href="#sources">See dates, sources & definitions ↓</a></aside>
+    </section>
+    <nav class="stats-jump" aria-label="Statistics sections"><a href="#published">National indicators</a><a href="#registry">Registry explorer</a><a href="#population">Population & availability</a><a href="#research">Research</a><a href="#sources">Methods & sources</a></nav>
+    <p id="statistics-status" role="status" aria-live="polite" class="stats-status">Loading verified source tables and registry statistics…</p>
+    <noscript><p class="stats-notice">Enable JavaScript to explore charts, or download the <a href="./data/statistics/sources.json">source tables</a> and <a href="./data/statistics/summary.json">registry summary</a>.</p></noscript>
+
+    <section id="published" class="stats-section">
+      <div class="section-heading"><div><p class="section-index">01 / PUBLISHED NATIONAL INDICATORS</p><h2>The official national picture</h2></div><span class="date-pill">Data: 2025 · Published: June 2026</span></div>
+      <p class="section-copy">DGHS figures reproduced in the BBS Statistical Yearbook 2025, Table 13.01. These are published indicators—not a count of search results.</p>
+      <div id="official-kpis" class="stat-kpis four" aria-label="Published national healthcare indicators"></div>
+      <div class="chart-grid">
+        <article class="chart-card"><p class="small-label">CAPACITY · PUBLISHED 2025 DATA</p><h3>Hospital beds by sector</h3><p>Functional beds under DGHS and beds in registered private hospitals. A reported bed is not a promise that it is available today.</p><div id="bed-chart" class="bar-chart"></div><p id="bed-note" class="chart-note"></p></article>
+        <article class="chart-card"><p class="small-label">WORKFORCE · UNDER DGHS</p><h3>Existing staff versus sanctioned posts</h3><p>Sanctioned means approved posts. The difference below compares two published numbers; it does not measure staff attendance or all health workers in Bangladesh.</p><div id="staff-chart" class="staff-chart"></div></article>
+      </div>
+      <p class="source-line">Source: <a id="health-source" href="#sources">BBS Statistical Yearbook 2025, Table 13.01, pp. 501–502</a> · Original data: DGHS.</p>
+    </section>
+
+    <section id="registry" class="stats-section">
+      <div class="section-heading"><div><p class="section-index">02 / DGHS REGISTRY EXPLORER</p><h2>What is listed, and where?</h2></div><span id="registry-date" class="date-pill">Loading snapshot date…</span></div>
+      <p class="section-copy">Only records marked active in the saved DGHS registry are counted below. “Active” is a registry status, not confirmation of current licensing, opening hours or available treatment.</p>
+      <div class="stats-controls"><div><label for="stats-group">Facility group</label><select id="stats-group" disabled></select></div><div><label for="stats-division">Explore a division</label><select id="stats-division" disabled><option value="all">All Bangladesh</option></select></div><button id="stats-reset" type="button" disabled>Reset view</button><button id="stats-download" type="button" disabled>Download division CSV ↓</button></div>
+      <p id="group-definition" class="definition-note"></p>
+      <div id="registry-kpis" class="stat-kpis four" aria-live="polite"></div>
+      <div class="chart-grid">
+        <article class="chart-card"><p class="small-label">OWNERSHIP · SELECTED GROUP & AREA</p><h3>Who owns the listed institutions?</h3><p>Ownership comes from the dedicated DGHS field. Missing values remain “Not reported”; they are never assumed to mean government or private.</p><div id="ownership-chart" class="bar-chart"></div><p id="ownership-note" class="chart-note"></p></article>
+        <article class="chart-card"><p class="small-label">FACILITY TYPES · SELECTED GROUP & AREA</p><h3>A closer look at the mix</h3><p>Exact DGHS type labels. The chart shows the largest categories; the full table includes every type.</p><div id="type-chart" class="bar-chart compact"></div><details><summary>Show every facility type</summary><div class="stats-table-wrap"><table><caption>All types in the selected group and area</caption><thead><tr><th scope="col">DGHS facility type</th><th scope="col">Active records</th></tr></thead><tbody id="type-table"></tbody></table></div></details></article>
+      </div>
+      <p class="chart-note">Blood-bank listings are counted by the exact “Blood Bank” type. Hospitals may provide transfusion services without a separate blood-bank record; this page does not report blood stock or donation availability.</p>
+    </section>
+
+    <section id="population" class="stats-section">
+      <div class="section-heading"><div><p class="section-index">03 / POPULATION & AVAILABILITY</p><h2>Compare like-sized populations</h2></div><span class="date-pill">Population baseline: Census 2022</span></div>
+      <p class="section-copy">A division with more people may need more facilities. Rates per 100,000 residents let you compare the selected facility group on a common population basis.</p>
+      <div class="stats-notice"><strong>Availability is one part of access.</strong> These are current snapshot listings divided by the <strong>2022 adjusted census population</strong>, not estimates of 2026 coverage. They do not measure travel time, affordability, beds, staffing, service quality or cross-division patient flows.</div>
+      <div class="chart-grid population-grid">
+        <article class="chart-card"><div class="chart-title-row"><div><p class="small-label">EIGHT DIVISIONS · SELECTED GROUP</p><h3 id="division-chart-title">Listings per 100,000 residents</h3></div><fieldset class="chart-toggle"><legend class="sr-only">Chart measurement</legend><label><input type="radio" name="stats-measure" value="rate" checked>Per 100,000</label><label><input type="radio" name="stats-measure" value="count">Count</label></fieldset></div><p id="comparison-note"></p><div id="division-chart" class="bar-chart division-bars"></div><p id="division-insight" class="chart-note"></p></article>
+        <article class="chart-card balance-card"><p class="small-label">DISTRIBUTION · SELECTED AREA</p><h3>Does the share match the population?</h3><p id="balance-note"></p><div id="balance-chart" class="bar-chart"></div><p id="balance-insight" class="chart-note"></p><div class="formula-box"><span>How the rate is calculated</span><code>active listings ÷ 2022 population × 100,000</code><p>More listings per person does not automatically mean better care.</p></div></article>
+      </div>
+      <details class="table-details" open><summary>Exact division figures and population denominators</summary><div class="stats-table-wrap"><table id="division-table"><caption id="division-caption">Selected group, active registry records and BBS Census 2022 population</caption><thead><tr><th scope="col">Division</th><th scope="col">2022 population</th><th scope="col">Listings</th><th scope="col">Per 100,000</th><th scope="col">People per listing</th><th scope="col">Relative to national rate</th></tr></thead><tbody id="statistics-division-body"></tbody></table></div><p class="chart-note">“Relative” is the division rate divided by the national rate. 1.00× means the same rate. This is a descriptive comparison, not a recommended service target. A dash means the value cannot be calculated.</p></details>
+      <article class="chart-card district-card"><p class="small-label">DISTRICTS · COUNTS ONLY</p><h3>Where are the selected listings concentrated?</h3><p>Top ten districts in the chosen area. Districts are ranked by count, not by access; no district population denominator is used.</p><div id="district-chart" class="bar-chart compact"></div></article>
+      <p class="source-line">Population: <a id="population-source" href="#sources">BBS, Census 2022 adjusted division figures, Yearbook 2025, Table 2.03, p. 56</a>. National denominator = sum of the eight published division rows.</p>
+    </section>
+
+    <section id="research" class="stats-section"><div class="section-heading"><div><p class="section-index">04 / RECENT PUBLISHED RESEARCH</p><h2>What facility counts cannot tell us</h2></div><span class="date-pill">Sources checked: 4 November 2026</span></div><p class="section-copy">Recent studies add context. Their findings remain separate from this directory’s calculations; a new publication can still use older data.</p><div id="research-cards" class="research-grid"></div></section>
+
+    <section id="sources" class="stats-section methods-section"><p class="section-index">05 / METHODS & SOURCES</p><h2>Know what you are comparing</h2><div class="method-grid"><article><h3>Count records, not assumptions</h3><p>Each DGHS institution ID is counted once within a selected group. Different IDs can represent units on the same campus. Groups overlap, so do not add their totals together. Administrative and training offices are excluded from the hospital group.</p><p id="status-note"></p></article><article><h3>Keep dates visible</h3><p id="date-note"></p><p>Registry status does not establish a valid current licence. The official 2025 totals and registry counts use different dates, coverage and definitions; their difference is not growth or a count of unlicensed facilities.</p></article><article><h3>Use the right denominator</h3><p>Rates use BBS’s adjusted Census 2022 division counts as republished in June 2026. No population growth is guessed. Rates are a baseline comparison, not a travel-time accessibility model.</p><p>Division comes from the DGHS administrative label. No map boundary or third-party population dataset enters these statistics.</p></article></div>
+      <details><summary>Hospital group and government-ownership rules</summary><p>Government-owned hospital listings require both a hospital type below and an explicit government ownership value. Facilities with missing ownership are excluded from this subset, even if their name suggests public ownership.</p><p id="ownership-rules"></p><ul id="hospital-types" class="type-rules"></ul></details>
+      <div class="source-links"><a id="official-pdf" href="#sources">BBS Yearbook 2025 (official PDF) ↗</a><a href="https://hris.mohfw.gov.bd/public/facility-registry/" target="_blank" rel="noopener noreferrer">Official DGHS facility registry ↗</a><a href="./data/statistics/sources.json" download>Download source tables (JSON)</a><a href="./data/statistics/summary.json" download>Download calculated summary (JSON)</a><a href="https://github.com/Bipul-roy-AI/Health_care_accessibility/blob/main/docs/STATISTICS.md" target="_blank" rel="noopener noreferrer">Full methods & reproducibility ↗</a></div>
+    </section>
+  </main>
+  <footer><span>ShasthoPath · Healthcare statistics</span><span>Sources: DGHS · Bangladesh Bureau of Statistics · Published research</span><a href="./">Return to Find care</a></footer>
+</body>
+</html>

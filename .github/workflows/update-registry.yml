@@ -33,12 +33,14 @@ jobs:
           BATCH_SIZE: ${{ inputs.batch_size || '500' }}
         run: python3 scripts/update_profile_batch.py --limit "$BATCH_SIZE" --delay 1 --max-seconds 1200
       - name: Validate all extracted data
-        run: python3 scripts/validate_dghs.py
+        run: |
+          python3 scripts/validate_dghs.py
+          python3 scripts/build_statistics.py
       - name: Commit extracted institutional data
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/dghs
+          git add data/dghs data/statistics/summary.json
           if ! git diff --cached --quiet; then
             git commit -m 'Update DGHS detailed institution profiles'
             git pull --rebase origin main
@@ -48,7 +50,7 @@ jobs:
       - name: Prepare the updated site
         run: |
           mkdir _site
-          cp index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
+          cp statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
           cp -r vendor data _site/
           touch _site/.nojekyll
           python3 scripts/version_assets.py --directory _site
