@@ -35,6 +35,9 @@
       body.append(tr);
     }
     $('#access-divisions').replaceChildren(body);
+    const chartTitle = model.tiers[tier].label;
+    window.HealthCharts.bars('#access-count-chart', result.divisions.map((r)=>({label:r.division,value:r.active})), {title:chartTitle+' active listings',axisLabel:'Active listings · selected area'});
+    window.HealthCharts.bars('#access-completeness-chart', result.divisions.filter((r)=>r.active>0).map((r)=>({label:r.division,value:100*r.mapped/r.active,display:(100*r.mapped/r.active).toFixed(1)+'%',detail:r.mapped+' eligible / '+r.active+' active'})), {title:chartTitle+' coordinate availability',axisLabel:'Share of active listings (%)',maximum:100,stacked:true});
     $('#access-dates').textContent = `DGHS national report: ${index.reportExportedAt || 'Not reported'}. Snapshot update: ${index.generatedAt || 'Not reported'}. Facility locations do not establish population coverage or service capacity.`;
     $('#access-status').textContent = `${model.tiers[tier].label}: ${number(result.mapped)} points displayed. No travel-time or population-coverage calculation is shown.`;
     $('#access-download').disabled = false;

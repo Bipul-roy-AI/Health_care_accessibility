@@ -9,9 +9,9 @@
   "population": "analysis-inputs/target_population_counts.tif",
   "population_unit": "persons_per_cell",
   "threshold_minutes": [
-    15,
     30,
-    60
+    60,
+    120
   ],
   "capacity_csv": null,
   "service_period": null,
@@ -68,7 +68,9 @@
       "publisher": null,
       "date": null,
       "source_url": null,
-      "approved": false
+      "approved": false,
+      "mode": "motorised",
+      "validation_status": "NOT_PREPARED"
     },
     "zones": {
       "publisher": "Bangladesh Bureau of Statistics (BBS); supplied OCHA/HDX metadata",
@@ -115,5 +117,6 @@
     "mode": null,
     "season": null,
     "speed_assumptions": "Record and validate explicit scenario speeds; no measured times are implied"
-  }
+  },
+  "travel_mode": "motorised"
 }

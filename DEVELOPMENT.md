@@ -132,3 +132,9 @@ BASE_URL=http://127.0.0.1:8000 NODE_PATH=/opt/codex/runtimes/codex-primary-runti
 ```
 
 Browser checks cover navigation, source-backed figures, map changes, division-only population rates, real CSV downloads, mobile/tablet layout and failed data/image handling. Published export hashes and facility-count reconciliation are checked by `tests/test_availability_exports.py`.
+
+## Shared figures and advanced-study status
+
+`charts.js` / `charts.css` provide responsive SVG bar, completeness and scatter figures, labelled axes, source-value hover text and SVG downloads. The analysis, statistics, accessibility and national-overview pages load this shared dependency. Both publication workflows include it, and the normal asset versioner covers the references. The Analysis page parses the committed area CSVs without adding a population source or recomputing coverage. Missing CSV values remain missing, including all finer-level population rates.
+
+`prepare_study_status.py` records the motorised-only, 30/60/120 minute scenario and audits available inputs. `data/accessibility/study-status.json` describes readiness only; it never claims AccessMod 5 or the pilot was run. See [ADVANCED_ANALYSIS_INPUTS.md](docs/ADVANCED_ANALYSIS_INPUTS.md) for the required data and transport handoff.

@@ -77,3 +77,5 @@ calculate or approve proposed healthcare locations.
 ## Analysis page
 
 The separate [Analysis page](analysis.html) presents the completed DGHS/BBS availability baseline: 10 administrative-area maps, six-tier national figures, area CSV downloads and coordinate-quality findings. It uses saved results without fetching the current registry or external map tiles. Travel-time and population-access results remain pending their required inputs. See [baseline methods](docs/AVAILABILITY_BASELINE.md).
+
+The statistical pages now use responsive SVG figures with labelled axes and SVG downloads. The Analysis page adds care-tier counts, coordinate-completeness comparisons, division/district/ADM3 rankings and a count-versus-completeness scatter plot. Its five advanced-analysis modules expose the actual input-readiness report; no travel, coverage, referral or site-selection result is simulated. The selected motorised scenario reports 30, 60 and 120 minute thresholds. Union/ADM4 remains unavailable because the supplied archive is ADM3.

@@ -37,6 +37,10 @@ Recompute current counts without new inputs or geospatial dependencies:
 python scripts/run_accessibility.py audit --output outputs/dghs_input_audit.json
 ```
 
+## Selected scenario and pending advanced analyses
+
+The user selected **motorised travel only**, with **30, 60 and 120 minute** reporting thresholds. The template records those choices. AccessMod 5 has not been executed; no advanced Bangladesh results exist yet. [ADVANCED_ANALYSIS_INPUTS.md](ADVANCED_ANALYSIS_INPUTS.md) lists each requested analysis, its specific dependencies and the local transport handoff. The website now displays these five modules separately with a source/input-readiness report.
+
 ## Required input handoff
 
 1. **Administrative polygons:** District and ADM3 uploads are now validated; country and eight divisions are derived from districts. The file called `Bd_union.zip` is ADM3, so a true union/ADM4 layer is still needed. See [BOUNDARY_INPUTS.md](BOUNDARY_INPUTS.md). For additional layers ZIP each complete Shapefile set (`.shp`, `.shx`, `.dbf`, `.prj`; `.cpg` when present), or provide GeoPackage/GeoJSON. Include source, vintage, stable administrative ID column and CRS. Names alone are not unique union IDs. One complete non-overlapping administrative level is processed at a time, with a separate table/map for each level.

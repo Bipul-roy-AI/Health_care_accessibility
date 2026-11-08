@@ -38,6 +38,7 @@ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42
   assert.equal(await page.evaluate(async()=>{const c=await CountryBoundary.load();const r=new RegistryDirectory();const records=await r.load();return records.every(f=>!Number.isFinite(f.lat)||c.contains(f.lat,f.lon));}),true);
   assert.equal(await page.evaluate(async()=>{const c=await CountryBoundary.load();return !c.contains(23.8315,91.2868)&&c.contains(20.627,92.322);}),true);
   const totals=await page.locator('#division-table-body tr').evaluateAll(rows=>rows.reduce((sum,row)=>sum+Number(row.children[1].textContent.replaceAll(',','')),0));assert.equal(totals,index.count);
+  const chartTotal=await page.locator('#overview-count-chart .chart-observation').evaluateAll(rows=>rows.reduce((sum,row)=>sum+Number(row.dataset.value),0));assert.equal(chartTotal,index.count);
   const pointLegend=await page.locator('#point-legend strong').evaluateAll(nodes=>nodes.reduce((sum,node)=>sum+Number(node.textContent.replaceAll(',','')),0));assert.equal(pointLegend,index.coordinateCoverage.published);
   await page.locator('[name="overview-mode"][value="totals"]').check();assert.equal(await page.locator('.legend-shade').count(),6);assert.equal(await page.locator('#legend-title').innerText(),'Division totals');
   await page.locator('#overview-division').selectOption('Dhaka');const dhaka=index.records.filter(r=>r.division_name==='Dhaka');assert.equal(await page.locator('#overview-total').innerText(),dhaka.length.toLocaleString('en'));

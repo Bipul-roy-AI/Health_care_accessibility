@@ -49,6 +49,7 @@
     const tbody = document.createDocumentFragment();
     [...counts].sort((a, b) => b[1].total - a[1].total).forEach(([name, count]) => { const tr = document.createElement('tr'); tr.classList.toggle('selected', name === selectedDivision); const td = document.createElement('td'); const button = text('button', divisionName(name)); button.type = 'button'; button.addEventListener('click', () => selectDivision(name)); td.append(button); tr.append(td, text('td', number(count.total)), text('td', number(count.mapped))); tbody.append(tr); });
     $('#division-table-body').replaceChildren(tbody);
+    window.HealthCharts.bars('#overview-count-chart', [...counts].sort((a,b)=>b[1].total-a[1].total).map(([name,count])=>({label:divisionName(name),value:count.total,selected:name===selectedDivision})), {title:'DGHS institution listings by division',axisLabel:'Directory records · selected institution type'});
     $('#legend-title').textContent = t(mode === 'points' ? 'pointLegend' : 'totalsMode');
     const legend = document.createDocumentFragment();
     if (mode === 'points') for (const type of types) { const row = text('div', '', 'legend-row'); const swatch = text('span', '', `legend-dot ${type}`); row.append(swatch, text('span', t(type)), text('strong', number(mapped.filter((f) => f.category === type).length))); legend.append(row); }

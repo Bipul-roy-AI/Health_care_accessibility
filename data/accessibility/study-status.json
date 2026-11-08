@@ -1,0 +1,166 @@
+{
+  "checked_at": "2026-11-08T22:28:59.502900+00:00",
+  "travel_mode": "motorised",
+  "threshold_minutes": [
+    30,
+    60,
+    120
+  ],
+  "health_source": "DGHS",
+  "population_source": "BBS",
+  "support_policy": "Approved open/OSM transport support",
+  "accessmod5_execution": "NOT_RUN",
+  "python_model": "Tested pilot; not a validated Bangladesh motorised-routing model or AccessMod 5 equivalent",
+  "input_checks": {
+    "friction": {
+      "label": "Motorised travel-cost grid and documented transport assumptions",
+      "file_present": false,
+      "provenance_approved": false,
+      "ready": false,
+      "note": "File presence and provenance approval are necessary; grid/model validation still required."
+    },
+    "population": {
+      "label": "BBS spatial population counts aligned to the analysis grid",
+      "file_present": false,
+      "provenance_approved": false,
+      "ready": false,
+      "note": "File presence and provenance approval are necessary; grid/model validation still required."
+    },
+    "capacity": {
+      "label": "DGHS service capacity in persons per declared period",
+      "file_present": false,
+      "provenance_approved": false,
+      "ready": false,
+      "note": "File presence and provenance approval are necessary; grid/model validation still required."
+    },
+    "candidates": {
+      "label": "Feasible candidate sites, proposed capacity and site budget",
+      "file_present": false,
+      "provenance_approved": false,
+      "ready": false,
+      "note": "File presence and provenance approval are necessary; grid/model validation still required."
+    }
+  },
+  "analyses": [
+    {
+      "id": "accessibility",
+      "label": "Travel-time accessibility",
+      "status": "NOT_RUN",
+      "required_inputs": [
+        "friction"
+      ],
+      "missing_inputs": [
+        "friction"
+      ],
+      "question": "Time to the nearest facility; facilities reachable within each threshold, separately by DGHS tier.",
+      "outputs": "Travel-time map, threshold maps, travel-time distribution, facility-option counts and tables.",
+      "note": "Input readiness does not certify an analysis run. No AccessMod 5 or Bangladesh model result exists for this module."
+    },
+    {
+      "id": "capacity",
+      "label": "Capacity-constrained geographic coverage",
+      "status": "NOT_RUN",
+      "required_inputs": [
+        "friction",
+        "population",
+        "capacity"
+      ],
+      "missing_inputs": [
+        "friction",
+        "population",
+        "capacity"
+      ],
+      "question": "People allocated service capacity, and physically accessible people left unserved.",
+      "outputs": "Served/unserved maps, capacity-allocation chart and facility/population tables.",
+      "note": "Input readiness does not certify an analysis run. No AccessMod 5 or Bangladesh model result exists for this module."
+    },
+    {
+      "id": "referral",
+      "label": "Referral analysis",
+      "status": "NOT_RUN",
+      "required_inputs": [
+        "friction"
+      ],
+      "missing_inputs": [
+        "friction"
+      ],
+      "question": "Travel time and distance between selected facility tiers along modelled routes.",
+      "outputs": "Referral-route maps, time/distance distributions and origin–destination tables.",
+      "note": "Input readiness does not certify an analysis run. No AccessMod 5 or Bangladesh model result exists for this module."
+    },
+    {
+      "id": "zonal",
+      "label": "Population coverage by administrative area",
+      "status": "NOT_RUN",
+      "required_inputs": [
+        "friction",
+        "population"
+      ],
+      "missing_inputs": [
+        "friction",
+        "population"
+      ],
+      "question": "Percentage of BBS population within 30, 60 and 120 minutes in each available administrative area.",
+      "outputs": "Population-coverage choropleths, threshold comparison charts and zonal tables.",
+      "note": "Input readiness does not certify an analysis run. No AccessMod 5 or Bangladesh model result exists for this module."
+    },
+    {
+      "id": "scaling_up",
+      "label": "New-facility location optimisation",
+      "status": "NOT_RUN",
+      "required_inputs": [
+        "friction",
+        "population",
+        "capacity",
+        "candidates"
+      ],
+      "missing_inputs": [
+        "friction",
+        "population",
+        "capacity",
+        "candidates"
+      ],
+      "question": "Choose sites that maximise additional population served within the declared candidate set and budget.",
+      "outputs": "Selected-site maps, additional-people-served charts, scenarios and solver optimality status.",
+      "note": "Input readiness does not certify an analysis run. No AccessMod 5 or Bangladesh model result exists for this module."
+    }
+  ],
+  "boundaries": {
+    "available": [
+      {
+        "level": "country",
+        "features": 1
+      },
+      {
+        "level": "division",
+        "features": 8
+      },
+      {
+        "level": "district",
+        "features": 64
+      },
+      {
+        "level": "upazila_thana",
+        "features": 544
+      }
+    ],
+    "union": {
+      "status": "MISSING",
+      "required_fields": [
+        "ADM4_PCODE",
+        "ADM4_EN"
+      ],
+      "note": "Bd_union.zip is actually ADM3 (544 upazila/thana areas); it is not used as a union layer."
+    },
+    "note": "The file called Bd_union.zip contains ADM3 upazila/thana areas. ADM4 union results are not available."
+  },
+  "facility_coordinates_note": "DGHS location gaps and name–point disagreements require review before policy use. A point location does not establish a usable road entrance.",
+  "travel_validation_needed": [
+    "Road speeds and sensitivity scenarios",
+    "Water barriers, bridges and operating ferries",
+    "Network connectivity and grade-separated crossings",
+    "Facility access points",
+    "Comparison with observed motorised journey times"
+  ],
+  "population_note": "Division totals cannot establish population covered at travel-time thresholds; no uniform population distribution is assumed."
+}

@@ -34,6 +34,8 @@ const { chromium } = require('playwright');
     const localCount = data.records.filter((r) => String(r.is_active) === '1' && r.facility_type_name === 'Community Clinic' && r.division_name === division).length.toLocaleString('en-BD');
     assert.equal(await page.locator('#access-total').textContent(), localCount);
     assert.equal(await page.locator('#access-divisions tr').count(), 1);
+    assert.equal(Number(await page.locator('#access-count-chart .chart-observation').getAttribute('data-value')),Number(localCount.replaceAll(',','')));
+    assert.equal(await page.locator('#access-completeness-chart .chart-observation').count(),1);
     const areaDownload = page.waitForEvent('download');
     await page.click('#access-download');
     const areaFile = await areaDownload;

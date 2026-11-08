@@ -12,16 +12,9 @@
     $(target).replaceChildren(...cards);
   }
   function bars(target, rows, options = {}) {
-    const maximum = options.maximum || Math.max(...rows.map((r) => r.value), 0);
-    if (!rows.length || maximum === 0) { $(target).replaceChildren(node('p', 'No active listings in this selection.', 'empty-chart')); return; }
-    const children = rows.map((r) => {
-      const row = node('div', '', `bar-row${r.muted ? ' muted' : ''}${r.selected ? ' selected' : ''}`);
-      const label = node('div', '', 'bar-label'); label.append(node('span', r.label), node('strong', r.display ?? number(r.value, options.digits || 0)));
-      const track = node('div', '', 'bar-track'); track.setAttribute('aria-hidden', 'true');
-      const fill = node('div', '', 'bar-fill'); fill.style.width = `${Math.max(0, Math.min(100, r.value / maximum * 100))}%`; track.append(fill);
-      row.append(label, track); return row;
-    });
-    $(target).replaceChildren(...children);
+    const title = $(target).closest('article')?.querySelector('h3')?.textContent || 'Statistical comparison';
+    const axisLabel = target === '#bed-chart' ? 'Reported hospital beds' : target === '#balance-chart' ? 'Share (%)' : target === '#division-chart' && options.digits ? 'Listings per 100,000 BBS 2022 residents' : 'Active DGHS listings';
+    window.HealthCharts.bars(target, rows, { title, axisLabel, source: 'DGHS registry / BBS Yearbook 2025; source dates on Statistics page.', ...options });
   }
   function official() {
     const h = sources.health;
@@ -40,6 +33,13 @@
       const track = node('div', '', 'bar-track'); track.setAttribute('aria-hidden', 'true'); const fill = node('div', '', 'bar-fill'); fill.style.width = `${pct}%`; track.append(fill);
       card.append(line, track, node('small', `Difference: ${number(values.sanctioned - values.existing)} posts (${number(100 - pct, 1)}% of sanctioned posts).`)); return card;
     }));
+    const staffFigure = node('div'); $('#staff-chart').append(staffFigure);
+    window.HealthCharts.bars(staffFigure, [
+      { label: 'Doctors · existing', value: h.doctorsUnderDGHS.existing },
+      { label: 'Doctors · sanctioned', value: h.doctorsUnderDGHS.sanctioned, muted: true },
+      { label: 'Medical technologists · existing', value: h.medicalTechnologistsUnderDGHS.existing },
+      { label: 'Medical technologists · sanctioned', value: h.medicalTechnologistsUnderDGHS.sanctioned, muted: true }
+    ], { title: 'DGHS staffing — existing and sanctioned posts', axisLabel: 'Published staff posts · 2025', source: 'BBS Yearbook 2025, table 13.01; original source: DGHS.' });
     for (const [id, page] of [['#health-source', 530], ['#population-source', 84], ['#official-pdf', 1]]) { $(id).href = `${sources.url}#page=${page}`; $(id).target = '_blank'; $(id).rel = 'noopener noreferrer'; }
     $('#research-cards').replaceChildren(...sources.research.map((paper) => {
       const article = node('article', '', 'research-card'); article.append(node('span', `${paper.year} · ${paper.journal}`, 'small-label'), node('h3', paper.title), node('p', paper.finding), node('p', `Study scope: ${paper.scope}`), node('p', paper.limit, 'research-limit'));

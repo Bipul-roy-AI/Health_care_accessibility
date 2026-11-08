@@ -12,6 +12,9 @@ const base=process.env.BASE_URL || 'http://127.0.0.1:8000/';
   await page.waitForFunction(()=>!document.querySelector('#stats-group').disabled);
   assert.equal(await page.locator('#official-kpis strong').first().innerText(),'652');
   assert.equal(await page.locator('#statistics-division-body tr').count(),8);
+  assert.equal(await page.locator('#bed-chart .chart-observation').count(),2);
+  assert.equal(await page.locator('#division-chart .chart-observation').count(),8);
+  assert.equal(Number(await page.locator('#bed-chart .chart-observation').nth(1).getAttribute('data-value')),126353);
   for(const key of Object.keys(summary.groups)){
    await page.locator('#stats-group').selectOption(key);
    assert.equal(await page.locator('#registry-kpis strong').first().innerText(),summary.groups[key].national.count.toLocaleString('en-GB'));
