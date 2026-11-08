@@ -82,5 +82,13 @@
       "union"
     ],
     "note": "Keep community clinics separate; do not infer social/ethnic community labels from geography."
+  },
+  "travel_data_policy": {
+    "approval": "Open source or OSM data",
+    "health_facilities": "DGHS only",
+    "population": "BBS only",
+    "mode": null,
+    "season": null,
+    "speed_assumptions": "Record and validate explicit scenario speeds; no measured times are implied"
   }
 }

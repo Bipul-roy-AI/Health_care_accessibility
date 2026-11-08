@@ -25,3 +25,7 @@ Existing directory/overview, helpline and routing/map smoke browser suites passe
 The fictional integration test's numbers are verification fixtures only. They are not Bangladesh findings, not deployed study layers, and not a substitute for input validation or ground-truth comparison.
 
 User clarification: DGHS health data and BBS population are approved sources. The care-tier page now filters DGHS counts by division, district and upazila without loading a new spatial input. This does not create a population grid or approve a transport dataset.
+
+## Open transport preparation
+
+Five additional focused tests passed for official checksum-line parsing, atomic verified acquisition, refusal of oversized/mismatched artifacts, conservative mode/access filters and transport-only OSM XML extraction with node/bridge/layer tags retained. They do not download national data. A live Geofabrik endpoint probe was blocked by managed-network HTTP 403, so national transport acquisition remains unexecuted. The optional geospatial environment now includes pyosmium 4.3.2.

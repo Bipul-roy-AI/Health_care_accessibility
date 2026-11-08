@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "health": "DGHS only",
+    "population": "BBS only",
+    "transport": "Open-source or OSM data approved by user",
+    "boundaries": "User-supplied administrative layers; provenance still needed",
+    "speeds": "Explicit model assumptions, not observed travel times"
+  },
+  "osm": {
+    "publisher": "OpenStreetMap contributors",
+    "distributor": "Geofabrik",
+    "landingPage": "https://download.geofabrik.de/asia/bangladesh.html",
+    "pbfUrl": "https://download.geofabrik.de/asia/bangladesh-latest.osm.pbf",
+    "checksumUrl": "https://download.geofabrik.de/asia/bangladesh-latest.osm.pbf.md5",
+    "license": "ODbL 1.0",
+    "attribution": "© OpenStreetMap contributors",
+    "licenseUrl": "https://www.openstreetmap.org/copyright",
+    "approvedUse": ["roads", "paths", "crossing and access tags"],
+    "notUsedAs": ["health-facility source", "population source"],
+    "snapshotDate": null,
+    "downloadStatus": "NOT_DOWNLOADED_CLOUD_PROXY_403"
+  },
+  "terrainWater": {
+    "categoryApproved": true,
+    "selectedDatasets": [],
+    "note": "Select dated open elevation/water/barrier products after the study grid and season are defined; no terrain or water layer has been fetched or assumed current."
+  }
+}

@@ -4,12 +4,13 @@ User clarification in this conversation:
 
 - “DGHS health data and BBS population data.”
 - “Seperate by area and community.”
+- Supporting transport inputs: “Open source or OSM data.”
 
 Implementation:
 
 - Facility locations, institution types and health/service-capacity inputs come from DGHS.
 - Population comes from BBS. The existing BBS division-level Census 2022 totals remain descriptive denominators; they are not silently disaggregated to a fine grid or relabelled as travel-time coverage.
-- Supporting administrative boundaries and transport/friction inputs are still to be supplied or explicitly approved. BBS population approval does not authorize OSM roads or another population product automatically.
+- Open-source/OSM roads and documented open terrain/water/barrier data are approved supporting travel inputs. Actual snapshots, licences, processing and mode/season assumptions must be recorded. This does not authorize OSM health facilities or a different population publisher. Administrative boundary files are still to be supplied.
 - Keep community clinics, union-level facilities, upazila health complexes and urban primary health centres as separate strata. The website can filter each by DGHS division, district and upazila. Union spatial coverage needs supplied boundary IDs and matching BBS population.
 - “Community” is implemented as the DGHS community-clinic tier; no social, religious, ethnic, rural/urban or neighbourhood classification is inferred. If a different community geography is intended, it needs an explicit definition/input.
 
