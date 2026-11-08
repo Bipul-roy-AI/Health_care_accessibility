@@ -5,6 +5,7 @@ A free map and directory for finding healthcare institutions across Bangladesh.
 **[Open the website](https://bipul-roy-ai.github.io/Health_care_accessibility/)** ·
 **[National overview map](https://bipul-roy-ai.github.io/Health_care_accessibility/overview.html)** ·
 **[Healthcare statistics](https://bipul-roy-ai.github.io/Health_care_accessibility/statistics.html)** ·
+**[Analysis maps & tables](https://bipul-roy-ai.github.io/Health_care_accessibility/analysis.html)** ·
 **[Emergency & helplines](https://bipul-roy-ai.github.io/Health_care_accessibility/helplines.html)**
 
 ## What you can find
@@ -72,3 +73,7 @@ Population-based site recommendations are planned; the current website does not
 calculate or approve proposed healthcare locations.
 
 [Development, testing and daily data updates](DEVELOPMENT.md)
+
+## Analysis page
+
+The separate [Analysis page](analysis.html) presents the completed DGHS/BBS availability baseline: 10 administrative-area maps, six-tier national figures, area CSV downloads and coordinate-quality findings. It uses saved results without fetching the current registry or external map tiles. Travel-time and population-access results remain pending their required inputs. See [baseline methods](docs/AVAILABILITY_BASELINE.md).

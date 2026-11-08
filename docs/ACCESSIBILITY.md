@@ -2,7 +2,9 @@
 
 ## Prepared capabilities versus study results
 
-The new `accessibility.html` page maps **only saved DGHS institution coordinates**, separated into community, union, upazila and urban-primary types. It computes active/mapped counts by DGHS-recorded division and exports CSV. It makes no routing call and loads no outside facility dataset or basemap tiles. The separate saved availability baseline below it adds maps from the supplied administrative boundaries and BBS division population denominators. The existing `coordinateStatus=published` eligibility flags were produced by the repository's earlier national-boundary QA; they are retained, not represented as fresh DGHS entrance verification.
+The new `accessibility.html` page maps **only saved DGHS institution coordinates**, separated into community, union, upazila and urban-primary types. It computes active/mapped counts by DGHS-recorded division and exports CSV. It makes no routing call and loads no outside facility dataset or basemap tiles. The saved availability baseline on the separate `analysis.html` page adds maps from the supplied administrative boundaries and BBS division population denominators. The existing `coordinateStatus=published` eligibility flags were produced by the repository's earlier national-boundary QA; they are retained, not represented as fresh DGHS entrance verification.
+
+The separate **Analysis** navigation link opens the completed maps, tables, source dates and validation findings without loading the live directory index or external tiles.
 
 The offline Python pipeline implements the requested travel-time, facility-option counts, capacity allocation, referral routing, zonal coverage and candidate-location analyses. It is a **pilot-scale isotropic raster model with synthetic validation**, not a claim of complete AccessMod parity or a calibrated Bangladesh travel model. No national travel/population/capacity results have been computed: the required aligned study input files are missing.
 

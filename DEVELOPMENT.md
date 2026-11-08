@@ -122,3 +122,13 @@ python3 -m unittest discover -s tests/geospatial -v
 ```
 
 `tests/geospatial` is a separate optional-dependency suite, exercised by its own workflow. Test grids are fictional and temporary. Do not deploy them as study results. Input/output directories are ignored; a completed model manifest and substantive source/travel validation precede publishing any real result. See [ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
+
+## Analysis results page
+
+`analysis.html`, `analysis.js` and `analysis.css` present the frozen availability baseline from `data/accessibility/baseline/manifest.json`. Keep these source dates separate from daily registry updates. All main pages link to Analysis; both deployment workflows copy its assets, and `version_assets.py` versions its CSS/JS. No live DGHS index or external tile request is needed on this page. The existing accessibility study page links to these results.
+
+```bash
+BASE_URL=http://127.0.0.1:8000 NODE_PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules node tests/analysis.cjs
+```
+
+Browser checks cover navigation, source-backed figures, map changes, division-only population rates, real CSV downloads, mobile/tablet layout and failed data/image handling. Published export hashes and facility-count reconciliation are checked by `tests/test_availability_exports.py`.

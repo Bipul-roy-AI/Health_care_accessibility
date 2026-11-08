@@ -1,6 +1,6 @@
 # Bangladesh facility availability baseline
 
-The first real-data outputs are **10 maps and CSV exports** for eight divisions, 64 districts and 544 upazila/thana areas, with six DGHS facility tiers kept separate. The saved baseline is available in the accessibility page and [`data/accessibility/baseline/`](../data/accessibility/baseline/). It does not estimate travel time, population with access, unmet service capacity or new-site benefits.
+The first real-data outputs are **10 maps and CSV exports** for eight divisions, 64 districts and 544 upazila/thana areas, with six DGHS facility tiers kept separate. The saved baseline is available in the separate [Analysis page](../analysis.html) and [`data/accessibility/baseline/`](../data/accessibility/baseline/). It does not estimate travel time, population with access, unmet service capacity or new-site benefits.
 
 ## Sources and definitions
 

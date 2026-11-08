@@ -6,45 +6,6 @@
   L.control.scale({ imperial: false }).addTo(map);
   const points = L.layerGroup().addTo(map), renderer = L.canvas({ padding: 0.3 });
   const number = (n) => n.toLocaleString('en-BD');
-  let baseline;
-  const baselinePath = './data/accessibility/baseline/';
-  function renderBaseline() {
-    if (!baseline) return;
-    const level = $('#baseline-level').value, metricSelect = $('#baseline-metric');
-    const rate = metricSelect.querySelector('[value="active_listings_per_100000_bbs_residents"]');
-    rate.disabled = level !== 'division';
-    if (rate.disabled && metricSelect.value === rate.value) metricSelect.value = 'active_listings_by_registry_name';
-    const metric = metricSelect.value, filename = `${level}_${metric}.png`;
-    if (!baseline.levels[level]?.maps.includes(filename)) return;
-    const title = `${$('#baseline-level').selectedOptions[0].text}: ${metricSelect.selectedOptions[0].text}`;
-    $('#baseline-image').src = baselinePath + filename;
-    $('#baseline-image').alt = title + '; six separate DGHS facility tiers';
-    $('#baseline-image-link').href = baselinePath + filename;
-    $('#baseline-caption').textContent = title + '. Select the image to open the full-size PNG.';
-    $('#baseline-table').href = baselinePath + level + '_availability.csv';
-    $('#baseline-unmatched').href = baselinePath + level + '_unmatched_names.csv';
-    $('#baseline-assignments').href = baselinePath + level + '_facility_assignments.csv';
-    const totals = Object.values(baseline.levels[level].tiers).reduce((out, row) => {
-      for (const key of ['active', 'registry_matched', 'point_assigned', 'point_outside', 'point_ambiguous_border', 'name_point_disagreement']) out[key] = (out[key] || 0) + (row[key] || 0);
-      return out;
-    }, {});
-    $('#baseline-qa').textContent = `All six tiers: ${number(totals.registry_matched)} of ${number(totals.active)} active listings matched by administrative names; ${number(totals.point_assigned)} points assigned to one polygon; ${number(totals.point_outside)} outside the supplied footprint; ${number(totals.point_ambiguous_border)} ambiguous at shared boundaries. ${number(totals.name_point_disagreement)} name–point area disagreements require review. Neither assignment corrects the other.`;
-    $('#baseline-figure').hidden = false;
-  }
-  $('#baseline-level').addEventListener('change', renderBaseline);
-  $('#baseline-metric').addEventListener('change', renderBaseline);
-  fetch(baselinePath + 'manifest.json').then((response) => {
-    if (!response.ok) throw new Error('Baseline unavailable');
-    return response.json();
-  }).then((data) => {
-    if (data.status !== 'COMPLETED') throw new Error('Baseline incomplete');
-    baseline = data;
-    $('#baseline-meta').textContent = `Saved DGHS snapshot: ${data.sources.dghs_snapshot_updated_at}. Registry report: ${data.sources.dghs_report_exported_at}. BBS population: 2022 adjusted census, table 2.03. Boundary geometry: 2015, validOn 2020-11-13. This frozen baseline is separate from the current directory filters above.`;
-    renderBaseline();
-  }).catch(() => {
-    $('#baseline-meta').textContent = 'The saved baseline could not be loaded. No zonal map is displayed.';
-    $('#baseline-meta').classList.add('error');
-  });
   const area = () => ({ division: $('#access-division').value, district: $('#access-district').value, upazila: $('#access-upazila').value });
   function options(level, parents) {
     const select = $('#access-' + level), old = select.value;
