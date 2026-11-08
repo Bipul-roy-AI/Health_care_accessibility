@@ -6,7 +6,7 @@ The new `accessibility.html` page maps **only saved DGHS institution coordinates
 
 The offline Python pipeline implements the requested travel-time, facility-option counts, capacity allocation, referral routing, zonal coverage and candidate-location analyses. It is a **pilot-scale isotropic raster model with synthetic validation**, not a claim of complete AccessMod parity or a calibrated Bangladesh travel model. No national travel/population/capacity results have been computed: the required aligned study input files are missing.
 
-The user approved **DGHS health data and BBS population data**. Community clinics remain separate from the other tiers, with administrative-area comparisons. Division/district/upazila filters use recorded DGHS labels; union-level spatial results await supplied boundaries and matching population. This addition does **not** import the existing BBS population tables or use the site's OSM facilities/routing for any new study calculation. The existing site statistics remain a separate descriptive module. The study template now fixes the population publisher to BBS. Open-source/OSM travel support is now approved; particular snapshots and modelling assumptions still need documentation, and the administrative boundary files are not supplied. The template remains non-runnable until actual aligned BBS population and travel inputs are supplied and reviewed.
+The user approved **DGHS health data and BBS population data**. Community clinics remain separate from the other tiers, with administrative-area comparisons. Division/district/upazila filters use recorded DGHS labels; union-level spatial results await supplied boundaries and matching population. This addition does **not** import the existing BBS population tables or use the site's OSM facilities/routing for any new study calculation. The existing site statistics remain a separate descriptive module. The study template now fixes the population publisher to BBS. Open-source/OSM travel support is now approved; particular snapshots and modelling assumptions still need documentation, and district and ADM3 boundaries are now supplied and validated, with country/division derivatives; true union boundaries are still missing. The template remains non-runnable until actual aligned BBS population and travel inputs are supplied and reviewed.
 
 ## Actual input audit
 
@@ -33,7 +33,7 @@ python scripts/run_accessibility.py audit --output outputs/dghs_input_audit.json
 
 ## Required input handoff
 
-1. **Division, district and union polygons:** ZIP each complete Shapefile set (`.shp`, `.shx`, `.dbf`, `.prj`; `.cpg` when present), or provide GeoPackage/GeoJSON. Include source, vintage, stable administrative ID column and CRS. Names alone are not unique union IDs. One complete non-overlapping administrative level is processed at a time, with a separate table/map for each level.
+1. **Administrative polygons:** District and ADM3 uploads are now validated; country and eight divisions are derived from districts. The file called `Bd_union.zip` is ADM3, so a true union/ADM4 layer is still needed. See [BOUNDARY_INPUTS.md](BOUNDARY_INPUTS.md). For additional layers ZIP each complete Shapefile set (`.shp`, `.shx`, `.dbf`, `.prj`; `.cpg` when present), or provide GeoPackage/GeoJSON. Include source, vintage, stable administrative ID column and CRS. Names alone are not unique union IDs. One complete non-overlapping administrative level is processed at a time, with a separate table/map for each level.
 2. **Target population counts:** persons per raster cell for a declared year/population. The raster must match the travel grid's CRS, affine transform, extent and dimensions. Point/settlement counts need a reviewed count-preserving preparation step first. Division totals alone cannot establish fine-scale travel-time coverage; no uniform population spread or WorldPop substitution is applied.
 3. **Approved friction raster:** positive minutes per metre on a projected, north-up metre grid. Missing, zero and negative values are impassable. Supply the mode/season, road/land-cover/water/barrier assumptions, speed calibration and source. There is no guessed walking/driving speed, automatic OSM download, straight-line-to-travel-time conversion, live traffic, slope anisotropy, ferry timetable or one-way road model.
 4. **DGHS service capacity, if capacity coverage is required:** use [service-capacity.csv](templates/service-capacity.csv). One selected facility ID per row; `unit=persons_per_period`; `period` must match the declared service period. Retain the original DGHS service-capacity field and official DGHS source URL. A bed count cannot become annual outpatient capacity. Unknown capacity is an error, not zero. Target population/capacity must refer to the same service package and period; resident totals do not predict attendance by themselves.
@@ -55,13 +55,13 @@ Copy and complete `analysis-config.example.json`, keep care tiers separate or se
 
 ```json
 "zones": [
-  {"name": "division", "path": "analysis-inputs/divisions.shp", "id_field": "DIV_CODE"},
-  {"name": "district", "path": "analysis-inputs/districts.shp", "id_field": "DIST_CODE"},
-  {"name": "union", "path": "analysis-inputs/unions.shp", "id_field": "UNION_CODE"}
+  {"name": "division", "path": "analysis-inputs/boundaries/district/derived_division.gpkg", "id_field": "ADM1_PCODE"},
+  {"name": "district", "path": "analysis-inputs/boundaries/district/district.gpkg", "id_field": "ADM2_PCODE"},
+  {"name": "upazila_thana", "path": "analysis-inputs/boundaries/upazila/upazila_thana.gpkg", "id_field": "ADM3_PCODE"}
 ]
 ```
 
-Use the **actual** ID column names. Set `capacity_csv`/`service_period` and `candidate_csv`/`new_site_budget` only when those inputs are available. Each required provenance record needs publisher, date, source URL and `approved=true`.
+The example uses the **verified** uploaded ID fields. Add union only after a genuine union layer and its IDs have been checked. Set `capacity_csv`/`service_period` and `candidate_csv`/`new_site_budget` only when those inputs are available. Each required provenance record needs publisher, date, source URL and `approved=true`.
 
 ```bash
 python scripts/run_accessibility.py run --config analysis-config.json --output outputs/pilot_v1

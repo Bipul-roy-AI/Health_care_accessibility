@@ -17,7 +17,7 @@ Existing directory/overview, helpline and routing/map smoke browser suites passe
 ## Not executed / unavailable
 
 - No Bangladesh-wide travel-time, population coverage, unmet service capacity, referral or new-site result has been computed. There is no approved aligned population/friction input set or DGHS service-capacity dataset in the checkout.
-- Division/district/union study Shapefiles have not been supplied. New zonal outputs do not use existing third-party boundaries automatically.
+- District and ADM3 study Shapefiles have now been supplied and checked, and country/division derivatives prepared. The purported union ZIP is ADM3, so true union geometry is still missing. New zonal outputs do not use the original website's third-party boundaries automatically.
 - Clinical service appropriateness, current opening hours, facility entrances and transport speeds are not validated by registry active/type flags.
 - Esri and AccessMod reference-page requests were blocked by managed-network HTTP 403; their current contents were not reviewed.
 - National-scale performance and Windows execution have not been tested. The pilot backend has explicit size limits and does not silently change resolution or drop inputs.
@@ -29,3 +29,7 @@ User clarification: DGHS health data and BBS population are approved sources. Th
 ## Open transport preparation
 
 Five additional focused tests passed for official checksum-line parsing, atomic verified acquisition, refusal of oversized/mismatched artifacts, conservative mode/access filters and transport-only OSM XML extraction with node/bridge/layer tags retained. They do not download national data. A live Geofabrik endpoint probe was blocked by managed-network HTTP 403, so national transport acquisition remains unexecuted. The optional geospatial environment now includes pyosmium 4.3.2.
+
+## Uploaded boundary validation
+
+Five new focused tests passed for schema-based level detection, unique IDs/parent prefixes, overlaps/invalid polygons, unsafe ZIP paths/missing sidecars, and an archive misleadingly named union that correctly registers as ADM3. The actual uploads validate as 64 districts and 544 ADM3 areas, all with valid geometry/unique IDs and matching district ancestry; no overlaps or cross-level geometry differences above 1 m² were detected. Country and eight division derivatives are marked explicitly as derived. No raw Shapefiles were modified or committed.

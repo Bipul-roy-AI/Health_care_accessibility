@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "source": "User-supplied BBS administrative boundaries with OCHA/HDX metadata",
+  "geometry_date": "2015-01-01",
+  "validOn": "2020-11-13",
+  "crs": "EPSG:4326",
+  "levels": [
+    {
+      "level": "country",
+      "features": 1,
+      "path": "analysis-inputs/boundaries/district/derived_country.gpkg",
+      "id_field": "ADM0_PCODE",
+      "origin": "derived from supplied district layer; not an independent official layer"
+    },
+    {
+      "level": "division",
+      "features": 8,
+      "path": "analysis-inputs/boundaries/district/derived_division.gpkg",
+      "id_field": "ADM1_PCODE",
+      "origin": "derived from supplied district layer; not an independent official layer"
+    },
+    {
+      "level": "district",
+      "features": 64,
+      "path": "analysis-inputs/boundaries/district/district.gpkg",
+      "id_field": "ADM2_PCODE",
+      "origin": "supplied Bd_District.zip"
+    },
+    {
+      "level": "upazila_thana",
+      "features": 544,
+      "path": "analysis-inputs/boundaries/upazila/upazila_thana.gpkg",
+      "id_field": "ADM3_PCODE",
+      "origin": "supplied Bd_union.zip; actual ADM3 schema"
+    }
+  ],
+  "union": {
+    "status": "MISSING",
+    "required_fields": [
+      "ADM4_PCODE",
+      "ADM4_EN"
+    ],
+    "note": "Bd_union.zip is actually ADM3 (544 upazila/thana areas); it is not used as a union layer."
+  },
+  "hierarchy_check": {
+    "all_64_parent_codes_matched": true,
+    "parent_names_matched": true,
+    "geometry_differences_over_1m2": [],
+    "area_difference_tolerance_m2": 1
+  },
+  "raw_data_publication": "Original uploads and prepared GeoPackages remain under ignored analysis-inputs; audits and IDs only are committed."
+}

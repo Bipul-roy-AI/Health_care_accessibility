@@ -1,0 +1,69 @@
+{
+  "detected_administrative_level": 3,
+  "level_name": "upazila_thana",
+  "feature_count": 544,
+  "id_field": "ADM3_PCODE",
+  "name_field": "ADM3_EN",
+  "crs": "EPSG:4326",
+  "wgs84_bounds": [
+    88.00862798600008,
+    20.590609348000044,
+    92.68030687500004,
+    26.634513010000035
+  ],
+  "geometry_types": {
+    "Polygon": 486,
+    "MultiPolygon": 58
+  },
+  "invalid_geometries": 0,
+  "empty_geometries": 0,
+  "overlaps_over_1m2": 0,
+  "parent_code_counts": {
+    "ADM0_PCODE": 1,
+    "ADM1_PCODE": 8,
+    "ADM2_PCODE": 64,
+    "ADM3_PCODE": 544
+  },
+  "dates": {
+    "date": [
+      "2015-01-01"
+    ],
+    "validOn": [
+      "2020-11-13"
+    ],
+    "validTo": []
+  },
+  "duplicate_name_count": 17,
+  "note": "Level is detected from ID/name fields, not the ZIP filename. Shape_Area/Shape_Leng are not assumed km2/metres.",
+  "archive_name": "Bd_union.zip",
+  "archive_sha256": "1af15ece37c97706fa374302d9697fbab5f396991a0ae6b18a2f3793470bc359",
+  "shapefile_name": "Bd_union.shp",
+  "source_files_sha256": {
+    "Bd_union.cpg": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824",
+    "Bd_union.dbf": "132a5eaf0cd3c90deefa8bee5cede6b387a08219acede1d7bb1fa6be2ba7cbcf",
+    "Bd_union.prj": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+    "Bd_union.sbn": "08e584ad64036388e17e511793808d3be3583597688942a8759d267c367e3a4f",
+    "Bd_union.sbx": "ec37256f916f392912181ca11157e51b5960949499e625c75da5fcb929f441cf",
+    "Bd_union.shp": "c3ba2ca4c0d6a82bc8f0c108a745cb575b76e30073b9eab466f06d0c6907fac0",
+    "Bd_union.shp.xml": "71717cb32ce746cfc46a3abf6300fb83e35c28e60ad549c5110c7c5500d92884",
+    "Bd_union.shx": "fe8f8ef05a7cee9d1fbf24b012686bc7b84b8dabde1e8de6adf99be9cf9a9abe"
+  },
+  "source_metadata": {
+    "metadata_xml": true,
+    "publisher_organizations": [
+      "Bangladesh Bureau of Statistics (BBS)",
+      "ITOS - University of Georgia",
+      "UNOCHA - HumanitarianResponse.info"
+    ],
+    "purpose": [
+      "Bangladesh administrative level 3 (upazila) boundaries."
+    ],
+    "publication_date": [
+      "2020-11-13T00:00:00"
+    ],
+    "license_status": "Preserve the supplied COD/FOD terms; no CC0/ODbL licence is inferred for these boundaries."
+  },
+  "normalized_name": "upazila_thana.gpkg",
+  "normalized_sha256": "d92813516910244611342aae3bee2009426a53cbd569be7598d99d2a43046c02",
+  "derived_layers": []
+}

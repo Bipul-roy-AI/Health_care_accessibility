@@ -1,0 +1,131 @@
+{
+  "detected_administrative_level": 2,
+  "level_name": "district",
+  "feature_count": 64,
+  "id_field": "ADM2_PCODE",
+  "name_field": "ADM2_EN",
+  "crs": "EPSG:4326",
+  "wgs84_bounds": [
+    88.00862798600008,
+    20.590609348000044,
+    92.68030687500004,
+    26.634513010000035
+  ],
+  "geometry_types": {
+    "Polygon": 44,
+    "MultiPolygon": 20
+  },
+  "invalid_geometries": 0,
+  "empty_geometries": 0,
+  "overlaps_over_1m2": 0,
+  "parent_code_counts": {
+    "ADM0_PCODE": 1,
+    "ADM1_PCODE": 8,
+    "ADM2_PCODE": 64
+  },
+  "dates": {
+    "date": [
+      "2015-01-01"
+    ],
+    "validOn": [
+      "2020-11-13"
+    ],
+    "ValidTo": []
+  },
+  "duplicate_name_count": 0,
+  "note": "Level is detected from ID/name fields, not the ZIP filename. Shape_Area/Shape_Leng are not assumed km2/metres.",
+  "archive_name": "Bd_District.zip",
+  "archive_sha256": "685d15c211f8f876a9b284bf56bd2746e6be65788fc323e95017368b8cb58f42",
+  "shapefile_name": "Bd_district.shp",
+  "source_files_sha256": {
+    "Bd_district.cpg": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824",
+    "Bd_district.dbf": "c0bbc24afc8ae28e41e866a05a0cbeca147cfd6e30bfeccaab40a586204f26ae",
+    "Bd_district.prj": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+    "Bd_district.sbn": "5e7a572971b19d0bd6320c2d52a14e79dc8ae70f9e9b4690d572728e93f4084b",
+    "Bd_district.sbx": "d2e771500c8a0002f1d7246dbd3b685dae3e9b14dbe9fa558e0da614326d4648",
+    "Bd_district.shp": "045f6315e4837fb521ae5315f6cfa26580a38cddf6cca7dc088f429f95b803bd",
+    "Bd_district.shp.xml": "05ba47b797708e2bc4503addb7df33b0a578bf3a31afa0ecc38952b69552cc9a",
+    "Bd_district.shx": "86b8b4813bbbcdcbe54c38bdd5dbe20142e06000c4797af8f30eebc689faf2d1"
+  },
+  "source_metadata": {
+    "metadata_xml": true,
+    "publisher_organizations": [
+      "Bangladesh Bureau of Statistics (BBS)",
+      "ITOS - University of Georgia",
+      "UNOCHA - HumanitarianResponse.info"
+    ],
+    "purpose": [
+      "Bangladesh administrative level 2 (district) boundaries"
+    ],
+    "publication_date": [
+      "2020-11-13T00:00:00"
+    ],
+    "license_status": "Preserve the supplied COD/FOD terms; no CC0/ODbL licence is inferred for these boundaries."
+  },
+  "normalized_name": "district.gpkg",
+  "normalized_sha256": "a055bfb6f87f4a15c0504739b33cab2190518fbd434a6cdabea4144142d8e3a1",
+  "derived_layers": [
+    {
+      "detected_administrative_level": 0,
+      "level_name": "country",
+      "feature_count": 1,
+      "id_field": "ADM0_PCODE",
+      "name_field": "ADM0_EN",
+      "crs": "EPSG:4326",
+      "wgs84_bounds": [
+        88.00862798600008,
+        20.590609348000044,
+        92.68030687500004,
+        26.634513010000035
+      ],
+      "geometry_types": {
+        "MultiPolygon": 1
+      },
+      "invalid_geometries": 0,
+      "empty_geometries": 0,
+      "overlaps_over_1m2": 0,
+      "parent_code_counts": {
+        "ADM0_PCODE": 1
+      },
+      "dates": {},
+      "duplicate_name_count": 0,
+      "note": "Level is detected from ID/name fields, not the ZIP filename. Shape_Area/Shape_Leng are not assumed km2/metres.",
+      "name": "derived_country.gpkg",
+      "sha256": "95cb9d18aa1fdea19ccfb78fbb6f08da68319015a17e4e85b03877c537358591",
+      "derived_from": "Bd_district.shp",
+      "independent_official_layer": false
+    },
+    {
+      "detected_administrative_level": 1,
+      "level_name": "division",
+      "feature_count": 8,
+      "id_field": "ADM1_PCODE",
+      "name_field": "ADM1_EN",
+      "crs": "EPSG:4326",
+      "wgs84_bounds": [
+        88.00862798600008,
+        20.590609348000044,
+        92.68030687500004,
+        26.634513010000035
+      ],
+      "geometry_types": {
+        "MultiPolygon": 6,
+        "Polygon": 2
+      },
+      "invalid_geometries": 0,
+      "empty_geometries": 0,
+      "overlaps_over_1m2": 0,
+      "parent_code_counts": {
+        "ADM0_PCODE": 1,
+        "ADM1_PCODE": 8
+      },
+      "dates": {},
+      "duplicate_name_count": 0,
+      "note": "Level is detected from ID/name fields, not the ZIP filename. Shape_Area/Shape_Leng are not assumed km2/metres.",
+      "name": "derived_division.gpkg",
+      "sha256": "5ec3303bddd8098eb9e7c4645671e30c4644f8a7cc225e3b05de830c9a508c1d",
+      "derived_from": "Bd_district.shp",
+      "independent_official_layer": false
+    }
+  ]
+}

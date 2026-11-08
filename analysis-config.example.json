@@ -15,7 +15,23 @@
   ],
   "capacity_csv": null,
   "service_period": null,
-  "zones": [],
+  "zones": [
+    {
+      "name": "division",
+      "path": "analysis-inputs/boundaries/district/derived_division.gpkg",
+      "id_field": "ADM1_PCODE"
+    },
+    {
+      "name": "district",
+      "path": "analysis-inputs/boundaries/district/district.gpkg",
+      "id_field": "ADM2_PCODE"
+    },
+    {
+      "name": "upazila_thana",
+      "path": "analysis-inputs/boundaries/upazila/upazila_thana.gpkg",
+      "id_field": "ADM3_PCODE"
+    }
+  ],
   "referrals": [
     {
       "from_tiers": [
@@ -55,10 +71,12 @@
       "approved": false
     },
     "zones": {
-      "publisher": null,
-      "date": null,
-      "source_url": null,
-      "approved": false
+      "publisher": "Bangladesh Bureau of Statistics (BBS); supplied OCHA/HDX metadata",
+      "date": "2020-11-13",
+      "source_url": "user-upload:Bd_District.zip; user-upload:Bd_union.zip",
+      "geometry_date": "2015-01-01",
+      "approved": true,
+      "note": "Union ADM4 is missing. Country/division layers are derived from the district source."
     },
     "capacity": {
       "publisher": "DGHS",
@@ -81,7 +99,14 @@
       "upazila",
       "union"
     ],
-    "note": "Keep community clinics separate; do not infer social/ethnic community labels from geography."
+    "note": "Keep community clinics separate; do not infer social/ethnic community labels from geography.",
+    "boundary_availability": {
+      "country": "derived",
+      "division": "derived",
+      "district": "validated supplied layer",
+      "upazila_thana": "validated supplied layer; file named Bd_union.zip",
+      "union": "missing ADM4"
+    }
   },
   "travel_data_policy": {
     "approval": "Open source or OSM data",
