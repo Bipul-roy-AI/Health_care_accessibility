@@ -138,3 +138,9 @@ Browser checks cover navigation, source-backed figures, map changes, division-on
 `charts.js` / `charts.css` provide responsive SVG bar, completeness and scatter figures, labelled axes, source-value hover text and SVG downloads. The analysis, statistics, accessibility and national-overview pages load this shared dependency. Both publication workflows include it, and the normal asset versioner covers the references. The Analysis page parses the committed area CSVs without adding a population source or recomputing coverage. Missing CSV values remain missing, including all finer-level population rates.
 
 `prepare_study_status.py` records the motorised-only, 30/60/120 minute scenario and audits available inputs. `data/accessibility/study-status.json` describes readiness only; it never claims AccessMod 5 or the pilot was run. See [ADVANCED_ANALYSIS_INPUTS.md](docs/ADVANCED_ANALYSIS_INPUTS.md) for the required data and transport handoff.
+
+## Statistics visual dashboard
+
+The Statistics page uses vendored Chart.js 4.5.1 (`vendor/chartjs/`, official npm integrity verified, MIT) through `statistics-charts.js`. The other pages retain `charts.js`. Seven Statistics charts cover bed and ownership donuts, grouped workforce columns, facility/district rankings, division columns and population-share comparisons. Source tables/definitions remain unchanged. Figures include filter context and source dates; each offers PNG export and a local exact-value table. No runtime CDN requests are needed. Both deployment workflows copy the renderer and the existing recursive vendor copy includes the pinned library. The asset versioner fingerprints both scripts.
+
+`tests/statistics.cjs` verifies real chart datasets, seven filters, population rates, PNG/CSV exports, mobile layout and missing-data handling. Pasted page text contains canvas fallback tables rather than the plotted shapes; open the website or its PNG exports to see the figures.

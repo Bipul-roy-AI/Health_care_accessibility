@@ -12,9 +12,12 @@
     $(target).replaceChildren(...cards);
   }
   function bars(target, rows, options = {}) {
-    const title = $(target).closest('article')?.querySelector('h3')?.textContent || 'Statistical comparison';
+    const heading = $(target).closest('article')?.querySelector('h3')?.textContent || 'Statistical comparison';
+    const scope = $('#stats-division').value === 'all' ? 'Bangladesh' : $('#stats-division').value;
+    const title = target === '#bed-chart' ? heading : `${heading} · ${summary.groups[$('#stats-group').value].label} · ${target === '#division-chart' ? 'all divisions' : scope}`;
     const axisLabel = target === '#bed-chart' ? 'Reported hospital beds' : target === '#balance-chart' ? 'Share (%)' : target === '#division-chart' && options.digits ? 'Listings per 100,000 BBS 2022 residents' : 'Active DGHS listings';
-    window.HealthCharts.bars(target, rows, { title, axisLabel, source: 'DGHS registry / BBS Yearbook 2025; source dates on Statistics page.', ...options });
+    const source = target === '#bed-chart' ? 'DGHS 2025 indicators; BBS Yearbook 2025, table 13.01.' : `DGHS active report: ${date(summary.reportExportedAt)}. Population where used: BBS Census 2022.`;
+    window.StatisticsCharts.plot(target, rows, { title, axisLabel, kind: ['#bed-chart','#ownership-chart'].includes(target) ? 'doughnut' : target === '#division-chart' ? 'columns' : 'bars', totalLabel: target === '#bed-chart' ? 'reported beds' : 'active listings', source, ...options });
   }
   function official() {
     const h = sources.health;
@@ -34,12 +37,7 @@
       card.append(line, track, node('small', `Difference: ${number(values.sanctioned - values.existing)} posts (${number(100 - pct, 1)}% of sanctioned posts).`)); return card;
     }));
     const staffFigure = node('div'); $('#staff-chart').append(staffFigure);
-    window.HealthCharts.bars(staffFigure, [
-      { label: 'Doctors · existing', value: h.doctorsUnderDGHS.existing },
-      { label: 'Doctors · sanctioned', value: h.doctorsUnderDGHS.sanctioned, muted: true },
-      { label: 'Medical technologists · existing', value: h.medicalTechnologistsUnderDGHS.existing },
-      { label: 'Medical technologists · sanctioned', value: h.medicalTechnologistsUnderDGHS.sanctioned, muted: true }
-    ], { title: 'DGHS staffing — existing and sanctioned posts', axisLabel: 'Published staff posts · 2025', source: 'BBS Yearbook 2025, table 13.01; original source: DGHS.' });
+    window.StatisticsCharts.staffing(staffFigure, h);
     for (const [id, page] of [['#health-source', 530], ['#population-source', 84], ['#official-pdf', 1]]) { $(id).href = `${sources.url}#page=${page}`; $(id).target = '_blank'; $(id).rel = 'noopener noreferrer'; }
     $('#research-cards').replaceChildren(...sources.research.map((paper) => {
       const article = node('article', '', 'research-card'); article.append(node('span', `${paper.year} · ${paper.journal}`, 'small-label'), node('h3', paper.title), node('p', paper.finding), node('p', `Study scope: ${paper.scope}`), node('p', paper.limit, 'research-limit'));
@@ -79,7 +77,7 @@
     const populationShare = ratio(group.divisions[example].population, summary.populationTotal, 100);
     const listingShare = ratio(group.divisions[example].count, group.national.count, 100);
     $('#balance-note').textContent = scope === 'all' ? `${example}, the division with the most selected listings, is shown as an example. Choose any division above to inspect its balance.` : `${example}: share of Bangladesh’s population and share of selected listings.`;
-    bars('#balance-chart', [{ label: 'Share of 2022 population', value: populationShare, display: `${number(populationShare, 1)}%`, muted: true }, { label: 'Share of selected listings', value: listingShare || 0, display: `${number(listingShare, 1)}%` }], { maximum: 100 });
+    bars('#balance-chart', [{ label: 'Share of 2022 population', value: populationShare, display: `${number(populationShare, 1)}%`, muted: true }, { label: 'Share of selected listings', value: listingShare || 0, display: `${number(listingShare, 1)}%` }], { maximum: 100, digits: 1, title: `${example} · ${group.label} · population and listing shares` });
     const relative = ratio(ratio(group.divisions[example].count, group.divisions[example].population, 100000), nationalRate);
     $('#balance-insight').textContent = relative === null ? 'No national listings are available for a relative comparison.' : `${example} has ${number(relative, 2)}× the national listing rate. This reflects relative concentration, not adequacy, unmet need or the percentage of people with access.`;
     $('#statistics-division-body').replaceChildren(...comparisons.map((r) => {
