@@ -20,6 +20,13 @@ runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)
 
 
 class PipelineTest(unittest.TestCase):
+    def test_study_cli_refuses_legacy_population_policy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'config.json'
+            path.write_text(json.dumps({'source_policy':'DGHS_health_with_approved_support'}))
+            with self.assertRaisesRegex(ValueError,'BBS population'):
+                runner.run(path,Path(directory)/'out')
+
     def test_all_requested_model_outputs_on_known_synthetic_grid(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);(root/'data/dghs').mkdir(parents=True)
@@ -35,7 +42,8 @@ class PipelineTest(unittest.TestCase):
             zones=gpd.GeoDataFrame({'code':['A','B']},geometry=[box(300000,2600000,300200,2600100),box(300200,2600000,300300,2600100)],crs=32646)
             zones.to_file(root/'zones.geojson',driver='GeoJSON')
             provenance={key:{'publisher':'DGHS','date':'FICTIONAL_TEST','source_url':'https://hrm.dghs.gov.bd/FICTIONAL_TEST_FIXTURE','approved':True} for key in ['population','friction','capacity','zones','candidates']}
-            config={'health_source':'DGHS','source_policy':'DGHS_only','friction':'friction.tif','population':'population.tif','friction_unit':'minutes_per_metre','population_unit':'persons_per_cell','primary_tiers':['community'],'threshold_minutes':[1,2], 'capacity_csv':'capacity.csv','service_period':'TEST_PERIOD','zones':[{'name':'test','path':'zones.geojson','id_field':'code'}],'referrals':[{'from_tiers':['community'],'to_tiers':['secondary']}],'candidate_csv':'candidates.csv','new_site_budget':1,'provenance':provenance}
+            provenance['population']['publisher']='BBS'
+            config={'health_source':'DGHS','source_policy':'DGHS_health_BBS_population_approved_support','friction':'friction.tif','population':'population.tif','friction_unit':'minutes_per_metre','population_unit':'persons_per_cell','primary_tiers':['community'],'threshold_minutes':[1,2], 'capacity_csv':'capacity.csv','service_period':'TEST_PERIOD','zones':[{'name':'test','path':'zones.geojson','id_field':'code'}],'referrals':[{'from_tiers':['community'],'to_tiers':['secondary']}],'candidate_csv':'candidates.csv','new_site_budget':1,'provenance':provenance}
             (root/'config.json').write_text(json.dumps(config))
             with patch.object(runner,'ROOT',root):runner.run(root/'config.json',root/'out')
             manifest=json.loads((root/'out/run_manifest.json').read_text())

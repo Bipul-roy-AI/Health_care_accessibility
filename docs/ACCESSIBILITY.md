@@ -6,7 +6,7 @@ The new `accessibility.html` page maps **only saved DGHS institution coordinates
 
 The offline Python pipeline implements the requested travel-time, facility-option counts, capacity allocation, referral routing, zonal coverage and candidate-location analyses. It is a **pilot-scale isotropic raster model with synthetic validation**, not a claim of complete AccessMod parity or a calibrated Bangladesh travel model. No national travel/population/capacity results have been computed: the required study inputs and source approval are missing.
 
-The user requires DGHS health data. This addition does **not** import the existing BBS population tables or use the site's OSM facilities/routing for any new study calculation. The existing site statistics remain a separate descriptive module. Whether support geography/population/travel layers may be non-DGHS is an explicit unresolved source-policy choice; the example configuration is intentionally non-runnable until that is settled.
+The user approved **DGHS health data and BBS population data**. Community clinics remain separate from the other tiers, with administrative-area comparisons. Division/district/upazila filters use recorded DGHS labels; union-level spatial results await supplied boundaries and matching population. This addition does **not** import the existing BBS population tables or use the site's OSM facilities/routing for any new study calculation. The existing site statistics remain a separate descriptive module. The study template now fixes the population publisher to BBS. Particular boundary and travel inputs still require approval. The template remains non-runnable until actual aligned BBS population and travel inputs are supplied and reviewed.
 
 ## Actual input audit
 
@@ -41,7 +41,7 @@ python scripts/run_accessibility.py audit --output outputs/dghs_input_audit.json
 
 Include a travel buffer around the target population: facilities outside an administrative study area can serve residents inside it. The code keeps cross-zone travel within the supplied friction extent, but cannot route beyond that extent. Population outside polygons remains visible in QA rather than disappearing from denominators.
 
-Under a strict `DGHS_only` policy, **each** population/friction/boundary/candidate input must be declared DGHS-sourced. If DGHS does not publish a required input, that analysis remains unavailable. Under `DGHS_health_with_approved_support`, supporting layers require explicit source approval, while health facilities and service capacity remain DGHS. Provenance declarations and hashes support auditability; they are not independent authentication of a submitted source.
+The selected study policy is `DGHS_health_BBS_population_approved_support`: health facilities and capacity must be DGHS; population must be BBS; boundaries, transport and candidate-site inputs require separate explicit approval. WorldPop or another population publisher is rejected under this policy. Legacy strict-DGHS configurations remain supported by the general validator but are not the selected study configuration. Provenance declarations and hashes support auditability; they are not independent authentication of a submitted source.
 
 ## Running a validated input set
 
@@ -51,7 +51,7 @@ Install optional analysis dependencies separately from static website developmen
 python -m pip install -r scripts/requirements-geospatial.txt
 ```
 
-Copy and complete `analysis-config.example.json`, select `primary_tiers` explicitly, approve the allowed source policy and review the thresholds (15/30/60 minutes are examples, not adopted service standards). Paths are relative to the configuration file. To add zones:
+Copy and complete `analysis-config.example.json`, keep care tiers separate or select `primary_tiers` explicitly for a declared comparison, review each input file and review the thresholds (15/30/60 minutes are examples, not adopted service standards). Paths are relative to the configuration file. To add zones:
 
 ```json
 "zones": [

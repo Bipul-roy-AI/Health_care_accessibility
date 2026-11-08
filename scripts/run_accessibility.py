@@ -28,6 +28,8 @@ def run(config_path,output):
     from accessibility.raster_io import read_grids, facility_cells, write_raster, zonal_statistics
     from accessibility.allocation import allocate, select_sites
     config_path=Path(config_path).resolve();config=json.loads(config_path.read_text())
+    if config.get('source_policy')!='DGHS_health_BBS_population_approved_support':
+        raise ValueError('This study requires the approved DGHS health / BBS population policy; no other population source is enabled')
     check_provenance(config)
     if config.get('friction_unit')!='minutes_per_metre' or config.get('population_unit')!='persons_per_cell':raise ValueError('Explicit friction/population units required')
     resolve=lambda value:(config_path.parent/value).resolve()

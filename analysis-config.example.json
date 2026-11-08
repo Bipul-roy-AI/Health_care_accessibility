@@ -1,18 +1,39 @@
 {
   "health_source": "DGHS",
-  "source_policy": "CHOOSE_DGHS_only_OR_DGHS_health_with_approved_support",
-  "primary_tiers": ["community"],
+  "source_policy": "DGHS_health_BBS_population_approved_support",
+  "primary_tiers": [
+    "community"
+  ],
   "friction": "analysis-inputs/friction_minutes_per_metre.tif",
   "friction_unit": "minutes_per_metre",
   "population": "analysis-inputs/target_population_counts.tif",
   "population_unit": "persons_per_cell",
-  "threshold_minutes": [15, 30, 60],
+  "threshold_minutes": [
+    15,
+    30,
+    60
+  ],
   "capacity_csv": null,
   "service_period": null,
   "zones": [],
   "referrals": [
-    {"from_tiers": ["community", "union"], "to_tiers": ["upazila"]},
-    {"from_tiers": ["upazila"], "to_tiers": ["secondary"]}
+    {
+      "from_tiers": [
+        "community",
+        "union"
+      ],
+      "to_tiers": [
+        "upazila"
+      ]
+    },
+    {
+      "from_tiers": [
+        "upazila"
+      ],
+      "to_tiers": [
+        "secondary"
+      ]
+    }
   ],
   "candidate_csv": null,
   "new_site_budget": null,
@@ -21,10 +42,45 @@
   "max_candidates": 100,
   "site_solver_seconds": 120,
   "provenance": {
-    "population": {"publisher": null, "date": null, "source_url": null, "approved": false},
-    "friction": {"publisher": null, "date": null, "source_url": null, "approved": false},
-    "zones": {"publisher": null, "date": null, "source_url": null, "approved": false},
-    "capacity": {"publisher": "DGHS", "date": null, "source_url": null, "approved": false},
-    "candidates": {"publisher": null, "date": null, "source_url": null, "approved": false}
+    "population": {
+      "publisher": "BBS",
+      "date": null,
+      "source_url": null,
+      "approved": false
+    },
+    "friction": {
+      "publisher": null,
+      "date": null,
+      "source_url": null,
+      "approved": false
+    },
+    "zones": {
+      "publisher": null,
+      "date": null,
+      "source_url": null,
+      "approved": false
+    },
+    "capacity": {
+      "publisher": "DGHS",
+      "date": null,
+      "source_url": null,
+      "approved": false
+    },
+    "candidates": {
+      "publisher": null,
+      "date": null,
+      "source_url": null,
+      "approved": false
+    }
+  },
+  "study_grouping": {
+    "care_tiers": "separate",
+    "area_levels": [
+      "division",
+      "district",
+      "upazila",
+      "union"
+    ],
+    "note": "Keep community clinics separate; do not infer social/ethnic community labels from geography."
   }
 }

@@ -82,7 +82,7 @@ def read_capacity(path,facility_ids,period):
 def check_provenance(config):
     """Explicit source declarations are necessary but not proof of authenticity."""
     if config.get('health_source')!='DGHS':raise ValueError('Facility/health source must be DGHS')
-    if config.get('source_policy') not in ('DGHS_only','DGHS_health_with_approved_support'):raise ValueError('Choose the source policy explicitly')
+    if config.get('source_policy') not in ('DGHS_only','DGHS_health_with_approved_support','DGHS_health_BBS_population_approved_support'):raise ValueError('Choose the source policy explicitly')
     required=['population','friction']
     if config.get('zones'):required.append('zones')
     if config.get('capacity_csv'):required.append('capacity')
@@ -92,6 +92,7 @@ def check_provenance(config):
         if meta.get('approved') is not True or not meta.get('publisher') or not meta.get('source_url') or not meta.get('date'):
             raise ValueError(f'Input {key} needs reviewed publisher, date, source URL and explicit approval')
         if config['source_policy']=='DGHS_only' and meta['publisher']!='DGHS':raise ValueError(f'{key} is not declared DGHS-sourced')
+        if key=='population' and config['source_policy']=='DGHS_health_BBS_population_approved_support' and meta['publisher']!='BBS':raise ValueError('This study requires BBS population; another publisher is not approved')
         if key=='capacity' and meta['publisher']!='DGHS':raise ValueError('Capacity must be DGHS-sourced')
 
 

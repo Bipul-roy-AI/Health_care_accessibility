@@ -83,6 +83,12 @@ class ZonalTests(unittest.TestCase):
 class ProvenanceTests(unittest.TestCase):
     def test_non_dghs_health_data_rejected(self):
         with self.assertRaises(ValueError):check_provenance({'health_source':'OSM'})
+    def test_selected_policy_requires_bbs_population(self):
+        base={'health_source':'DGHS','source_policy':'DGHS_health_BBS_population_approved_support','provenance':{key:{'publisher': 'BBS' if key=='population' else 'Approved travel provider', 'date':'TEST', 'source_url':'https://example.invalid', 'approved':True} for key in ['population','friction']}}
+        check_provenance(base)
+        base['provenance']['population']['publisher']='WorldPop'
+        with self.assertRaises(ValueError):check_provenance(base)
+
     def test_unknown_support_data_is_not_approved(self):
         with self.assertRaises(ValueError):check_provenance({'health_source':'DGHS','source_policy':'DGHS_only'})
     def test_clinical_types_exclude_administrative_offices(self):

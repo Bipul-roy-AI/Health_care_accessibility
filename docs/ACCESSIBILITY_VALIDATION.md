@@ -4,7 +4,7 @@ Validated in the cloud workspace on 8 November 2026, using the committed DGHS sn
 
 ## Passed
 
-- **14 geospatial tests:** travel-time/distance units, impassable barriers/corner cutting, multiple/co-located facilities, sparse-graph limits, capacity conservation and non-double-counting, missing capacity, exact candidate selection, population-weighted zonal percentages, overlapping-zone refusal and provenance/type rules. Includes an end-to-end temporary fictional pilot producing raster/PNG/CSV/GeoJSON outputs, capacity results, referrals and site optimization.
+- **16 geospatial tests:** travel-time/distance units, impassable barriers/corner cutting, multiple/co-located facilities, sparse-graph limits, capacity conservation and non-double-counting, missing capacity, exact candidate selection, population-weighted zonal percentages, overlapping-zone refusal and provenance/type rules, including rejection of non-BBS population under the selected study policy. Includes an end-to-end temporary fictional pilot producing raster/PNG/CSV/GeoJSON outputs, capacity results, referrals and site optimization.
 - **13 existing Python tests** passed.
 - Existing DGHS validation passed: 39,442 unique institutions, 62 report fields, 28,464 usable points and 2,752 detailed-profile snapshots; no DGHS source files were changed.
 - Existing statistics rebuild check passed with its original DGHS/BBS scope. Those BBS figures are not inputs to the new accessibility calculations.
@@ -23,3 +23,5 @@ Existing directory/overview, helpline and routing/map smoke browser suites passe
 - National-scale performance and Windows execution have not been tested. The pilot backend has explicit size limits and does not silently change resolution or drop inputs.
 
 The fictional integration test's numbers are verification fixtures only. They are not Bangladesh findings, not deployed study layers, and not a substitute for input validation or ground-truth comparison.
+
+User clarification: DGHS health data and BBS population are approved sources. The care-tier page now filters DGHS counts by division, district and upazila without loading a new spatial input. This does not create a population grid or approve a transport dataset.
