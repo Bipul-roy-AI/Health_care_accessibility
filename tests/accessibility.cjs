@@ -1,0 +1,41 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || (fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : chromium.executablePath()), headless: true, args: ['--no-sandbox'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    const external = [], errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.route('**/*', (route) => {
+      const url = new URL(route.request().url());
+      if (!['127.0.0.1','localhost'].includes(url.hostname)) { external.push(url.href); return route.abort(); }
+      return route.continue();
+    });
+    const data = JSON.parse(fs.readFileSync('data/dghs/index.json','utf8'));
+    const expected = (types) => { const rows=data.records.filter((r) => String(r.is_active)==='1' && types.includes(r.facility_type_name)); return { total: rows.length.toLocaleString('en-BD'), mapped: rows.filter((r) => r.coordinateStatus==='published' && r.lat!=null && r.lon!=null && Number.isFinite(Number(r.lat)) && Number.isFinite(Number(r.lon))).length.toLocaleString('en-BD') }; };
+    const community=expected(['Community Clinic']), union=expected(['Union Health Sub Center','Union Health Center','Union Health & Family Welfare Center (UH&FWC)']);
+    const base = process.env.BASE_URL || 'http://127.0.0.1:8000';
+    await page.goto(base + '/accessibility.html');
+    await page.waitForFunction((value) => document.querySelector('#access-total').textContent === value, community.total);
+    assert.equal(await page.locator('#access-mapped').textContent(), community.mapped);
+    assert.match(await page.locator('#access-status').textContent(), /No travel-time or population-coverage calculation/);
+    await page.selectOption('#access-tier', 'union');
+    assert.equal(await page.locator('#access-total').textContent(), union.total);
+    assert.equal(await page.locator('#access-mapped').textContent(), union.mapped);
+    const pending = page.waitForEvent('download');
+    await page.click('#access-download');
+    const file = await pending;
+    assert.match(file.suggestedFilename(), /dghs_union_division_counts\.csv/);
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2));
+    assert.deepEqual(external, []);
+    assert.deepEqual(errors, []);
+    await page.route('**/data/dghs/index.json', (route) => route.fulfill({ status: 503, body: 'unavailable' }));
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector('#access-status').classList.contains('error'));
+    assert(await page.locator('#access-download').isDisabled());
+    console.log('PASS: DGHS map/counts, tier filters, CSV, narrow layout, no external sources, unavailable data handling');
+  } finally { await browser.close(); }
+})().catch((error) => { console.error(error); process.exitCode = 1; });

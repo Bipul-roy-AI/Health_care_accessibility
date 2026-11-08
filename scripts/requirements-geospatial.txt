@@ -1,0 +1,7 @@
+-r requirements.txt
+numpy==2.5.4
+scipy==1.18.1
+rasterio==1.5.2
+pyproj==3.8.0
+geopandas==1.2.0
+matplotlib==3.11.2

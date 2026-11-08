@@ -1,0 +1,17 @@
+name: Validate geospatial model calculations
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  known-grids:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/requirements-geospatial.txt
+      - run: python -m unittest discover -s tests/geospatial -v
+      - run: python scripts/run_accessibility.py audit --output /tmp/dghs-input-audit.json

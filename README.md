@@ -52,6 +52,14 @@ come from **geoBoundaries (CC0)**. The national boundary is from
 The site shows snapshot dates and distinguishes missing information. Check current
 services and entrances with the institution before travelling.
 
+## DGHS accessibility study
+
+A new [Accessibility study page](accessibility.html) separates DGHS primary-care tiers and maps usable institution coordinates without adding outside facilities, population estimates, route calls or new basemap data. It distinguishes facility counts from population access.
+
+The [offline analysis pipeline](docs/ACCESSIBILITY.md) prepares least-cost travel-time surfaces, reachable-facility counts, capacity-constrained population allocation, referral paths, administrative coverage tables/maps and candidate-site optimization. It has synthetic validation; **Bangladesh travel/population coverage has not been computed** because the required approved inputs are not yet supplied. New health inputs must be DGHS-sourced. Supporting population, travel and boundary provenance needs the user's explicit source-policy decision.
+
+Please supply the requested division/district/union polygons, aligned target population/travel grids and, for capacity analysis, a DGHS persons-per-period service-capacity measure. Bed counts cannot be substituted. Missing union-level facility coordinates are a major bias risk. See [input templates and limitations](docs/ACCESSIBILITY.md).
+
 ## Future work
 
 - Identify potential locations for new healthcare centres using population needs,

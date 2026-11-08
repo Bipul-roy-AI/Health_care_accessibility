@@ -103,3 +103,22 @@ excluded-coordinate review. Neither records nor coordinates are silently moved t
 a nearby district centre. The browser independently checks all plotted DGHS points
 and withholds routes to rejected points. Canvas dots retain actual point locations;
 no averaged cluster centres are displayed.
+
+## Accessibility study addition
+
+The static page is `accessibility.html`; `accessibility-model.js` applies exact DGHS active/type/coordinate rules without extra data sources. `accessibility.js` renders points and division counts using the committed registry. It makes no external tile/routing request. The original website's external layers remain separate.
+
+```bash
+node tests/accessibility-model.cjs
+NODE_PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules node tests/accessibility.cjs
+python3 scripts/run_accessibility.py audit --output outputs/dghs_input_audit.json
+```
+
+Optional geospatial backend:
+
+```bash
+python3 -m pip install -r scripts/requirements-geospatial.txt
+python3 -m unittest discover -s tests/geospatial -v
+```
+
+`tests/geospatial` is a separate optional-dependency suite, exercised by its own workflow. Test grids are fictional and temporary. Do not deploy them as study results. Input/output directories are ignored; a completed model manifest and substantive source/travel validation precede publishing any real result. See [ACCESSIBILITY.md](docs/ACCESSIBILITY.md).

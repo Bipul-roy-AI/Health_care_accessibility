@@ -32,6 +32,9 @@ jobs:
           node --check country-boundary.js
           node --check helplines.js
           node --check statistics.js
+          node --check accessibility.js
+          node --check accessibility-model.js
+          node tests/accessibility-model.cjs
           python3 scripts/build_statistics.py --check
           python3 scripts/validate_dghs.py
           python3 -m unittest discover -s tests -p 'test_*.py'
@@ -46,6 +49,7 @@ jobs:
           NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/directory.cjs
           NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/helplines.cjs
           NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/statistics.cjs
+          NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/accessibility.cjs
   deploy:
     needs: test
     runs-on: ubuntu-24.04
@@ -57,7 +61,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir _site
-          cp statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
+          cp accessibility.html accessibility.js accessibility-model.js accessibility.css statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
           cp -r vendor _site/vendor
           cp -r data _site/data
           touch _site/.nojekyll
