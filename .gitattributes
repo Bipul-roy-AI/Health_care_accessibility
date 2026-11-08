@@ -1,0 +1,2 @@
+# Preserve published CSV checksums on Windows and Linux checkouts.
+data/accessibility/baseline/*.csv text eol=lf

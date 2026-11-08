@@ -1,0 +1,336 @@
+{
+  "status": "COMPLETED",
+  "created_at": "2026-11-08T21:47:50.268988+00:00",
+  "analysis": "facility availability and coordinate QA; not population accessibility",
+  "sources": {
+    "dghs_index_sha256": "742354e58fc5e071b83aae1d0ee322b6e3a686a2a714a93effdbf8f23b5b03ba",
+    "dghs_source_url": "https://hrm.dghs.gov.bd/index.php/public/facility-registry/reports/organization-list?submit=Run&is_active=1&columns_csv=id%2Ccode%2Cis_active%2Cname%2Cdivision_name%2Cname_bn%2Cdistrict_name%2Cfacility_agency_name%2Ccity_corporation_name%2Cestablishment_year%2Cupazila_name%2Cpaurasava_name%2Cunion_name%2Clatitude%2Cward_name%2Clongitude%2Cmailing_address%2Cland_phone_1%2Cfax_1%2Cland_phone_2%2Cfax_2%2Cland_phone_3%2Cfax_3%2Cmobile_1%2Cwebsite_url%2Cmobile_2%2Cofficial_contact_no%2Cemail_1%2Cemail_2%2Cemail_3%2Cis_private%2Cfacility_healthcare_level_name%2Cministry_name%2Cfacility_level_name%2Cfacility_function_name%2Cfacility_ownership_name%2Cfacility_location_type_name%2Cfacility_type_name%2Clatest_bed_count%2Clatest_single_cabin_count%2Clatest_double_cabin_count%2Clatest_cabin_count%2Capproved_bed_number%2Crevenue_bed_number%2Cdevelopment_bed_number%2Clatest_male_bed_count%2Clatest_female_bed_count%2Clatest_icu_bed_count%2Clatest_hdu_bed_count%2Clatest_dialysis_bed_count%2Clatest_ccu_bed_count%2Chas_opd%2Chas_pharmacy%2Chas_ipd%2Chas_pathology%2Chas_ambulance%2Chas_emergency%2Cpermission_approval_license_type%2Cpermission_approval_license_authority%2Chas_legal_possession_of_land%2Chas_boundary_wall%2Cland_info_code&alias_columns_csv=id%2Ccode%2Cis_active%2Cname%2Cdivision_name%2Cname_bn%2Cdistrict_name%2Cfacility_agency_name%2Ccity_corporation_name%2Cestablishment_year%2Cupazila_name%2Cpaurasava_name%2Cunion_name%2Clatitude%2Cward_name%2Clongitude%2Cmailing_address%2Cland_phone_1%2Cfax_1%2Cland_phone_2%2Cfax_2%2Cland_phone_3%2Cfax_3%2Cmobile_1%2Cwebsite_url%2Cmobile_2%2Cofficial_contact_no%2Cemail_1%2Cemail_2%2Cemail_3%2Cis_private%2Cfacility_healthcare_level_name%2Cministry_name%2Cfacility_level_name%2Cfacility_function_name%2Cfacility_ownership_name%2Cfacility_location_type_name%2Cfacility_type_name%2Clatest_bed_count%2Clatest_single_cabin_count%2Clatest_double_cabin_count%2Clatest_cabin_count%2Capproved_bed_number%2Crevenue_bed_number%2Cdevelopment_bed_number%2Clatest_male_bed_count%2Clatest_female_bed_count%2Clatest_icu_bed_count%2Clatest_hdu_bed_count%2Clatest_dialysis_bed_count%2Clatest_ccu_bed_count%2Chas_opd%2Chas_pharmacy%2Chas_ipd%2Chas_pathology%2Chas_ambulance%2Chas_emergency%2Cpermission_approval_license_type%2Cpermission_approval_license_authority%2Chas_legal_possession_of_land%2Chas_boundary_wall%2Cland_info_code&ret=excel",
+    "dghs_report_exported_at": "2026-11-01T23:01:47.675646+00:00",
+    "dghs_snapshot_updated_at": "2026-11-07T23:52:29.571008+00:00",
+    "bbs_metadata_sha256": "68af24328dbe82db8b6a5fda0ed9cd7a406f3566df90547d62967d3919fef719",
+    "bbs_url": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2026/7/49661c30-24aa-4c70-b22f-c5600836eacc.pdf",
+    "bbs_pdf_sha256": "b931f05311e997f4c3d15f6b3ce53e18d4b1d853ee03836110f728129e13fe46",
+    "bbs_population": {
+      "year": 2022,
+      "basis": "Post-enumeration-check adjusted census population",
+      "table": "2.03",
+      "printedPage": 56,
+      "pdfPage": 84,
+      "note": "Division estimates are subject to rounding. The national denominator below is the sum of these eight rows, not a 2026 population estimate.",
+      "divisions": {
+        "Barishal": 9325820,
+        "Chattogram": 34178612,
+        "Dhaka": 45644586,
+        "Khulna": 17813218,
+        "Mymensingh": 12637472,
+        "Rajshahi": 20794019,
+        "Rangpur": 18020071,
+        "Sylhet": 11415113
+      }
+    },
+    "boundary_catalog_sha256": "2a654629e93c23fc937112ebc285d9465c4f2d7fd17dc9214ed109aadf6037b1"
+  },
+  "name_join": {
+    "method": "NFKC, case, punctuation/whitespace normalization; explicit ADM1/2 aliases; parent hierarchy required; no fuzzy matching",
+    "aliases_adm1_adm2": {
+      "barisal": "barishal",
+      "chittagong": "chattogram",
+      "bogra": "bogura",
+      "comilla": "cumilla",
+      "jessore": "jashore",
+      "brahamanbaria": "brahmanbaria",
+      "jhalokati": "jhalokathi",
+      "khagrachhari": "khagrachari",
+      "nawabganj": "chapainawabganj"
+    },
+    "ambiguous_or_unmatched": "not allocated by name; retained in detailed QA"
+  },
+  "point_assignment": "Published valid coordinates only. Intersects exactly one polygon; shared-border ambiguity excluded; no snapping/geocoding.",
+  "tiers": {
+    "community": [
+      "Community Clinic"
+    ],
+    "union": [
+      "Union Health & Family Welfare Center (UH&FWC)",
+      "Union Health Center",
+      "Union Health Sub Center"
+    ],
+    "upazila": [
+      "Upazila Health Complex"
+    ],
+    "urban_primary": [
+      "Urban Primary Health Care Center"
+    ],
+    "secondary": [
+      "District/General Hospital"
+    ],
+    "tertiary": [
+      "Medical College Hospital",
+      "Postgraduate Institute & Hospital",
+      "Specialized Hospital"
+    ]
+  },
+  "levels": {
+    "division": {
+      "features": 8,
+      "boundary_gpkg_sha256": "5ec3303bddd8098eb9e7c4645671e30c4644f8a7cc225e3b05de830c9a508c1d",
+      "boundary_origin": "derived from supplied district layer; not an independent official layer",
+      "tiers": {
+        "community": {
+          "active": 14393,
+          "registry_matched": 14393,
+          "point_assigned": 12161,
+          "name_point_disagreement": 665,
+          "point_outside": 63,
+          "point_ineligible_coordinates": 2169
+        },
+        "union": {
+          "active": 5245,
+          "registry_matched": 5245,
+          "point_ineligible_coordinates": 4201,
+          "name_point_disagreement": 55,
+          "point_assigned": 1034,
+          "point_outside": 10
+        },
+        "upazila": {
+          "active": 434,
+          "registry_matched": 434,
+          "point_assigned": 418,
+          "name_point_disagreement": 17,
+          "point_ineligible_coordinates": 14,
+          "point_outside": 2
+        },
+        "urban_primary": {
+          "active": 15,
+          "registry_matched": 15,
+          "point_ineligible_coordinates": 11,
+          "name_point_disagreement": 0,
+          "point_assigned": 4
+        },
+        "secondary": {
+          "active": 60,
+          "registry_matched": 60,
+          "point_assigned": 59,
+          "name_point_disagreement": 1,
+          "point_ineligible_coordinates": 1
+        },
+        "tertiary": {
+          "active": 59,
+          "registry_matched": 59,
+          "point_assigned": 38,
+          "name_point_disagreement": 0,
+          "point_ineligible_coordinates": 21
+        }
+      },
+      "maps": [
+        "division_active_listings_by_registry_name.png",
+        "division_coordinate_availability_pct.png",
+        "division_spatial_points_inside.png",
+        "division_active_listings_per_100000_bbs_residents.png"
+      ]
+    },
+    "district": {
+      "features": 64,
+      "boundary_gpkg_sha256": "a055bfb6f87f4a15c0504739b33cab2190518fbd434a6cdabea4144142d8e3a1",
+      "boundary_origin": "supplied Bd_District.zip",
+      "tiers": {
+        "community": {
+          "active": 14393,
+          "registry_matched": 14393,
+          "point_assigned": 12161,
+          "name_point_disagreement": 1352,
+          "point_outside": 63,
+          "point_ineligible_coordinates": 2169
+        },
+        "union": {
+          "active": 5245,
+          "registry_matched": 5244,
+          "point_ineligible_coordinates": 4201,
+          "name_point_disagreement": 113,
+          "point_assigned": 1034,
+          "point_outside": 10,
+          "registry_unmatched_name": 1
+        },
+        "upazila": {
+          "active": 434,
+          "registry_matched": 434,
+          "point_assigned": 418,
+          "name_point_disagreement": 29,
+          "point_ineligible_coordinates": 14,
+          "point_outside": 2
+        },
+        "urban_primary": {
+          "active": 15,
+          "registry_matched": 15,
+          "point_ineligible_coordinates": 11,
+          "name_point_disagreement": 0,
+          "point_assigned": 4
+        },
+        "secondary": {
+          "active": 60,
+          "registry_matched": 60,
+          "point_assigned": 59,
+          "name_point_disagreement": 3,
+          "point_ineligible_coordinates": 1
+        },
+        "tertiary": {
+          "active": 59,
+          "registry_matched": 59,
+          "point_assigned": 38,
+          "name_point_disagreement": 1,
+          "point_ineligible_coordinates": 21
+        }
+      },
+      "maps": [
+        "district_active_listings_by_registry_name.png",
+        "district_coordinate_availability_pct.png",
+        "district_spatial_points_inside.png"
+      ]
+    },
+    "upazila_thana": {
+      "features": 544,
+      "boundary_gpkg_sha256": "d92813516910244611342aae3bee2009426a53cbd569be7598d99d2a43046c02",
+      "boundary_origin": "supplied Bd_union.zip; actual ADM3 schema",
+      "tiers": {
+        "community": {
+          "active": 14393,
+          "registry_matched": 13170,
+          "point_assigned": 12161,
+          "name_point_disagreement": 1824,
+          "registry_unmatched_name": 1223,
+          "point_outside": 63,
+          "point_ineligible_coordinates": 2169
+        },
+        "union": {
+          "active": 5245,
+          "registry_matched": 4805,
+          "point_ineligible_coordinates": 4201,
+          "name_point_disagreement": 172,
+          "point_assigned": 1034,
+          "registry_unmatched_name": 440,
+          "point_outside": 10
+        },
+        "upazila": {
+          "active": 434,
+          "registry_matched": 394,
+          "point_assigned": 418,
+          "name_point_disagreement": 40,
+          "registry_unmatched_name": 40,
+          "point_ineligible_coordinates": 14,
+          "point_outside": 2
+        },
+        "urban_primary": {
+          "active": 15,
+          "registry_matched": 15,
+          "point_ineligible_coordinates": 11,
+          "name_point_disagreement": 0,
+          "point_assigned": 4
+        },
+        "secondary": {
+          "active": 60,
+          "registry_matched": 49,
+          "point_assigned": 59,
+          "name_point_disagreement": 15,
+          "registry_unmatched_name": 11,
+          "point_ineligible_coordinates": 1
+        },
+        "tertiary": {
+          "active": 59,
+          "registry_unmatched_name": 27,
+          "point_assigned": 38,
+          "name_point_disagreement": 3,
+          "registry_matched": 32,
+          "point_ineligible_coordinates": 21
+        }
+      },
+      "maps": [
+        "upazila_thana_active_listings_by_registry_name.png",
+        "upazila_thana_coordinate_availability_pct.png",
+        "upazila_thana_spatial_points_inside.png"
+      ]
+    }
+  },
+  "limitations": [
+    "2026 registry snapshot / 2022 population / 2015 geometry (validOn 2020); rates are mixed-vintage availability indicators.",
+    "No district or upazila BBS denominators; their population/rate cells are blank.",
+    "Missing or withheld coordinates are not zero facilities. A polygon with zero points can still contain unlocated facilities.",
+    "Name-based and point-based areas may disagree. Neither automatically corrects the other.",
+    "Spatial assignment is independent of registry names and is not a facility entrance validation.",
+    "All six tiers are registry type classifications; not a verified list of services, operational hours or staff.",
+    "True union/ADM4 not available. Union-level facility type is not union geography.",
+    "No travel-time, accessible-population percentage, capacity allocation or optimum-site result calculated."
+  ],
+  "software": {
+    "geopandas": "1.2.0",
+    "numpy": "2.5.4",
+    "shapely": "2.2.0",
+    "pyproj": "3.8.0",
+    "matplotlib": "3.11.2"
+  },
+  "national": [
+    {
+      "tier": "community",
+      "active": 14393,
+      "eligible_coordinates": 12224,
+      "bbs_population_2022": 169828911,
+      "active_per_100000_bbs_residents": 8.475
+    },
+    {
+      "tier": "union",
+      "active": 5245,
+      "eligible_coordinates": 1044,
+      "bbs_population_2022": 169828911,
+      "active_per_100000_bbs_residents": 3.088402
+    },
+    {
+      "tier": "upazila",
+      "active": 434,
+      "eligible_coordinates": 420,
+      "bbs_population_2022": 169828911,
+      "active_per_100000_bbs_residents": 0.255551
+    },
+    {
+      "tier": "urban_primary",
+      "active": 15,
+      "eligible_coordinates": 4,
+      "bbs_population_2022": 169828911,
+      "active_per_100000_bbs_residents": 0.008832
+    },
+    {
+      "tier": "secondary",
+      "active": 60,
+      "eligible_coordinates": 59,
+      "bbs_population_2022": 169828911,
+      "active_per_100000_bbs_residents": 0.03533
+    },
+    {
+      "tier": "tertiary",
+      "active": 59,
+      "eligible_coordinates": 38,
+      "bbs_population_2022": 169828911,
+      "active_per_100000_bbs_residents": 0.034741
+    }
+  ],
+  "output_sha256": {
+    "district_active_listings_by_registry_name.png": "f7f9491a399b895ad4ee2d625e732d9976712e4f12340321c73084d53f8a696e",
+    "district_availability.csv": "3d08b39841d55a94d0a5092ffcb0e3702eb53f747e3028aa4b725da1172da02f",
+    "district_coordinate_availability_pct.png": "6b3137850af317efb9299290597d708ea0beb80ab3f886d7ecbbb0e5990a9503",
+    "district_facility_assignments.csv": "42893e2ac8e046c6e3f44627d7aa3681793d8734021a0ff1301b2aab134edf6c",
+    "district_spatial_points_inside.png": "06d53c89ba70a33ad7ed3e5728585235c9ec57ecf7c8a4cd480fd6f9d2f8f266",
+    "district_unmatched_names.csv": "047c76718e9efc27930f709dcc12073221d5176c6a11fe4c6a265859dcc6e918",
+    "division_active_listings_by_registry_name.png": "a49a9d4064162bbc1078aa8a5c5d7dceeb3548b00146c91b8a00205fee4b09f9",
+    "division_active_listings_per_100000_bbs_residents.png": "9478b6feb2d14533ecfb172de03a447163a7aeaeb22e60aa8662f6890133a706",
+    "division_availability.csv": "044050f5e5c9d03b0787d6c6862c09ce3251bf2c5844cc6fd9c8ae775791f95d",
+    "division_coordinate_availability_pct.png": "29da55c045515142e4693512fe6d6ee5d9215f40ab1b4f774e6e2dc8c270d99c",
+    "division_facility_assignments.csv": "f2ee8475ff4e8e6d1fbb066d080ac2c228a7ad2b7db67f329f0fd4efbd0216ae",
+    "division_spatial_points_inside.png": "979db2df8b40f85bbcf1a92001c79378d42efa79d2ee6571f06dfad166d3888a",
+    "division_unmatched_names.csv": "fcefd0e3971768663e634754ace73250f881ee6bc8698bc31bf1ddb9a9a7203c",
+    "national_availability.csv": "09f3c9e6b0d1f3d2d7614ec63ff0938a157cbe69c2a822ea312210fb81cb62a7",
+    "upazila_thana_active_listings_by_registry_name.png": "b41233cf99e7f2a5247d645246e630070073cfd1f96b93db34c9b9cf2541fcf1",
+    "upazila_thana_availability.csv": "f88013536231d4517dbdb220d7976d3f64313925919e83e57bf546537f0507c9",
+    "upazila_thana_coordinate_availability_pct.png": "c361203b382752e321306517e63e6341f5971ab3ecf28e653e6a8736f8254073",
+    "upazila_thana_facility_assignments.csv": "34564f61be30898cc4d6d66ca0a82cd7a880d1f719a1c13d33ed69decf68927a",
+    "upazila_thana_spatial_points_inside.png": "d1810a956f817a64c8f01eb5aa8ea9354a1e383b9d7b2329f9c46e814f6d4e04",
+    "upazila_thana_unmatched_names.csv": "f8a47f9d7aa4b4b244579e9753b019f252dc4344f50a23260a340f3e876a78f1"
+  }
+}

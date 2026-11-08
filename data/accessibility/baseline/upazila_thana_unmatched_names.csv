@@ -1,0 +1,162 @@
+﻿tier,division_name,district_name,upazila_name,registry_join_status,active_listings
+community,Barishal,Barguna,Taltali,unmatched_name,15
+community,Barishal,Barishal,Barishal Sadar,unmatched_name,39
+community,Barishal,Bhola,Borhanuddin,unmatched_name,29
+community,Barishal,Bhola,Charfession,unmatched_name,69
+community,Barishal,Jhalokathi,Jhalokathi Sadar,unmatched_name,28
+community,Barishal,Patuakhali,Rangabali,unmatched_name,13
+community,Barishal,Pirojpur,Indurkani,unmatched_name,12
+community,Barishal,Pirojpur,Nesarabad,unmatched_name,30
+community,Chattogram,Bandarban,Naikhongchari,unmatched_name,15
+community,Chattogram,Bandarban,Rowangchari,unmatched_name,10
+community,Chattogram,Chattogram,Fatikchari,unmatched_name,56
+community,Chattogram,Chattogram,Karnaphuli,unmatched_name,12
+community,Chattogram,Cumilla,Cumilla Adarsha Sadar,unmatched_name,27
+community,Chattogram,Cumilla,Cumilla Sadar Dakshin,unmatched_name,26
+community,Chattogram,Cumilla,Lalmi,unmatched_name,19
+community,Chattogram,Cumilla,Monoharganj,unmatched_name,21
+community,Chattogram,Khagrachari,Khagrachari Sadar,unmatched_name,16
+community,Chattogram,Khagrachari,Lakshmichari,unmatched_name,7
+community,Chattogram,Khagrachari,Mahalchari,unmatched_name,14
+community,Chattogram,Khagrachari,Manikchari,unmatched_name,16
+community,Chattogram,Lakshmipur,Raipur,unmatched_name,34
+community,Chattogram,Noakhali,Noakhali Sadar,unmatched_name,44
+community,Chattogram,Rangamati,Baghaichari,unmatched_name,18
+community,Chattogram,Rangamati,Belaichari,unmatched_name,7
+community,Chattogram,Rangamati,Juraichari,unmatched_name,11
+community,Chattogram,Rangamati,Kowkhali,unmatched_name,12
+community,Dhaka,Gazipur,,unmatched_name,1
+community,Dhaka,Rajbari,Goalanda,unmatched_name,16
+community,Khulna,Jashore,Chaugacha,unmatched_name,27
+community,Khulna,Jashore,Jashore Sadar,unmatched_name,60
+community,Khulna,Jashore,Jhikargacha,unmatched_name,32
+community,Khulna,Jashore,Monirampur,unmatched_name,47
+community,Khulna,Khulna,Paikgacha,unmatched_name,37
+community,Mymensingh,Mymensingh,,unmatched_name,1
+community,Mymensingh,Mymensingh,Gafargaon,unmatched_name,53
+community,Mymensingh,Mymensingh,Gouripur,unmatched_name,36
+community,Mymensingh,Mymensingh,Muktagacha,unmatched_name,42
+community,Mymensingh,Mymensingh,Tarakanda,unmatched_name,38
+community,Rajshahi,Bogura,Bogura Sadar,unmatched_name,36
+community,Rajshahi,Chapainawabganj,Chapainawabganj Sadar,unmatched_name,37
+community,Rajshahi,Natore,Naldanga,unmatched_name,17
+community,Rangpur,Gaibandha,Saghata,unmatched_name,42
+community,Rangpur,Kurigram,Rajibpur,unmatched_name,14
+community,Sylhet,Habiganj,Shayestaganj,unmatched_name,6
+community,Sylhet,Sunamganj,Shantiganj,unmatched_name,25
+community,Sylhet,Sylhet,Golapganj,unmatched_name,33
+community,Sylhet,Sylhet,Osmaninagar,unmatched_name,23
+secondary,Barishal,Barishal,Barishal Sadar,unmatched_name,1
+secondary,Barishal,Jhalokathi,Jhalokathi Sadar,unmatched_name,1
+secondary,Chattogram,Cumilla,Cumilla Adarsha Sadar,unmatched_name,1
+secondary,Chattogram,Khagrachari,Khagrachari Sadar,unmatched_name,1
+secondary,Chattogram,Noakhali,Noakhali Sadar,unmatched_name,1
+secondary,Dhaka,Narayanganj,,unmatched_name,1
+secondary,Khulna,Jashore,Jashore Sadar,unmatched_name,1
+secondary,Rajshahi,Bogura,,unmatched_name,1
+secondary,Rajshahi,Chapainawabganj,Chapainawabganj Sadar,unmatched_name,1
+secondary,Rajshahi,Rajshahi,,unmatched_name,1
+secondary,Sylhet,Sylhet,Kotwali,unmatched_name,1
+tertiary,Barishal,Barishal,Barishal Sadar,unmatched_name,1
+tertiary,Chattogram,Cumilla,,unmatched_name,1
+tertiary,Chattogram,Noakhali,Noakhali Sadar,unmatched_name,1
+tertiary,Dhaka,Dhaka,,unmatched_name,10
+tertiary,Dhaka,Dhaka,Banani,unmatched_name,2
+tertiary,Dhaka,Dhaka,Lalbag,unmatched_name,1
+tertiary,Dhaka,Dhaka,Mugda Para,unmatched_name,1
+tertiary,Dhaka,Dhaka,Shahbag,unmatched_name,1
+tertiary,Dhaka,Kishoreganj,,unmatched_name,1
+tertiary,Dhaka,Tangail,,unmatched_name,1
+tertiary,Khulna,Jashore,Jashore Sadar,unmatched_name,1
+tertiary,Khulna,Khulna,,unmatched_name,1
+tertiary,Khulna,Kushtia,,unmatched_name,1
+tertiary,Khulna,Satkhira,,unmatched_name,1
+tertiary,Rajshahi,Bogura,Bogura Sadar,unmatched_name,1
+tertiary,Rangpur,Rangpur,,unmatched_name,1
+tertiary,Sylhet,Sylhet,Kotwali,unmatched_name,1
+union,Barishal,Barguna,Taltali,unmatched_name,2
+union,Barishal,Barishal,Barishal Sadar,unmatched_name,9
+union,Barishal,Bhola,Borhanuddin,unmatched_name,9
+union,Barishal,Bhola,Charfession,unmatched_name,14
+union,Barishal,Jhalokathi,Jhalokathi Sadar,unmatched_name,10
+union,Barishal,Patuakhali,Rangabali,unmatched_name,1
+union,Barishal,Pirojpur,Indurkani,unmatched_name,5
+union,Barishal,Pirojpur,Nesarabad,unmatched_name,10
+union,Chattogram,,,unmatched_name,1
+union,Chattogram,Bandarban,Naikhongchari,unmatched_name,6
+union,Chattogram,Bandarban,Rowangchari,unmatched_name,6
+union,Chattogram,Chattogram,Fatikchari,unmatched_name,20
+union,Chattogram,Chattogram,Karnaphuli,unmatched_name,5
+union,Chattogram,Cumilla,Cumilla Adarsha Sadar,unmatched_name,8
+union,Chattogram,Cumilla,Cumilla Sadar Dakshin,unmatched_name,9
+union,Chattogram,Cumilla,Lalmi,unmatched_name,4
+union,Chattogram,Cumilla,Monoharganj,unmatched_name,14
+union,Chattogram,Khagrachari,Khagrachari Sadar,unmatched_name,9
+union,Chattogram,Khagrachari,Lakshmichari,unmatched_name,7
+union,Chattogram,Khagrachari,Mahalchari,unmatched_name,8
+union,Chattogram,Khagrachari,Manikchari,unmatched_name,2
+union,Chattogram,Lakshmipur,Raipur,unmatched_name,10
+union,Chattogram,Noakhali,Noakhali Sadar,unmatched_name,11
+union,Chattogram,Rangamati,Baghaichari,unmatched_name,7
+union,Chattogram,Rangamati,Belaichari,unmatched_name,5
+union,Chattogram,Rangamati,Juraichari,unmatched_name,4
+union,Chattogram,Rangamati,Kowkhali,unmatched_name,4
+union,Dhaka,Dhaka,Bhatara,unmatched_name,1
+union,Dhaka,Rajbari,Goalanda,unmatched_name,7
+union,Khulna,Jashore,Chaugacha,unmatched_name,25
+union,Khulna,Jashore,Jashore Sadar,unmatched_name,28
+union,Khulna,Jashore,Jhikargacha,unmatched_name,22
+union,Khulna,Jashore,Monirampur,unmatched_name,34
+union,Khulna,Khulna,Paikgacha,unmatched_name,10
+union,Mymensingh,Mymensingh,Gafargaon,unmatched_name,14
+union,Mymensingh,Mymensingh,Gouripur,unmatched_name,10
+union,Mymensingh,Mymensingh,Muktagacha,unmatched_name,10
+union,Mymensingh,Mymensingh,Tarakanda,unmatched_name,11
+union,Rajshahi,Bogura,Bogura Sadar,unmatched_name,11
+union,Rajshahi,Chapainawabganj,Chapainawabganj Sadar,unmatched_name,15
+union,Rangpur,Gaibandha,Saghata,unmatched_name,10
+union,Rangpur,Kurigram,Rajibpur,unmatched_name,2
+union,Sylhet,Habiganj,Shayestaganj,unmatched_name,2
+union,Sylhet,Sunamganj,Shantiganj,unmatched_name,9
+union,Sylhet,Sylhet,Golapganj,unmatched_name,11
+union,Sylhet,Sylhet,Osmaninagar,unmatched_name,8
+upazila,Barishal,Barguna,Taltali,unmatched_name,1
+upazila,Barishal,Bhola,Borhanuddin,unmatched_name,1
+upazila,Barishal,Bhola,Charfession,unmatched_name,1
+upazila,Barishal,Patuakhali,Rangabali,unmatched_name,1
+upazila,Barishal,Pirojpur,Indurkani,unmatched_name,1
+upazila,Barishal,Pirojpur,Nesarabad,unmatched_name,1
+upazila,Chattogram,Bandarban,Naikhongchari,unmatched_name,1
+upazila,Chattogram,Bandarban,Rowangchari,unmatched_name,1
+upazila,Chattogram,Chattogram,Fatikchari,unmatched_name,1
+upazila,Chattogram,Chattogram,Karnaphuli,unmatched_name,1
+upazila,Chattogram,Cox's Bazar,Eidgaon,unmatched_name,1
+upazila,Chattogram,Cumilla,Cumilla Sadar Dakshin,unmatched_name,1
+upazila,Chattogram,Cumilla,Lalmi,unmatched_name,1
+upazila,Chattogram,Cumilla,Monoharganj,unmatched_name,1
+upazila,Chattogram,Khagrachari,Guimara,unmatched_name,1
+upazila,Chattogram,Khagrachari,Lakshmichari,unmatched_name,1
+upazila,Chattogram,Khagrachari,Mahalchari,unmatched_name,1
+upazila,Chattogram,Khagrachari,Manikchari,unmatched_name,1
+upazila,Chattogram,Lakshmipur,Raipur,unmatched_name,1
+upazila,Chattogram,Rangamati,Baghaichari,unmatched_name,1
+upazila,Chattogram,Rangamati,Belaichari,unmatched_name,1
+upazila,Chattogram,Rangamati,Juraichari,unmatched_name,1
+upazila,Chattogram,Rangamati,Kowkhali,unmatched_name,1
+upazila,Dhaka,Madaripur,Dasar,unmatched_name,1
+upazila,Dhaka,Rajbari,Goalanda,unmatched_name,1
+upazila,Khulna,Jashore,Chaugacha,unmatched_name,1
+upazila,Khulna,Jashore,Jhikargacha,unmatched_name,1
+upazila,Khulna,Jashore,Monirampur,unmatched_name,1
+upazila,Khulna,Khulna,Paikgacha,unmatched_name,1
+upazila,Mymensingh,Mymensingh,Gafargaon,unmatched_name,1
+upazila,Mymensingh,Mymensingh,Gouripur,unmatched_name,1
+upazila,Mymensingh,Mymensingh,Muktagacha,unmatched_name,1
+upazila,Mymensingh,Mymensingh,Tarakanda,unmatched_name,1
+upazila,Rajshahi,Natore,Naldanga,unmatched_name,1
+upazila,Rangpur,Gaibandha,Saghata,unmatched_name,1
+upazila,Rangpur,Kurigram,Rajibpur,unmatched_name,1
+upazila,Sylhet,Habiganj,Shayestaganj,unmatched_name,1
+upazila,Sylhet,Sunamganj,Shantiganj,unmatched_name,1
+upazila,Sylhet,Sylhet,Golapganj,unmatched_name,1
+upazila,Sylhet,Sylhet,Osmaninagar,unmatched_name,1
