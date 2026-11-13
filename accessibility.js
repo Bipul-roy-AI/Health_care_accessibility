@@ -126,7 +126,7 @@
     return num(field === 'mean' ? d.travel[k].mean_min[i] : d.travel[k].within[t][i]);
   };
   const fv = (level, pcode, key) => { const d = state.data.floodLv[level], i = d?.idx.get(pcode); return i === undefined || !d[key] ? NaN : num(d[key][i]); };
-  const fe = (level, pcode, field) => { const d = state.data.floodLv[level], i = d?.idx.get(pcode), e = d?.[state.flood]; return i === undefined || !e || !e[field] ? NaN : num(e[field][i]); };
+  const fe = (level, pcode, field, id = state.flood) => { const d = state.data.floodLv[level], i = d?.idx.get(pcode), e = d?.[id]; return i === undefined || !e || !e[field] ? NaN : num(e[field][i]); };
   const MODE = { motorized: ['motorized', 'যান্ত্রিক যানবাহনে'], walking: ['walking', 'হেঁটে'] };
   const tWithin = (k, t) => (a, level) => tv(level, a.pcode, k, 'within', t);
   const TRAVEL_NOTE = ['Modelled minutes over the 2019 friction surface; people shares.', '২০১৯ সালের ঘর্ষণ পৃষ্ঠে আনুমানিক মিনিট; মানুষের অংশ।'];
@@ -153,15 +153,15 @@
     { id: 'f_ge5', basis: 'floods', klass: null, levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most often flooded', 'সবচেয়ে বেশিবার প্লাবিত'], value: (a, level) => fv(level, a.pcode, 'flooded_ge5_pct'),
       en: 'People flooded in 5 or more of the 26 years (%)', bn: '২৬ বছরের মধ্যে ৫ বা বেশি বছর প্লাবিত মানুষ (%)',
       note: ['Share of people whose 1 km cell was at least half flooded in five or more yearly maps.', 'যাদের ১ কিমি ঘর অন্তত ৫টি বার্ষিক মানচিত্রে অর্ধেক বা বেশি প্লাবিত, সেই মানুষের অংশ।'] },
-    { id: 'f_flooded', basis: 'floods', event: true, klass: null, levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most affected', 'সবচেয়ে বেশি আক্রান্ত'], value: (a, level) => fe(level, a.pcode, 'flooded_pct'),
+    { id: 'f_flooded', basis: 'floods', event: true, klass: null, levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most affected', 'সবচেয়ে বেশি আক্রান্ত'], value: (a, level, flood) => fe(level, a.pcode, 'flooded_pct', flood),
       en: 'People in flooded cells, selected flood (%)', bn: 'প্লাবিত ঘরে মানুষ, বাছাই করা বন্যা (%)',
       note: ['Share of people whose 1 km cell is at least half flooded.', 'যাদের ১ কিমি ঘর অন্তত অর্ধেক প্লাবিত, সেই মানুষের অংশ।'] },
     { id: 'f_lost_hosp', basis: 'floods', event: true, klass: 'any_hospital', levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most affected', 'সবচেয়ে বেশি আক্রান্ত'],
-      value: (a, level) => { const v = fe(level, a.pcode, 'lost_hospital'); return a.population > 0 ? v / a.population * 100 : NaN; },
+      value: (a, level, flood) => { const v = fe(level, a.pcode, 'lost_hospital', flood); return a.population > 0 ? v / a.population * 100 : NaN; },
       en: 'People losing hospital access within 60 minutes, selected flood (%)', bn: 'বাছাই করা বন্যায় ৬০ মিনিটে হাসপাতালে পৌঁছানোর সুযোগ হারানো মানুষ (%)',
       note: ['Within 60 minutes of any hospital normally, but not during the flood (flooded facilities closed, wading speed in flooded cells). A stress test, not a count.', 'স্বাভাবিক সময়ে যেকোনো হাসপাতাল ৬০ মিনিটের মধ্যে, কিন্তু বন্যায় নয় (প্লাবিত প্রতিষ্ঠান বন্ধ, প্লাবিত ঘরে হেঁটে পানি পেরোনোর গতি)। চাপ-পরীক্ষা, প্রকৃত গণনা নয়।'] },
     { id: 'f_lost_primary', basis: 'floods', event: true, klass: 'primary_care', levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most affected', 'সবচেয়ে বেশি আক্রান্ত'],
-      value: (a, level) => { const v = fe(level, a.pcode, 'lost_primary'); return a.population > 0 ? v / a.population * 100 : NaN; },
+      value: (a, level, flood) => { const v = fe(level, a.pcode, 'lost_primary', flood); return a.population > 0 ? v / a.population * 100 : NaN; },
       en: 'People losing primary care within a 60-minute walk, selected flood (%)', bn: 'বাছাই করা বন্যায় ৬০ মিনিট হাঁটা দূরত্বে প্রাথমিক সেবা হারানো মানুষ (%)',
       note: ['Within a 60-minute walk normally, but not during the flood.', 'স্বাভাবিক সময়ে ৬০ মিনিট হাঁটা দূরত্বে, কিন্তু বন্যায় নয়।'] }
   );
@@ -382,6 +382,14 @@
     return [head, dl];
   }
 
+  async function ensurePeopleUnion() {
+    if (state.data.areas.union) return;
+    const file = await get('./data/access/areas-union.json');
+    const cols = file.columns;
+    state.data.areas.union = file.rows.map((r) => Object.fromEntries(cols.map((c, i) => [c, r[i]])));
+    state.data.index.union = new Map(state.data.areas.union.map((a) => [a.pcode, a]));
+  }
+
   async function showLevel(level) {
     state.level = level;
     if (state.basis === 'land' && !state.data.land[level]) {
@@ -390,10 +398,7 @@
     }
     if (state.basis !== 'land' && level === 'union' && !state.data.areas.union) {
       $('#access-map').classList.add('loading');
-      const file = await get('./data/access/areas-union.json');
-      const cols = file.columns;
-      state.data.areas.union = file.rows.map((r) => Object.fromEntries(cols.map((c, i) => [c, r[i]])));
-      state.data.index.union = new Map(state.data.areas.union.map((a) => [a.pcode, a]));
+      await ensurePeopleUnion();
     }
     if (state.basis === 'travel' || state.basis === 'floods') { $('#access-map').classList.add('loading'); await ensureTravel(level); }
     fillSelects();
@@ -644,12 +649,85 @@
                `মানুষের বাসস্থান কতবার প্লাবিত: প্লাবিত বছরের সংখ্যা অনুযায়ী মানুষের অংশ, ২০০০–২০২৫ (${N(fq.people_flooded_ge['1'], 1)}% অন্তত একবার, ${N(fq.people_flooded_ge['5'], 1)}% ৫ বা বেশি বছর)`),
       yLabel: T('% of people', 'মানুষের %'), axisLabel: T(`Years flooded (of ${fq.years_mapped})`, `প্লাবিত বছর (${N(fq.years_mapped)}টির মধ্যে)`), labelEvery: 2, digits: 0, source: FLOOD_SOURCE() });
   }
-  async function showFlood(id) {
-    state.flood = id; state.basis = 'floods';
-    if (!measure().event) state.measure = 'f_lost_hosp';
-    if (state.level === 'division') state.level = 'district';
-    $('#map-section').scrollIntoView({ behavior: 'smooth' });
-    await showLevel(state.level);
+  // ---------- Flood map (its own map in the Floods section) ----------
+  const fstate = { level: 'district', measure: 'f_lost_hosp', flood: 'f2020_07', map: null };
+  const floodMeasure = () => MEASURES.find((m) => m.id === fstate.measure);
+  function floodSelects() {
+    const level = fstate.level, f = state.data.floods;
+    $('#f-level').replaceChildren(...ALL.map((k) => option(k, lvl(k)))); $('#f-level').value = level;
+    $('#f-metric').replaceChildren(...MEASURES.filter((m) => basisOf(m) === 'floods' && m.levels.includes(level)).map((m) => option(m.id, T(m.en, m.bn))));
+    $('#f-metric').value = fstate.measure;
+    const group = (label, list) => { const g = document.createElement('optgroup'); g.label = label; g.append(...list.map((e) => option(e.id, floodLabel(e)))); return g; };
+    $('#f-flood').replaceChildren(group(T('Named floods (Sentinel-1)', 'নামকৃত বন্যা (সেন্টিনেল-১)'), f.events), group(T('Whole years, 2000–2025', 'পুরো বছর, ২০০০–২০২৫'), [...f.years].reverse()));
+    $('#f-flood').value = fstate.flood;
+    $('#f-flood-wrap').hidden = !floodMeasure().event;
+    $('#f-names').replaceChildren(...areasOf(level).map((a) => option(areaLabel(a, level), '')));
+  }
+  function floodPaint() {
+    const m = floodMeasure(), level = fstate.level, list = areasOf(level), fr = m.event ? floodRecord(fstate.flood) : null;
+    const val = (a) => Number(m.value(a, level, fstate.flood));
+    $('#f-metric-note').textContent = (fr ? floodLabel(fr) + '. ' : '') + T(...m.note) + (fr && fr.id.startsWith('y') && level === 'union' && m.id !== 'f_flooded'
+      ? ' ' + T('Access losses for whole years are published down to upazila.', 'পুরো বছরের প্রবেশগম্যতা হারানোর হিসাব উপজেলা পর্যন্ত প্রকাশিত।') : '');
+    fstate.map.setMetric({ legendTitle: T(m.en, m.bn), ramp: m.ramp, digits: m.digits, values: new Map(list.map((a) => [a.pcode, val(a)])) });
+    const usable = list.filter((a) => Number.isFinite(val(a)) && (a.population || 0) > 0 && (level !== 'union' || a.source !== 'estimated')).sort((a, b) => val(b) - val(a));
+    $('#f-rank-title').textContent = T(`${m.rank[0]}: 20 ${LEVELS[level].en.toLowerCase()} areas · ${m.en}`, `${m.rank[1]}: ২০টি ${LEVELS[level].bn} · ${m.bn}`);
+    window.HealthCharts.bars($('#c-flood-rank'), usable.slice(0, 20).map((a) => ({ label: areaLabel(a, level), value: val(a), display: N(val(a), m.digits),
+      detail: T('population ', 'জনসংখ্যা ') + N(a.population) })), { title: T(m.en, m.bn) + (fr ? ' · ' + floodLabel(fr) : ''), axisLabel: T(m.en, m.bn), digits: m.digits, source: FLOOD_SOURCE() });
+  }
+  function floodDetail(pcode) {
+    const level = fstate.level, a = pcode ? byPcode(level).get(pcode) : null, box = $('#f-detail');
+    const h = document.createElement('h3');
+    if (!a) { h.textContent = T('Select an area', 'একটি এলাকা বাছুন'); const p = document.createElement('p'); p.textContent = T('Click the map or search by name.', 'মানচিত্রে ক্লিক করুন বা নাম খুঁজুন।'); box.replaceChildren(h, p); return; }
+    h.textContent = areaLabel(a, level);
+    const fr = floodRecord(fstate.flood), share = (v) => (a.population > 0 && Number.isFinite(v) ? pct(v / a.population * 100) : '—');
+    const items = [[T('Population 2022', 'জনসংখ্যা ২০২২'), N(a.population)],
+      [T('Years flooded (average, of 26)', 'প্লাবিত বছর (গড়, ২৬টির মধ্যে)'), N(fv(level, a.pcode, 'years_flooded_mean'), 1)],
+      [T('People flooded in 1+ years', '১ বা বেশি বছর প্লাবিত মানুষ'), pct(fv(level, a.pcode, 'flooded_ge1_pct'))],
+      [T('People flooded in 5+ years', '৫ বা বেশি বছর প্লাবিত মানুষ'), pct(fv(level, a.pcode, 'flooded_ge5_pct'))],
+      [T('People flooded in 10+ years', '১০ বা বেশি বছর প্লাবিত মানুষ'), pct(fv(level, a.pcode, 'flooded_ge10_pct'))]];
+    const dl = (rows) => { const d = document.createElement('dl'); rows.forEach(([t, v]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = t; dd.textContent = v; d.append(dt, dd); }); return d; };
+    const nodes = [h, dl(items)];
+    if (fr) {
+      const sub = document.createElement('h4'); sub.textContent = floodLabel(fr);
+      const lostH = fe(level, a.pcode, 'lost_hospital', fstate.flood), lostP = fe(level, a.pcode, 'lost_primary', fstate.flood);
+      nodes.push(sub, dl([[T('People in flooded cells', 'প্লাবিত ঘরে মানুষ'), pct(fe(level, a.pcode, 'flooded_pct', fstate.flood))],
+        [T('Lose hospital ≤ 60 min', '৬০ মিনিটে হাসপাতাল হারায়'), Number.isFinite(lostH) ? `${N(lostH)} (${share(lostH)})` : '—'],
+        [T('Lose primary care ≤ 60 min walk', '৬০ মিনিট হাঁটায় প্রাথমিক সেবা হারায়'), Number.isFinite(lostP) ? `${N(lostP)} (${share(lostP)})` : '—']]));
+    }
+    box.replaceChildren(...nodes);
+  }
+  async function floodLevel(level) {
+    fstate.level = level;
+    $('#flood-map').classList.add('loading');
+    if (level === 'union') await ensurePeopleUnion();
+    await ensureTravel(level);
+    if (!floodMeasure().levels.includes(level)) fstate.measure = 'f_lost_hosp';
+    floodSelects(); floodDetail(null);
+    await fstate.map.setLayer(LEVELS[level].geo);
+    $('#flood-map').classList.remove('loading');
+    floodPaint();
+  }
+  function initFloodMap() {
+    if (!state.data.floods) return;
+    fstate.map = window.AtlasChoropleth.create('flood-map', {
+      label: (p) => { const a = byPcode(fstate.level).get(p.pcode); return a ? areaLabel(a, fstate.level) : p.name || p.shapeName; },
+      onSelect: (pcode) => floodDetail(pcode), boundaries: true, defaultBoundaries: ['division'], storageKey: 'shasthopath-flood-basemap'
+    });
+    $('#f-level').addEventListener('change', (e) => floodLevel(e.target.value));
+    $('#f-metric').addEventListener('change', (e) => { fstate.measure = e.target.value; $('#f-flood-wrap').hidden = !floodMeasure().event; floodPaint(); });
+    $('#f-flood').addEventListener('change', (e) => { fstate.flood = e.target.value; floodPaint(); floodDetail(null); });
+    $('#f-search').addEventListener('change', (e) => {
+      const q = e.target.value.trim().toLowerCase(), name = q.split(' · ')[0], list = areasOf(fstate.level);
+      const hit = list.find((a) => areaLabel(a, fstate.level).toLowerCase() === q) || list.find((a) => a.name.toLowerCase() === name) || list.find((a) => a.name.toLowerCase().includes(name));
+      if (hit) fstate.map.select(hit.pcode, true);
+    });
+    return floodLevel(fstate.level);
+  }
+  function showFlood(id) {
+    fstate.flood = id;
+    if (!floodMeasure().event) fstate.measure = 'f_lost_hosp';
+    $('#flood-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    floodSelects(); floodPaint(); floodDetail(null);
   }
 
   function staticSections() { kpis(); curves(); travelSection(); floodSection(); inequality(); clusters(); selects(); social(); primary(); quality(); methods(); }
@@ -758,7 +836,8 @@
     $('#s-x').addEventListener('change', social); $('#s-y').addEventListener('change', social);
     staticSections();
     await showLevel(state.level);
-    document.addEventListener('site-language', () => { fillSelects(); paint(); staticSections(); detail(null); });
+    await initFloodMap();
+    document.addEventListener('site-language', () => { fillSelects(); paint(); staticSections(); detail(null); if (fstate.map) { floodSelects(); floodPaint(); floodDetail(null); } });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

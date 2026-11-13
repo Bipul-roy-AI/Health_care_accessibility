@@ -3,10 +3,9 @@ import sys
 import unittest
 from pathlib import Path
 
-import numpy as np
-
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 try:
+    import numpy as np
     import rasterio  # noqa: F401
     import skimage  # noqa: F401
     HAVE = True
@@ -14,7 +13,7 @@ except ImportError:  # optional geospatial stack
     HAVE = False
 
 
-@unittest.skipUnless(HAVE, "rasterio and scikit-image are needed")
+@unittest.skipUnless(HAVE, "numpy, rasterio and scikit-image are needed")
 class Travel(unittest.TestCase):
     def test_fill_water_bridges_rivers_and_estuary_only(self):
         from rasterio.transform import from_origin

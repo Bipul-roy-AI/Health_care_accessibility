@@ -50,7 +50,8 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     // Selecting an area fills the detail panel.
     await page.fill('#a-search', worst.name); await page.dispatchEvent('#a-search', 'change');
     await page.waitForFunction((name) => document.querySelector('#a-detail h3')?.textContent === name, worst.name);
-    assert.equal(await page.locator('#a-detail .access-within tr').count(), 6);
+    assert.equal(await page.locator('#a-detail .access-within').first().locator('tr').count(), 6);
+    assert.equal(await page.locator('#a-detail .access-within').count(), 2);   // distance and travel-time tables
 
     // Facility overlay follows the measure.
     await page.check('#a-points');
@@ -119,14 +120,28 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     assert.equal(await page.locator('#t-events tr').count(), floods.events.length);
     assert.ok(floods.events.every((e) => e.flooded_km2 <= e.surface_water_km2));
     const ev = floods.events[5];
-    await page.click(`#t-events tr:nth-child(6) .flood-map-btn`);
-    await page.waitForFunction((id) => document.querySelector('#a-flood').value === id && !document.querySelector('#access-map.loading'), ev.id);
-    assert.equal(await page.$eval('#a-basis', (e) => e.value), 'floods');
-    assert.equal(await page.$eval('#a-flood-wrap', (e) => e.hidden), false);
     const fd = floods.per_area.district, lostTop = Math.max(...fd.pcodes.map((p, i) => fd[ev.id].lost_hospital[i] / districts.find((d) => d.pcode === p).population * 100));
-    assert.ok(Math.abs(Number(await page.locator('#c-rank .chart-observation').first().getAttribute('data-value')) - lostTop) < 1e-9);
-    await page.selectOption('#a-metric', 'f_years');
-    assert.equal(await page.$eval('#a-flood-wrap', (e) => e.hidden), true);
+    // The Floods section has its own map: districts drawn, ranking, 'Show' drives it.
+    await page.waitForFunction((n) => document.querySelectorAll('#flood-map .leaflet-overlay-pane path.leaflet-interactive').length === n, districts.length, { timeout: 30000 });
+    assert.equal(await page.$eval('#f-metric', (e) => e.value), 'f_lost_hosp');
+    assert.equal(await page.locator('#c-flood-rank .chart-observation').count(), 20);
+    await page.click(`#t-events tr:nth-child(6) .flood-map-btn`);
+    await page.waitForFunction((id) => document.querySelector('#f-flood').value === id, ev.id);
+    assert.equal(await page.$eval('#f-flood-wrap', (e) => e.hidden), false);
+    assert.ok(Math.abs(Number(await page.locator('#c-flood-rank .chart-observation').first().getAttribute('data-value')) - lostTop) < 1e-9);
+    const topFlood = districts.find((d, _, all) => Math.abs(fd[ev.id].lost_hospital[fd.pcodes.indexOf(d.pcode)] / d.population * 100 - lostTop) < 1e-9);
+    await page.fill('#f-search', topFlood.name); await page.dispatchEvent('#f-search', 'change');
+    await page.waitForFunction((name) => document.querySelector('#f-detail h3')?.textContent === name, topFlood.name);
+    assert.match(await page.textContent('#f-detail'), /Lose hospital/);
+    await page.selectOption('#f-metric', 'f_years');
+    assert.equal(await page.$eval('#f-flood-wrap', (e) => e.hidden), true);
+    await page.selectOption('#f-level', 'upazila');
+    await page.waitForFunction((n) => document.querySelectorAll('#flood-map .leaflet-overlay-pane path.leaflet-interactive').length === n && !document.querySelector('#flood-map.loading'), upazilas.length, { timeout: 30000 });
+    // The main map's Floods basis still works, with its own selector.
+    await page.selectOption('#a-basis', 'floods');
+    await page.waitForFunction(() => document.querySelector('#a-metric').value === 'f_years');
+    await page.selectOption('#a-metric', 'f_lost_hosp');
+    assert.equal(await page.$eval('#a-flood-wrap', (e) => e.hidden), false);
     await page.selectOption('#a-basis', 'people');
     await page.waitForFunction(() => document.querySelector('#a-metric').value === 'within5_public');
 
@@ -170,6 +185,6 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     await broken.goto(base + '/accessibility.html');
     await broken.waitForSelector('#atlas-status.atlas-error');
     assert.ok(await broken.$('#atlas-content[hidden]'));
-    console.log('PASS: Access page (BBS population x DGHS): KPIs, layers, ranking, detail, points, people vs land curves, location quality, land basis + CSV, travel time + CSV, floods (years, events, map selector), inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
+    console.log('PASS: Access page (BBS population x DGHS): KPIs, layers, ranking, detail, points, people vs land curves, location quality, land basis + CSV, travel time + CSV, floods (years, events, own flood map + detail + ranking, main-map basis), inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
   } finally { await browser.close(); }
 })();
