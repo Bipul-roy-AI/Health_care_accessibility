@@ -1,7 +1,8 @@
 'use strict';
 (() => {
   const charts = new WeakMap(), palette = ['#176b58', '#4196ab', '#b98c36', '#9c80aa', '#71988a', '#d27b59'];
-  const number = (n, digits = 0) => n.toLocaleString('en-GB', { maximumFractionDigits: digits });
+  const L = (en, bn) => (document.documentElement.lang === 'bn' ? bn : en);
+  const number = (n, digits = 0) => n.toLocaleString((document.documentElement.lang === 'bn' ? 'bn-BD' : 'en-GB'), { maximumFractionDigits: digits });
   const wrap = (text, length) => {
     const lines = []; let line = '';
     for (const word of text.split(' ')) { if (line && (line + ' ' + word).length > length) { lines.push(line); line = ''; } line += (line ? ' ' : '') + word; }
@@ -32,8 +33,8 @@
     charts.get(target)?.destroy();
     const holder = document.createElement('div'); holder.className = 'statistics-plot'; holder.style.height = options.height + 'px';
     const canvas = document.createElement('canvas'); canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', options.title); holder.append(canvas);
-    const button = document.createElement('button'); button.type = 'button'; button.className = 'chart-download'; button.textContent = 'Download chart · PNG ↓'; button.setAttribute('aria-label', 'Download ' + options.title + ' as PNG');
-    const details = document.createElement('details'), summary = document.createElement('summary'); summary.textContent = 'View chart data'; details.append(summary);
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'chart-download'; button.textContent = L('Download chart · PNG ↓', 'চার্ট ডাউনলোড · PNG ↓'); button.setAttribute('aria-label', 'Download ' + options.title + ' as PNG');
+    const details = document.createElement('details'), summary = document.createElement('summary'); summary.textContent = L('View chart data', 'চার্টের তথ্য দেখুন'); details.append(summary);
     const scroll = document.createElement('div'); scroll.className = 'stats-table-wrap'; const dataTable = document.createElement('table');
     const caption = document.createElement('caption'); caption.textContent = options.title + ' — exact source values'; dataTable.append(caption);
     for (const [i, row] of table.entries()) {
@@ -58,11 +59,11 @@
         legend: { display: false }, statisticsFigure: { digits: 0 }, tooltip: { displayColors: true } }, ...extra };
   }
   function plot(target, rows, opt = {}) {
-    const title = opt.title || 'Statistical comparison', source = opt.source || 'Source: DGHS registry / BBS Yearbook 2025; dates on this page.';
+    const title = opt.title || 'Statistical comparison', source = opt.source || L('Source: DGHS registry / BBS Yearbook 2025; dates on this page.', 'উৎস: DGHS রেজিস্ট্রি / BBS বর্ষগ্রন্থ ২০২৫; তারিখ এই পৃষ্ঠায়।');
     const values = rows.map((r) => r.value), total = values.reduce((a, b) => a + b, 0), digits = opt.digits || 0;
     if (!rows.length || (opt.kind === 'doughnut' && total === 0)) {
       if (typeof target === 'string') target = document.querySelector(target);
-      charts.get(target)?.destroy(); target.textContent = 'No active listings in this selection.'; return;
+      charts.get(target)?.destroy(); target.textContent = L('No active listings in this selection.', 'এই বাছাইয়ে কোনো সক্রিয় তালিকা নেই।'); return;
     }
     const config = { type: opt.kind === 'doughnut' ? 'doughnut' : 'bar', plugins: [figurePlugin],
       data: { labels: rows.map((r) => opt.kind === 'doughnut' ? r.label : wrap(r.label, opt.kind === 'columns' ? 12 : 23)), datasets: [{ label: opt.axisLabel, data: values, backgroundColor: rows.map((r, i) => r.muted ? '#bba984' : opt.kind === 'doughnut' ? palette[i % palette.length] : r.selected ? '#b8842c' : '#267a66'), borderRadius: opt.kind === 'doughnut' ? 0 : 3, borderWidth: opt.kind === 'doughnut' ? 2 : 0, borderColor: '#fff', maxBarThickness: 35 }] },
@@ -76,22 +77,22 @@
       const horizontal = opt.kind !== 'columns'; config.options.indexAxis = horizontal ? 'y' : 'x';
       const ticks = { color: '#456456', font: { size: 11 }, maxRotation: 45, autoSkip: false };
       const category = { grid: { display: false }, ticks };
-      const numeric = { beginAtZero: true, ...(opt.maximum ? { max: opt.maximum } : {}), grid: { color: '#e5ece7' }, title: { display: true, text: wrap(opt.axisLabel || 'Active listings', 38), color: '#456456' }, ticks: { color: '#456456', callback: (v) => number(v, digits) } };
+      const numeric = { beginAtZero: true, ...(opt.maximum ? { max: opt.maximum } : {}), grid: { color: '#e5ece7' }, title: { display: true, text: wrap(opt.axisLabel || L('Active listings', 'সক্রিয় তালিকা'), 38), color: '#456456' }, ticks: { color: '#456456', callback: (v) => number(v, digits) } };
       config.options.scales = horizontal ? { x: numeric, y: category } : { x: category, y: numeric };
       config.options.plugins.tooltip.callbacks = { title: (items) => rows[items[0].dataIndex].label, label: (context) => `${opt.axisLabel}: ${number(context.raw, digits)}` };
     }
-    mount(target, config, { title, height: opt.kind === 'doughnut' ? 400 : opt.kind === 'columns' ? 440 : Math.max(310, rows.length * 47 + 160) }, [['Category', opt.axisLabel || 'Value'], ...rows.map((r) => [r.label, r.value])]);
+    mount(target, config, { title, height: opt.kind === 'doughnut' ? 400 : opt.kind === 'columns' ? 440 : Math.max(310, rows.length * 47 + 160) }, [[L('Category', 'শ্রেণি'), opt.axisLabel || 'Value'], ...rows.map((r) => [r.label, r.value])]);
   }
   function staffing(target, health) {
-    const title = 'DGHS workforce — existing staff and sanctioned posts';
-    const rows = [['Doctors', health.doctorsUnderDGHS], ['Medical technologists', health.medicalTechnologistsUnderDGHS]];
+    const title = L('DGHS workforce — existing staff and sanctioned posts', 'DGHS জনবল — কর্মরত ও অনুমোদিত পদ');
+    const rows = [[L('Doctors', 'চিকিৎসক'), health.doctorsUnderDGHS], [L('Medical technologists', 'মেডিকেল টেকনোলজিস্ট'), health.medicalTechnologistsUnderDGHS]];
     const config = { type: 'bar', plugins: [figurePlugin], data: { labels: rows.map(([label]) => wrap(label, 18)), datasets: [
-      { label: 'Existing staff', data: rows.map(([, v]) => v.existing), backgroundColor: '#267a66', maxBarThickness: 42 },
-      { label: 'Sanctioned posts', data: rows.map(([, v]) => v.sanctioned), backgroundColor: '#bba984', maxBarThickness: 42 }
-    ] }, options: options(title, 'BBS Yearbook 2025, table 13.01; original source: DGHS.') };
+      { label: L('Existing staff', 'কর্মরত'), data: rows.map(([, v]) => v.existing), backgroundColor: '#267a66', maxBarThickness: 42 },
+      { label: L('Sanctioned posts', 'অনুমোদিত পদ'), data: rows.map(([, v]) => v.sanctioned), backgroundColor: '#bba984', maxBarThickness: 42 }
+    ] }, options: options(title, L('BBS Yearbook 2025, table 13.01; original source: DGHS.', 'BBS বর্ষগ্রন্থ ২০২৫, সারণি ১৩.০১; মূল উৎস: DGHS।')) };
     config.options.plugins.legend = { display: true, position: 'bottom', labels: { usePointStyle: true, font: { size: 11 } } };
-    config.options.scales = { x: { grid: { display: false }, ticks: { color: '#456456' } }, y: { beginAtZero: true, grid: { color: '#e5ece7' }, title: { display: true, text: 'Staff / posts · published 2025', color: '#456456' } } };
-    mount(target, config, { title, height: 420 }, [['Staff category', 'Existing staff', 'Sanctioned posts'], ...rows.map(([label, v]) => [label, v.existing, v.sanctioned])]);
+    config.options.scales = { x: { grid: { display: false }, ticks: { color: '#456456' } }, y: { beginAtZero: true, grid: { color: '#e5ece7' }, title: { display: true, text: L('Staff / posts · published 2025', 'জনবল / পদ · ২০২৫'), color: '#456456' } } };
+    mount(target, config, { title, height: 420 }, [[L('Staff category', 'জনবলের ধরন'), L('Existing staff', 'কর্মরত'), L('Sanctioned posts', 'অনুমোদিত পদ')], ...rows.map(([label, v]) => [label, v.existing, v.sanctioned])]);
   }
   window.StatisticsCharts = { plot, staffing };
 })();

@@ -2,7 +2,8 @@
 'use strict';
 (() => {
   const ns = 'http://www.w3.org/2000/svg', states = new WeakMap();
-  const fmt = (n, digits = 0) => n.toLocaleString('en-GB', { maximumFractionDigits: digits });
+  const L = (en, bn) => (document.documentElement.lang === 'bn' ? bn : en);
+  const fmt = (n, digits = 0) => n.toLocaleString((document.documentElement.lang === 'bn' ? 'bn-BD' : 'en-GB'), { maximumFractionDigits: digits });
   function element(tag, attributes = {}, text) {
     const node = document.createElementNS(ns, tag);
     for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
@@ -19,7 +20,7 @@
     svg.append(element('text', { x, y, fill: '#38594f', 'font-size': 12, ...attributes }, value));
   }
   function download(svg, title) {
-    const button = document.createElement('button'); button.type = 'button'; button.className = 'chart-download'; button.textContent = 'Download figure · SVG ↓'; button.setAttribute('aria-label', `Download ${title} as SVG`);
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'chart-download'; button.textContent = L('Download figure · SVG ↓', 'চিত্র ডাউনলোড · SVG ↓'); button.setAttribute('aria-label', `Download ${title} as SVG`);
     button.addEventListener('click', () => {
       const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml;charset=utf-8' }));
       const link = document.createElement('a'); link.href = url; link.download = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 100) + '.svg'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -27,15 +28,15 @@
   }
   function draw(target, state) {
     const { kind, rows, options } = state, width = Math.max(280, Math.round(target.clientWidth || 600));
-    const title = options.title || 'Data comparison';
-    if (!rows.length) { const p = document.createElement('p'); p.textContent = options.emptyMessage || 'No observations available for this selection.'; target.replaceChildren(p); return; }
+    const title = options.title || L('Data comparison', 'তথ্যের তুলনা');
+    if (!rows.length) { const p = document.createElement('p'); p.textContent = options.emptyMessage || L('No observations available for this selection.', 'এই বাছাইয়ে কোনো তথ্য নেই।'); target.replaceChildren(p); return; }
     const wrap = (value, limit) => {
       const lines = []; let line = '';
       for (const word of value.split(' ')) { if (line && (line + ' ' + word).length > limit) { lines.push(line); line = ''; } line += (line ? ' ' : '') + word; }
       if (line) lines.push(line); return lines;
     };
     const headings = wrap(title, Math.max(22, Math.floor((width - 32) / 7)));
-    const source = wrap(options.source || 'Source: accompanying DGHS/BBS tables; see page for dates and definitions.', Math.max(30, Math.floor((width - 32) / 5.5)));
+    const source = wrap(options.source || L('Source: accompanying DGHS/BBS tables; see page for dates and definitions.', 'উৎস: সংশ্লিষ্ট DGHS/BBS সারণি; তারিখ ও সংজ্ঞা পৃষ্ঠায় দেখুন।'), Math.max(30, Math.floor((width - 32) / 5.5)));
     const headerHeight = headings.length * 17 + 14;
     let root, svg;
     function canvas(height) {
@@ -66,10 +67,10 @@
         group.append(element('rect', { x: left, y: y + 9, width: maximum > 0 ? Math.max(0, Math.min(1, row.value / maximum)) * plot : 0, height: 17, rx: 2, fill: row.muted ? '#83a49b' : '#176b58' }));
         svg.append(group);
       });
-      wrap(options.axisLabel || 'Value', Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, width / 2, bottom + 41 + i * 14, { 'text-anchor': 'middle', 'font-size': 12 }));
+      wrap(options.axisLabel || L('Value', 'মান'), Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, width / 2, bottom + 41 + i * 14, { 'text-anchor': 'middle', 'font-size': 12 }));
       if (options.stacked) {
-        svg.append(element('rect', { x: left, y: height - 22, width: 10, height: 10, fill: '#176b58' })); text(svg, 'Eligible coordinates', left + 16, height - 13, { 'font-size': 10 });
-        svg.append(element('rect', { x: width / 2, y: height - 22, width: 10, height: 10, fill: '#e8c8a5' })); text(svg, 'Unavailable / withheld', width / 2 + 16, height - 13, { 'font-size': 10 });
+        svg.append(element('rect', { x: left, y: height - 22, width: 10, height: 10, fill: '#176b58' })); text(svg, L('Eligible coordinates', 'যোগ্য স্থানাঙ্ক'), left + 16, height - 13, { 'font-size': 10 });
+        svg.append(element('rect', { x: width / 2, y: height - 22, width: 10, height: 10, fill: '#e8c8a5' })); text(svg, L('Unavailable / withheld', 'অপ্রাপ্য / বাদ রাখা'), width / 2 + 16, height - 13, { 'font-size': 10 });
       }
     } else if (kind === 'lines') {
       const height = 340, left = 50, right = width - 20, top = 26, bottom = height - 56;
@@ -101,7 +102,7 @@
       // Direct end labels: spread vertically so they never overlap (>=13px apart).
       ends.forEach((end) => { end.y = Math.max(top + 10, end.y); });
       ends.sort((a, b) => a.y - b.y);
-      for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 13);
+      for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 15);
       const overflow = ends.length ? ends[ends.length - 1].y - (bottom - 4) : 0;
       if (overflow > 0) ends.forEach((end) => { end.y -= overflow; });
       ends.forEach((end) => text(svg, end.label, right - 2, end.y, { 'text-anchor': 'end', 'font-size': 11, 'font-weight': 600, fill: end.colour, style: 'paint-order:stroke;stroke:#fff;stroke-width:3px' }));
@@ -138,7 +139,7 @@
       });
       root.addEventListener('pointerleave', () => { hover.style.display = 'none'; });
       function closestX(points, value) { let best = points[0]; for (const point of points) if (Math.abs(point[0] - value) < Math.abs(best[0] - value)) best = point; return best[0]; }
-      wrap(options.axisLabel || 'Value', Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, width / 2, bottom + 34 + i * 13, { 'text-anchor': 'middle', 'font-size': 11 }));
+      wrap(options.axisLabel || L('Value', 'মান'), Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, width / 2, bottom + 34 + i * 13, { 'text-anchor': 'middle', 'font-size': 11 }));
       text(svg, options.yLabel || '', 0, 0, { transform: `translate(12 ${(top + bottom) / 2}) rotate(-90)`, 'text-anchor': 'middle', 'font-size': 11 });
     } else {
       const height = 330, left = 47, right = width - 22, top = 23, bottom = height - 52;

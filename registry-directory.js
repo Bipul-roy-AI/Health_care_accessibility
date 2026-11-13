@@ -18,7 +18,10 @@
       return 'other';
     }
     async load() {
-      const [response, country] = await Promise.all([fetch('./data/dghs/index.json', { cache: 'no-cache', credentials: 'omit' }), CountryBoundary.load()]);
+      const [response, country, quality] = await Promise.all([fetch('./data/dghs/index.json', { cache: 'no-cache', credentials: 'omit' }), CountryBoundary.load(),
+        // Location audit (scripts/build_atlas.py): points placed outside their recorded district or on a coordinate shared across areas.
+        fetch('./data/atlas/location-quality.json', { credentials: 'omit' }).then((r) => r.ok ? r.json() : null).catch(() => null)]);
+      const flagged = new Set(Array.isArray(quality?.flagged_ids) ? quality.flagged_ids.map(String) : []);
       if (!response.ok) throw new Error('Registry index unavailable');
       const data = await response.json();
       if (data.schemaVersion !== 1 || !Array.isArray(data.records) || data.count !== data.records.length || !data.fields || data.chunkSize !== 250 || typeof data.generatedAt !== 'string' || !Number.isFinite(Date.parse(data.generatedAt))) throw new Error('Invalid registry snapshot');
@@ -31,16 +34,17 @@
         const mapping = { name: 'name', name_bn: 'name:bn', facility_ownership_name: 'ownership', facility_agency_name: 'operator', mailing_address: 'addr:full', district_name: 'addr:district', upazila_name: 'addr:city', email_1: 'email', website_url: 'website', code: 'ref:DGHS' };
         for (const [field, tag] of Object.entries(mapping)) if (record[field] != null && record[field] !== '') tags[tag] = String(record[field]);
         const phone = [record.mobile_1, record.land_phone_1].filter(Boolean).map(String); if (phone.length) tags.phone = [...new Set(phone)].join(' / ');
-        const hasPoint = record.coordinateStatus === 'published' && country.contains(record.lat, record.lon);
+        const locationFlag = flagged.has(id);
+        const hasPoint = record.coordinateStatus === 'published' && !locationFlag && country.contains(record.lat, record.lon);
         const fields = {};
         for (const [key, value] of Object.entries(record)) if (data.fields[key]) fields[data.fields[key]] = value;
         const outside = record.coordinateStatus === 'outside' || (record.coordinateStatus === 'published' && Number.isFinite(record.lat) && Number.isFinite(record.lon) && !hasPoint);
-        return { id: `dghs/${id}`, lat: hasPoint ? record.lat : null, lon: hasPoint ? record.lon : null, tags, category: RegistryDirectory.category(record.facility_type_name), retrievedAt: record.retrievedAt || data.generatedAt, registry: { id, code: String(record.code || ''), type: String(record.facility_type_name || ''), division: String(record.division_name || ''), active: !['0', 'no'].includes(String(record.is_active).toLowerCase()), url: RegistryDirectory.profileURL(id), fields, detailsLoaded: false, boundaryValidated: hasPoint, reportedPoint: outside ? [Number(record.reportedLatitude ?? record.lat), Number(record.reportedLongitude ?? record.lon)] : null, coordinateStatus: hasPoint ? 'published' : outside ? 'outside' : record.coordinateStatus === 'missing' ? 'missing' : 'invalid' } };
+        return { id: `dghs/${id}`, lat: hasPoint ? record.lat : null, lon: hasPoint ? record.lon : null, tags, category: RegistryDirectory.category(record.facility_type_name), retrievedAt: record.retrievedAt || data.generatedAt, registry: { id, locationFlag, code: String(record.code || ''), type: String(record.facility_type_name || ''), division: String(record.division_name || ''), active: !['0', 'no'].includes(String(record.is_active).toLowerCase()), url: RegistryDirectory.profileURL(id), fields, detailsLoaded: false, boundaryValidated: hasPoint, reportedPoint: outside ? [Number(record.reportedLatitude ?? record.lat), Number(record.reportedLongitude ?? record.lon)] : null, coordinateStatus: hasPoint ? 'published' : outside ? 'outside' : record.coordinateStatus === 'missing' ? 'missing' : 'invalid' } };
       });
       const computedCoverage = { published: 0, missing: 0, invalid: 0, outside: 0 };
       facilities.forEach((f) => computedCoverage[f.registry.coordinateStatus]++);
       data.coordinateCoverage = computedCoverage;
-      this.country = country; this.metadata = data; this.facilities = facilities; this.chunks.clear(); return facilities;
+      this.country = country; this.quality = quality; this.metadata = data; this.facilities = facilities; this.chunks.clear(); return facilities;
     }
     async enrich(facility) {
       if (!facility.registry || facility.registry.detailsLoaded) return facility;

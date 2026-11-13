@@ -1,1 +1,16 @@
-{"boundaryID": "BGD-ADM1-32408957", "boundaryISO": "BGD", "boundaryYear": "2015", "boundaryType": "ADM1", "boundarySource": "geoBoundaries, Wikimedia Commons", "boundaryCanonical": "Division", "boundaryLicense": "CC0 1.0 Universal (CC0 1.0) Public Domain Dedication", "licenseDetail": "", "licenseSource": "https//commons.wikimedia.org/wiki/File", "boundarySourceURL": "https//commons.wikimedia.org/wiki/File", "sourceDataUpdateDate": "Thu Jan 19 07:31:04 2023", "buildDate": "Dec 12, 2023", "admUnitCount": "8", "meanVertices": "286.0", "minVertices": "142", "maxVertices": "484", "meanPerimeterLengthKM": "948.9174042586358", "maxPerimeterLengthKM": "1905.5895608693747", "minPerimeterLengthKM": "595.1847253776617", "meanAreaSqKM": "17527.808168800242", "minAreaSqKM": "9557.77295751372", "maxAreaSqKM": "30503.04705273207"}
+{
+  "files": {
+    "bangladesh-divisions.geojson": "8 divisions dissolved from the 64 BBS/OCHA districts (so all levels nest exactly)",
+    "bangladesh-districts.geojson": "64 districts, geoBoundaries gbOpen BGD ADM2 (simplified), BBS pcodes attached",
+    "bangladesh-upazilas.geojson": "544 upazilas/thanas, geoBoundaries gbOpen BGD ADM3 (simplified), BBS pcodes attached",
+    "bangladesh-unions.topojson": "5,160 unions, geoBoundaries gbOpen BGD ADM4 (simplified, TopoJSON); IDs are <upazila pcode>-U<nnn>, not official BBS codes",
+    "bangladesh-country.geojson": "National outline from OpenStreetMap (ODbL); see country-source-metadata.json"
+  },
+  "boundarySource": "Bangladesh Bureau of Statistics (BBS) and OCHA ROAP, via geoBoundaries",
+  "boundaryLicense": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+  "geoBoundariesBoundaryYear": "2020",
+  "sourceDataset": "HDX: Administrative boundaries of Bangladesh as of 2015",
+  "sourceURL": "https://www.geoboundaries.org/",
+  "replaced": "Until 2026-11-13 the division layer was geoBoundaries ADM1 from Wikimedia Commons (CC0). It differed from the BBS districts by 5-24% of each division's area and was replaced.",
+  "builtBy": "scripts/build_atlas.py"
+}

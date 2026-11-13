@@ -58,7 +58,7 @@ const elements = [
     await page.locator('.facility-name').first().click(); await page.waitForSelector('.leaflet-popup-content'); assert.match(await page.locator('.leaflet-popup-content').innerText(),/Test Hospital/);
     await page.locator('.facility').first().locator('.view-details').click(); await page.waitForSelector('.facility-dialog[open]'); assert.match(await page.locator('.details-body').innerText(),/Wheelchair access/); assert.match(await page.locator('.details-body').innerText(),/Not recorded/); await page.keyboard.press('Escape'); assert.equal(await page.locator('.facility-dialog').isVisible(),false);
     await page.locator('#language').click(); assert.equal(await page.locator('html').getAttribute('lang'),'bn'); assert.match(await page.locator('.facility-name').first().innerText(),/পরীক্ষা/);
-    await page.locator('#language').click(); assert.equal(await page.locator('h1 br').count(),1);
+    await page.locator('#language').click(); assert.match(await page.locator('h1').innerText(),/Find health care/);
     await page.locator('#locate').click(); await page.waitForFunction(()=>document.querySelector('.facility-type').textContent.includes('km'));
     await page.waitForFunction(()=>!document.querySelector('#refresh').disabled);
     mode='failure'; await page.locator('#refresh').click(); await page.waitForSelector('#status.error'); assert.equal(await page.locator('.facility').count(),5); assert.match(await page.locator('#status').innerText(),/last successful search/);

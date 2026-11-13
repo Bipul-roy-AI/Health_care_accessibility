@@ -18,18 +18,19 @@ const { chromium } = require('playwright');
     for (const name of ['index.html', 'overview.html', 'statistics.html', 'helplines.html', 'accessibility.html']) {
       const response = await page.request.get(`${base}/${name}`);
       assert.equal(response.status(), 200);
-      assert.match(await response.text(), /href="\.\/analysis\.html">Analysis<\/a>/, name);
+      assert.match(await response.text(), /href="\.\/analysis\.html"[^>]*>Availability<\/a>/, name);
     }
     await page.goto(base + '/analysis.html');
     await page.waitForFunction(() => !document.querySelector('#baseline-figure').hidden);
-    assert.equal(await page.title(), 'Analysis — ShasthoPath');
-    assert.equal(await page.locator('nav[aria-label="Main navigation"] [aria-current="page"]').textContent(), 'Analysis');
+    assert.equal(await page.title(), 'Availability · ShasthoPath');
+    assert.equal(await page.locator('nav[aria-label="Main navigation"] [aria-current="page"]').textContent(), 'Availability');
     assert.equal(await page.locator('#analysis-active').textContent(), '20,206');
     assert.equal(await page.locator('#analysis-areas').textContent(), '616');
     assert.equal(await page.locator('#analysis-maps').textContent(), '10');
     assert.equal(await page.locator('#analysis-national tr').count(), 6);
-    await page.waitForFunction(() => document.querySelectorAll('#study-modules article').length === 5 && document.querySelectorAll('#area-ranking-chart .chart-observation').length === 8);
-    assert.match(await page.locator('#study-scenario').textContent(), /motorised travel only.*30, 60, 120/);
+    // The planned-analysis list now lives only on the Access study page.
+    assert.equal(await page.locator('#study-modules').count(), 0);
+    await page.waitForFunction(() => document.querySelectorAll('#area-ranking-chart .chart-observation').length === 8);
     assert.equal(await page.locator('#baseline-level option[value="union"]').isDisabled(), true);
     const countBars = await page.locator('#national-count-chart .chart-observation').evaluateAll((nodes) => nodes.map((n) => Number(n.dataset.value)));
     assert.deepEqual(countBars, baseline.national.map((r) => r.active));
