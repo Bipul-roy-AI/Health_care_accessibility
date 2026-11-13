@@ -4,8 +4,9 @@ Earth Engine exports are supplied: scripts/gee/bangladesh_access_inputs.js).
 Inputs
   friction: bd_friction_2019_1km.tif, bands motorized, walking (minutes per metre),
             EPSG:32646, 1 km (Malaria Atlas Project friction surface 2019, CC BY 4.0).
-  floods:   bd_floods.tif, one band per event (1 flooded, 0 dry, 255 no radar),
-            gfd_events_2000_2018, perm_water; EPSG:32646, 100-200 m.
+  floods:   bd_floods_years.tif (y2000..y2025: yearly maximum flood extent; 2000-2018 Global
+            Flood Database MODIS, 2019-2025 Sentinel-1) and bd_floods_events.tif (one band per
+            named event 2019-2025); values 1 flooded, 0 dry, 255 no data; perm_water; EPSG:32646.
 
 Method
   Travel time: least-cost accumulation (skimage MCP_Geometric) from every usable
@@ -16,7 +17,8 @@ Method
   Flood scenario for each event: facilities whose own pixel is flooded are closed;
   land cells at least half flooded take WADE_MIN_PER_M (about 1.5 km/h: wading or
   a country boat) if that is slower than normal; travel time is recomputed.
-  "Loses access" = within LIMIT minutes normally but not during the event.
+  "Loses access" = within LIMIT minutes normally but not during the event. Yearly bands
+  put a whole year's flooding on the map at once, so their losses are an upper bound.
 """
 from __future__ import annotations
 
@@ -48,7 +50,6 @@ EVENT_NOTES = {
     "f2024_08": ("Aug 2024", "Eastern flash flood, 11 districts", "https://reliefweb.int/report/bangladesh/bangladesh-eastern-flash-flood-situation-report-no-01-25-august-2024"),
     "f2024_10": ("Oct 2024", "Sherpur, Mymensingh, Netrokona flash flood", "https://reliefweb.int/report/bangladesh/bangladesh-situation-overview-northcentral-flood-2024-potential-inundation-exposed-and-affected-population-version-1st-update-07-october-2024"),
     "f2025_06": ("May–Jun 2025", "Sylhet division, Netrokona, Noakhali, Bhola, CHT", "https://reliefweb.int/disaster/fl-2025-000076-bgd"),
-    "f2026_07": ("Jul 2026", "Chattogram division and CHT, then north-east", "https://bangladesh.un.org/sites/default/files/2026-07/SitRep_ICCG_Flash%20Flood%20%26%20Landslides_13July26.pdf"),
 }
 
 
@@ -160,79 +161,85 @@ def build(ctx) -> dict:
         per_area[level] = {"pcodes": [a["pcode"] for a in areas], "travel": rows}
 
     # ---------- Floods ----------
-    floods = {"events": [], "per_area": {}}
-    if ctx.get("floods"):
+    floods = {"events": [], "years": [], "per_area": {}}
+    flood_files = [Path(p) for p in (ctx.get("floods") or [])]
+    if flood_files:
         import rasterio
-        with rasterio.open(ctx["floods"]) as src:
-            fl_transform, fl_shape = src.transform, (src.height, src.width)
-            names = list(src.descriptions)
-            arrays = {name: src.read(i + 1) for i, name in enumerate(names)}
-        perm = arrays.get("perm_water", np.zeros(fl_shape, np.uint8))
-        event_ids = [n for n in names if n.startswith("f")]
-        fac_flood_cells = {k: cells_of(fl_transform, fl_shape, v[:, 0], v[:, 1]) for k, v in facility.items()}
         per_level = {lv: defaultdict(dict) for lv in levels}
-        times_flooded_cells = np.zeros(len(weight))
-        for eid in event_ids:
-            band = np.where(perm == 1, 0, arrays[eid])
-            frac = area_flood_fraction(band, fl_transform, transform, shape)
-            flooded_cell = frac["flooded"] >= FLOODED_SHARE
-            observed_share = float(frac["observed"][np.isfinite(bands["motorized"])].mean())
-            people_flooded = sample(flooded_cell.astype(float)) == 1
-            times_flooded_cells += people_flooded
-            closed, after = {}, {}
-            for k in MODES:
-                r, c = fac_flood_cells[k]
-                ok = r >= 0
-                is_closed = np.zeros(len(r), bool)
-                is_closed[ok] = band[r[ok], c[ok]] == 1
-                closed[k] = int(is_closed.sum())
-                fric = bands[MODES[k][0]].copy()
-                fric[flooded_cell] = np.fmax(fric[flooded_cell], WADE_MIN_PER_M)
-                fr_r, fr_c = fac_cells[k]
-                open_starts = zip(fr_r[~is_closed], fr_c[~is_closed])
-                after[k] = sample(travel_minutes(fric, open_starts, cell))
-            lost = {k: (baseline[k] <= MODES[k][1]) & ~(after[k] <= MODES[k][1]) for k in MODES}
-            ev = {"id": eid, "when": EVENT_NOTES.get(eid, ("", "", ""))[0], "note": EVENT_NOTES.get(eid, ("", "", ""))[1],
-                  "source": EVENT_NOTES.get(eid, ("", "", ""))[2], "radar_coverage_pct": round(100 * observed_share, 1),
-                  "flooded_km2": round(float(flooded_cell.sum()) * cell * cell / 1e6),
-                  "people_in_flooded_cells": round(float(weight[people_flooded].sum())),
-                  "facilities_flooded": closed,
-                  "people_losing_access": {k: round(float(weight[lost[k]].sum())) for k in MODES},
-                  "median_min_after": {k: round(weighted_median(after[k], weight), 1) for k in MODES}}
-            floods["events"].append(ev)
+        years_flooded = np.zeros(len(weight))
+        years_seen = np.zeros(len(weight))
+        for path in flood_files:
+            with rasterio.open(path) as src:
+                if src.crs is None or src.crs.to_epsg() != 32646:
+                    raise SystemExit(f"{path}: expected EPSG:32646, got {src.crs}")
+                fl_transform, fl_shape = src.transform, (src.height, src.width)
+                arrays = {name: src.read(i + 1) for i, name in enumerate(src.descriptions)}
+            perm = arrays.get("perm_water", np.zeros(fl_shape, np.uint8))
+            fac_flood_cells = {k: cells_of(fl_transform, fl_shape, v[:, 0], v[:, 1]) for k, v in facility.items()}
+            for band_id in sorted(n for n in arrays if n and n[0] in "fy" and n[1:5].isdigit()):
+                is_year = band_id.startswith("y")
+                band = np.where(perm == 1, 0, arrays[band_id])
+                frac = area_flood_fraction(band, fl_transform, transform, shape)
+                flooded_cell = frac["flooded"] >= FLOODED_SHARE
+                observed_share = float(frac["observed"][np.isfinite(bands["motorized"])].mean())
+                people_flooded = sample(flooded_cell.astype(float)) == 1
+                if is_year:
+                    years_flooded += people_flooded
+                    years_seen += sample((frac["observed"] >= 0.5).astype(float)) == 1
+                closed, after = {}, {}
+                for k in MODES:
+                    r, c = fac_flood_cells[k]
+                    ok = r >= 0
+                    is_closed = np.zeros(len(r), bool)
+                    is_closed[ok] = band[r[ok], c[ok]] == 1
+                    closed[k] = int(is_closed.sum())
+                    fric = bands[MODES[k][0]].copy()
+                    fric[flooded_cell] = np.fmax(fric[flooded_cell], WADE_MIN_PER_M)
+                    fr_r, fr_c = fac_cells[k]
+                    after[k] = sample(travel_minutes(fric, zip(fr_r[~is_closed], fr_c[~is_closed]), cell))
+                lost = {k: (baseline[k] <= MODES[k][1]) & ~(after[k] <= MODES[k][1]) for k in MODES}
+                year = int(band_id[1:5])
+                when, note, source = EVENT_NOTES.get(band_id, ("", "", ""))
+                if is_year:
+                    when = str(year)
+                    note = "Yearly maximum flood extent, " + ("Global Flood Database (MODIS, mapped events)" if year <= 2018 else "Sentinel-1 radar, April-October")
+                    source = ("https://developers.google.com/earth-engine/datasets/catalog/GLOBAL_FLOOD_DB_MODIS_EVENTS_V1" if year <= 2018
+                              else "https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S1_GRD")
+                record = {"id": band_id, "year": year, "when": when, "note": note, "source": source,
+                          "sensor": "MODIS" if is_year and year <= 2018 else "Sentinel-1",
+                          "coverage_pct": round(100 * observed_share, 1),
+                          "flooded_km2": round(float(flooded_cell.sum()) * cell * cell / 1e6),
+                          "people_in_flooded_cells": round(float(weight[people_flooded].sum())),
+                          "facilities_flooded": closed,
+                          "people_losing_access": {k: round(float(weight[lost[k]].sum())) for k in MODES},
+                          "median_min_after": {k: round(weighted_median(after[k], weight), 1) for k in MODES}}
+                floods["years" if is_year else "events"].append(record)
+                for level, areas in levels.items():
+                    idx, n = area_of[level], len(areas)
+                    pop = np.maximum(np.bincount(idx, weights=weight, minlength=n), 1e-9)
+                    entry = {"flooded_pct": [round(float(v), 1) for v in 100 * np.bincount(idx, weights=weight * people_flooded, minlength=n) / pop]}
+                    if not (is_year and level == "union"):
+                        entry["lost_hospital"] = [round(float(v)) for v in np.bincount(idx, weights=weight * lost["any_hospital"], minlength=n)]
+                        entry["lost_primary"] = [round(float(v)) for v in np.bincount(idx, weights=weight * lost["primary_care"], minlength=n)]
+                    per_level[level][band_id] = entry
+        # Repeated flooding 2000-2025: how many yearly maps flooded each person's 1 km cell.
+        if years_seen.any():
             for level, areas in levels.items():
                 idx, n = area_of[level], len(areas)
-                pop = np.bincount(idx, weights=weight, minlength=n)
-                flooded_people = np.bincount(idx, weights=weight * people_flooded, minlength=n)
-                lost_h = np.bincount(idx, weights=weight * lost["any_hospital"], minlength=n)
-                lost_p = np.bincount(idx, weights=weight * lost["primary_care"], minlength=n)
-                per_level[level][eid] = {
-                    "flooded_pct": [round(float(v), 1) for v in 100 * flooded_people / np.maximum(pop, 1e-9)],
-                    "lost_hospital": [round(float(v)) for v in lost_h],
-                    "lost_primary": [round(float(v)) for v in lost_p]}
-        # Exposure to repeated flooding: share of people whose cell flooded in >= 2 of the mapped events,
-        # and the 2000-2018 Global Flood Database count.
-        gfd = arrays.get("gfd_events_2000_2018")
-        for level, areas in levels.items():
-            idx, n = area_of[level], len(areas)
-            pop = np.bincount(idx, weights=weight, minlength=n)
-            repeat = np.bincount(idx, weights=weight * (times_flooded_cells >= 2), minlength=n)
-            per_level[level]["repeat_pct"] = [round(float(v), 1) for v in 100 * repeat / np.maximum(pop, 1e-9)]
-        if gfd is not None:
-            from rasterio.warp import Resampling, reproject
-            dest = np.zeros(shape, np.float32)
-            reproject(np.where(perm == 1, 0, gfd).astype(np.float32), dest, src_transform=fl_transform, src_crs="EPSG:32646",
-                      dst_transform=transform, dst_crs="EPSG:32646", resampling=Resampling.max)
-            g = sample(dest)
-            for level, areas in levels.items():
-                idx, n = area_of[level], len(areas)
-                pop = np.bincount(idx, weights=weight, minlength=n)
-                ever = np.bincount(idx, weights=weight * (np.nan_to_num(g) >= 1), minlength=n)
-                per_level[level]["gfd_ever_pct"] = [round(float(v), 1) for v in 100 * ever / np.maximum(pop, 1e-9)]
+                pop = np.maximum(np.bincount(idx, weights=weight, minlength=n), 1e-9)
+                per_level[level]["years_flooded_mean"] = [round(float(v), 2) for v in np.bincount(idx, weights=weight * years_flooded, minlength=n) / pop]
+                for k in (1, 5, 10):
+                    per_level[level][f"flooded_ge{k}_pct"] = [round(float(v), 1) for v in 100 * np.bincount(idx, weights=weight * (years_flooded >= k), minlength=n) / pop]
+            total_w = float(weight.sum())
+            floods["frequency"] = {"years_mapped": len(floods["years"]),
+                                   "people_flooded_ge": {str(k): round(100 * float(weight[years_flooded >= k].sum()) / total_w, 1) for k in (1, 5, 10)},
+                                   "histogram": [round(100 * float(weight[years_flooded == k].sum()) / total_w, 2) for k in range(int(years_flooded.max()) + 1)]}
         floods["per_area"] = {lv: {"pcodes": [a["pcode"] for a in levels[lv]], **per_level[lv]} for lv in levels}
         floods["assumptions"] = {"flooded_cell_share": FLOODED_SHARE, "wade_min_per_m": WADE_MIN_PER_M,
                                  "closed_if": "facility's own flood pixel is flooded",
-                                 "loses_access": "within the limit normally, beyond it during the event"}
+                                 "loses_access": "within the limit normally, beyond it during the flood",
+                                 "years": "a year's map combines all of that year's floods, so access losses are an upper bound",
+                                 "eras": "2000-2018 MODIS (Global Flood Database, mapped events only) and 2019-2025 Sentinel-1 radar differ in resolution and detection; compare within an era"}
 
     OUT.mkdir(exist_ok=True)
     payload = {"generatedAt": ctx["generated"], "friction_source": "Malaria Atlas Project friction surface 2019 (Weiss et al., 2020), CC BY 4.0",
@@ -240,9 +247,10 @@ def build(ctx) -> dict:
                "per_area": {lv: per_area[lv] for lv in ("division", "district", "upazila")}}
     (OUT / "travel.json").write_text(json.dumps(payload, separators=(",", ":")) + "\n", encoding="utf-8")
     (OUT / "travel-union.json").write_text(json.dumps({"generatedAt": ctx["generated"], **per_area["union"]}, separators=(",", ":")) + "\n", encoding="utf-8")
-    if floods["events"]:
-        small = {"generatedAt": ctx["generated"], "events": floods["events"], "assumptions": floods["assumptions"],
+    if floods["events"] or floods["years"]:
+        small = {"generatedAt": ctx["generated"], "events": floods["events"], "years": floods["years"],
+                 "frequency": floods.get("frequency"), "assumptions": floods["assumptions"],
                  "per_area": {lv: floods["per_area"][lv] for lv in ("division", "district", "upazila")}}
         (OUT / "floods.json").write_text(json.dumps(small, separators=(",", ":")) + "\n", encoding="utf-8")
         (OUT / "floods-union.json").write_text(json.dumps({"generatedAt": ctx["generated"], **floods["per_area"]["union"]}, separators=(",", ":")) + "\n", encoding="utf-8")
-    return {"national": national, "events": floods["events"]}
+    return {"national": national, "events": floods["events"], "years": floods["years"]}

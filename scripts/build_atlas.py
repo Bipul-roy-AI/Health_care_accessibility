@@ -299,7 +299,7 @@ def main() -> int:
     parser.add_argument("--adm4", type=Path, required=True)
     parser.add_argument("--census", type=Path, help="data/population/bbs-census-2022.json: also build data/access/")
     parser.add_argument("--friction", type=Path, help="bd_friction_2019_1km.tif (Earth Engine export): travel time")
-    parser.add_argument("--floods", type=Path, help="bd_floods.tif (Earth Engine export): flood-disrupted access")
+    parser.add_argument("--floods", type=Path, nargs="*", help="bd_floods_years.tif and/or bd_floods_events.tif (Earth Engine exports)")
     args = parser.parse_args()
 
     from pyproj import Transformer
