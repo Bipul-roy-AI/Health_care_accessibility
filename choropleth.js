@@ -64,7 +64,7 @@
     }
     function style(feature) {
       const selected = state.selected === feature.properties.pcode;
-      return { fillColor: fill(feature.properties.pcode), fillOpacity: layers.hasTiles() ? 0.72 : 0.92, color: selected ? '#153a30' : '#ffffff',
+      return { fillColor: fill(feature.properties.pcode), fillOpacity: state.metric?.fillOpacity ?? (layers.hasTiles() ? 0.72 : 0.92), color: selected ? '#153a30' : '#ffffff',
                weight: selected ? 2.4 : state.thin ? 0.25 : 0.7, opacity: 1 };
     }
     function legend() {

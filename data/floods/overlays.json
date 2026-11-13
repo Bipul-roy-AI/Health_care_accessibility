@@ -1,0 +1,621 @@
+{
+ "generatedAt": "2026-11-13T22:07:35+00:00",
+ "crs": "EPSG:3857 images; bounds in latitude/longitude",
+ "legend": {
+  "event": [
+   {
+    "color": "#08306b",
+    "en": "Flooded beyond normal monsoon water",
+    "bn": "স্বাভাবিক বর্ষার বাইরে প্লাবিত"
+   },
+   {
+    "color": "#4fb3bf",
+    "en": "Normal monsoon water (flooded in 4+ of the other 6 radar years)",
+    "bn": "স্বাভাবিক বর্ষার পানি (অন্য ৬টি রাডার বছরের ৪+টিতে প্লাবিত)"
+   }
+  ],
+  "year": [
+   {
+    "color": "#08306b",
+    "en": "Flooded at some time in the year",
+    "bn": "বছরের কোনো এক সময়ে প্লাবিত"
+   }
+  ],
+  "frequency": [
+   {
+    "color": "#c6dbef",
+    "en": "1 year",
+    "bn": "1 বছর"
+   },
+   {
+    "color": "#9ecae1",
+    "en": "2–3 years",
+    "bn": "2–3 বছর"
+   },
+   {
+    "color": "#6baed6",
+    "en": "4–6 years",
+    "bn": "4–6 বছর"
+   },
+   {
+    "color": "#3182bd",
+    "en": "7–12 years",
+    "bn": "7–12 বছর"
+   },
+   {
+    "color": "#08519c",
+    "en": "13–19 years",
+    "bn": "13–19 বছর"
+   },
+   {
+    "color": "#08306b",
+    "en": "20–26 years",
+    "bn": "20–26 বছর"
+   }
+  ]
+ },
+ "notes": "Permanent water (JRC Global Surface Water, 10+ months a year) and areas outside Bangladesh are transparent. Events at 200 m, years and frequency at 250 m; modal class when downsampling.",
+ "layers": {
+  "f2019_07": {
+   "file": "overlays/f2019_07.png",
+   "bounds": [
+    [
+     20.770275,
+     88.020352
+    ],
+    [
+     26.625074,
+     92.497556
+    ]
+   ],
+   "res_m": 200,
+   "bytes": 362748,
+   "kind": "event"
+  },
+  "f2020_07": {
+   "file": "overlays/f2020_07.png",
+   "bounds": [
+    [
+     20.771955,
+     88.020352
+    ],
+    [
+     26.625074,
+     92.497556
+    ]
+   ],
+   "res_m": 200,
+   "bytes": 468071,
+   "kind": "event"
+  },
+  "f2022_05": {
+   "file": "overlays/f2022_05.png",
+   "bounds": [
+    [
+     21.025398,
+     88.050895
+    ],
+    [
+     26.631498,
+     92.497556
+    ]
+   ],
+   "res_m": 200,
+   "bytes": 117729,
+   "kind": "event"
+  },
+  "f2022_06": {
+   "file": "overlays/f2022_06.png",
+   "bounds": [
+    [
+     20.783713,
+     88.068861
+    ],
+    [
+     26.554383,
+     92.497556
+    ]
+   ],
+   "res_m": 200,
+   "bytes": 230983,
+   "kind": "event"
+  },
+  "f2024_06": {
+   "file": "overlays/f2024_06.png",
+   "bounds": [
+    [
+     20.775314,
+     88.068861
+    ],
+    [
+     26.543133,
+     92.497556
+    ]
+   ],
+   "res_m": 200,
+   "bytes": 218290,
+   "kind": "event"
+  },
+  "f2024_08": {
+   "file": "overlays/f2024_08.png",
+   "bounds": [
+    [
+     20.812266,
+     88.020352
+    ],
+    [
+     26.358149,
+     92.497556
+    ]
+   ],
+   "res_m": 200,
+   "bytes": 292043,
+   "kind": "event"
+  },
+  "f2024_10": {
+   "file": "overlays/f2024_10.png",
+   "bounds": [
+    [
+     20.812266,
+     88.018556
+    ],
+    [
+     26.325948,
+     92.495759
+    ]
+   ],
+   "res_m": 200,
+   "bytes": 155624,
+   "kind": "event"
+  },
+  "f2025_06": {
+   "file": "overlays/f2025_06.png",
+   "bounds": [
+    [
+     20.812266,
+     88.088624
+    ],
+    [
+     26.308233,
+     92.497556
+    ]
+   ],
+   "res_m": 200,
+   "bytes": 164996,
+   "kind": "event"
+  },
+  "y2000": {
+   "file": "overlays/y2000.png",
+   "bounds": [
+    [
+     21.727181,
+     88.00999
+    ],
+    [
+     26.288052,
+     92.393769
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 69935,
+   "kind": "year"
+  },
+  "y2001": {
+   "file": "overlays/y2001.png",
+   "bounds": [
+    [
+     21.82937,
+     88.027957
+    ],
+    [
+     25.615621,
+     91.15634
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 5846,
+   "kind": "year"
+  },
+  "y2002": {
+   "file": "overlays/y2002.png",
+   "bounds": [
+    [
+     20.787443,
+     88.041431
+    ],
+    [
+     26.589687,
+     92.490338
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 71787,
+   "kind": "year"
+  },
+  "y2003": {
+   "file": "overlays/y2003.png",
+   "bounds": [
+    [
+     20.751745,
+     88.007744
+    ],
+    [
+     26.601736,
+     92.499321
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 112978,
+   "kind": "year"
+  },
+  "y2004": {
+   "file": "overlays/y2004.png",
+   "bounds": [
+    [
+     20.751745,
+     88.021219
+    ],
+    [
+     26.561567,
+     92.499321
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 138456,
+   "kind": "year"
+  },
+  "y2005": {
+   "file": "overlays/y2005.png",
+   "bounds": [
+    [
+     21.666667,
+     88.023465
+    ],
+    [
+     26.561567,
+     92.499321
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 89514,
+   "kind": "year"
+  },
+  "y2006": {
+   "file": "overlays/y2006.png",
+   "bounds": [
+    [
+     20.751745,
+     88.025711
+    ],
+    [
+     26.551523,
+     92.499321
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 72515,
+   "kind": "year"
+  },
+  "y2007": {
+   "file": "overlays/y2007.png",
+   "bounds": [
+    [
+     20.751745,
+     88.012236
+    ],
+    [
+     26.304159,
+     92.499321
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 134874,
+   "kind": "year"
+  },
+  "y2008": {
+   "file": "overlays/y2008.png",
+   "bounds": [
+    [
+     21.666667,
+     88.007744
+    ],
+    [
+     26.619807,
+     92.497075
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 77842,
+   "kind": "year"
+  },
+  "y2009": {
+   "file": "overlays/y2009.png",
+   "bounds": [
+    [
+     21.666667,
+     88.018973
+    ],
+    [
+     26.420868,
+     92.447668
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 32044,
+   "kind": "year"
+  },
+  "y2010": {
+   "file": "overlays/y2010.png",
+   "bounds": [
+    [
+     20.751745,
+     88.021219
+    ],
+    [
+     26.547505,
+     92.497075
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 81735,
+   "kind": "year"
+  },
+  "y2011": {
+   "file": "overlays/y2011.png",
+   "bounds": [
+    [
+     21.666667,
+     88.007744
+    ],
+    [
+     26.390696,
+     91.190026
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 47402,
+   "kind": "year"
+  },
+  "y2012": {
+   "file": "overlays/y2012.png",
+   "bounds": [
+    [
+     23.740358,
+     88.025711
+    ],
+    [
+     24.688657,
+     89.719035
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 3890,
+   "kind": "year"
+  },
+  "y2013": {
+   "file": "overlays/y2013.png",
+   "bounds": [
+    [
+     21.666667,
+     88.018973
+    ],
+    [
+     26.197408,
+     91.190026
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 23166,
+   "kind": "year"
+  },
+  "y2014": {
+   "file": "overlays/y2014.png",
+   "bounds": [
+    [
+     23.012674,
+     88.021219
+    ],
+    [
+     26.306172,
+     92.497075
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 53024,
+   "kind": "year"
+  },
+  "y2015": {
+   "file": "overlays/y2015.png",
+   "bounds": [
+    [
+     20.753845,
+     88.023465
+    ],
+    [
+     26.306172,
+     92.387031
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 50291,
+   "kind": "year"
+  },
+  "y2016": {
+   "file": "overlays/y2016.png",
+   "bounds": [
+    [
+     20.751745,
+     88.007744
+    ],
+    [
+     26.342404,
+     92.497075
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 88078,
+   "kind": "year"
+  },
+  "y2017": {
+   "file": "overlays/y2017.png",
+   "bounds": [
+    [
+     20.751745,
+     88.023465
+    ],
+    [
+     26.294092,
+     92.497075
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 79344,
+   "kind": "year"
+  },
+  "y2018": {
+   "file": "overlays/y2018.png",
+   "bounds": [
+    [
+     20.751745,
+     88.016728
+    ],
+    [
+     26.60776,
+     92.393769
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 77710,
+   "kind": "year"
+  },
+  "y2019": {
+   "file": "overlays/y2019.png",
+   "bounds": [
+    [
+     20.829429,
+     88.014482
+    ],
+    [
+     26.549514,
+     92.492584
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 103683,
+   "kind": "year"
+  },
+  "y2020": {
+   "file": "overlays/y2020.png",
+   "bounds": [
+    [
+     20.84622,
+     88.018973
+    ],
+    [
+     26.549514,
+     92.490338
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 135654,
+   "kind": "year"
+  },
+  "y2021": {
+   "file": "overlays/y2021.png",
+   "bounds": [
+    [
+     21.068525,
+     88.018973
+    ],
+    [
+     26.501289,
+     92.546482
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 84474,
+   "kind": "year"
+  },
+  "y2022": {
+   "file": "overlays/y2022.png",
+   "bounds": [
+    [
+     21.068525,
+     88.021219
+    ],
+    [
+     26.451033,
+     92.497075
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 82960,
+   "kind": "year"
+  },
+  "y2023": {
+   "file": "overlays/y2023.png",
+   "bounds": [
+    [
+     21.076908,
+     88.021219
+    ],
+    [
+     26.543487,
+     92.555466
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 78117,
+   "kind": "year"
+  },
+  "y2024": {
+   "file": "overlays/y2024.png",
+   "bounds": [
+    [
+     21.047567,
+     88.021219
+    ],
+    [
+     26.455054,
+     92.544237
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 116075,
+   "kind": "year"
+  },
+  "y2025": {
+   "file": "overlays/y2025.png",
+   "bounds": [
+    [
+     21.141855,
+     88.018973
+    ],
+    [
+     26.455054,
+     92.476863
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 90559,
+   "kind": "year"
+  },
+  "frequency": {
+   "file": "overlays/frequency.png",
+   "bounds": [
+    [
+     20.751745,
+     88.007744
+    ],
+    [
+     26.619807,
+     92.555466
+    ]
+   ],
+   "res_m": 250,
+   "bytes": 419910,
+   "kind": "frequency",
+   "years_mapped": 26
+  }
+ }
+}

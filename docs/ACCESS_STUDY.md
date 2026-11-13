@@ -97,6 +97,10 @@ Flooding differs by place and year, so the study uses floods observed from satel
 | Oct 2024 | 1,162 | 1.1 M | 17 | 0.1 M |
 | May–Jun 2025 | 1,095 | 1.1 M | 19 | 0.1 M |
 
+**Flood layers on the map.** The Floods section has its own map, and the satellite flood maps can be drawn on it as layers: the selected flood or year, or how often each pixel flooded in 2000–2025. `scripts/build_flood_overlays.py` converts the exports into palette PNGs in Web Mercator (`data/floods/overlays/`, about 4.4 MB for 35 layers, loaded one at a time) with bounds in `data/floods/overlays.json`. Named floods are at 200 m and show flooding beyond normal monsoon water separately from normal monsoon water; years and frequency are at 250 m. Downsampling keeps the modal class, and permanent rivers are left out. The layers show every flooded pixel, while the tables count only 1 km cells that are at least half flooded, so the layers show more area. Scattered single specks are most likely wet rice fields or radar noise.
+
+    python3 scripts/build_flood_overlays.py --years bd_floods_years.tif --events bd_floods_events.tif
+
 Across the 26 yearly maps, 34.7% of people live in a 1 km cell flooded at least once, 12.8% in five or more years and 6.7% in ten or more.
 
 **Limits.**
