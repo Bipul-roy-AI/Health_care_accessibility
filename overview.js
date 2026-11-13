@@ -71,7 +71,7 @@
   $('#overview-reset').addEventListener('click', () => { selectedType = 'all'; $('#overview-type').value = 'all'; selectDivision('all'); });
   $('#language').addEventListener('click', () => { language = language === 'en' ? 'bn' : 'en'; document.documentElement.lang = language; document.querySelectorAll('[data-i18n]').forEach((e) => { e.textContent = t(e.dataset.i18n); }); $('#language').textContent = language === 'en' ? 'বাংলা' : 'English'; populateDivisions(); details.translate(); render(); });
   $('#overview-status').textContent = t('layersLoading');
-  Promise.all([registry.load(), fetch('./data/boundaries/bangladesh-divisions.geojson').then((r) => { if (!r.ok) throw new Error('Boundary file unavailable'); return r.json(); })]).then(([records, geometry]) => {
+  Promise.all([registry.load(), fetch('./data/boundaries/bangladesh-divisions.geojson', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error('Boundary file unavailable'); return r.json(); })]).then(([records, geometry]) => {
     if (geometry.type !== 'FeatureCollection' || geometry.features?.length !== 8 || new Set(geometry.features.map((f) => canonical(f.properties?.shapeName))).size !== 8 || geometry.features.some((f) => canonical(f.properties?.shapeName) === 'unspecified')) throw new Error('Invalid division boundaries');
     institutions = records; geojson = geometry;
     L.geoJSON(registry.country.geometry, { style: { color: '#173f35', weight: 2, fill: false }, interactive: false }).addTo(map);

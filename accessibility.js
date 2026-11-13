@@ -60,7 +60,7 @@
     link.href = url; link.download = `dghs_${$('#access-tier').value}_division_counts.csv`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
   Promise.all([fetch('./data/dghs/index.json').then((response) => { if (!response.ok) throw new Error('DGHS data unavailable'); return response.json(); }),
-    fetch('./data/atlas/location-quality.json').then((r) => (r.ok ? r.json() : null)).catch(() => null)]).then(([data, quality]) => {
+    fetch('./data/atlas/location-quality.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)]).then(([data, quality]) => {
     const flagged = new Set((quality?.flagged_ids || []).map(String));
     data.records.forEach((record) => { if (flagged.has(String(record.id))) record.locationFlag = true; });
     index = data; options('division', {}); options('district', {}); options('upazila', {}); render();

@@ -85,6 +85,14 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
     assert.match(text, /src="\.\/i18n\.js/, `${name} loads i18n.js`);
   }
 
+  // An outdated data file must produce a visible message, never empty sections.
+  const stale = await context.newPage();
+  await stale.route('**/data/atlas/distance.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ classes: {}, national: {} }) }));
+  await stale.goto(base + '/atlas.html');
+  await stale.waitForFunction(() => !document.querySelector('#atlas-status').hidden && document.querySelector('#atlas-content').hidden, null, { timeout: 30000 });
+  assert.match(await stale.textContent('#atlas-status'), /older version|could not be loaded/);
+  await stale.close();
+
   // Mobile: no horizontal overflow on the Distance page.
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
   watch(mobile);
