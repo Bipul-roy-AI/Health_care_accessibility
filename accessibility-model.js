@@ -6,7 +6,8 @@
     upazila: { label: 'Upazila health complexes', types: ['Upazila Health Complex'] },
     urban_primary: { label: 'Urban primary health centres', types: ['Urban Primary Health Care Center'] },
   };
-  const validPoint = (row) => row.coordinateStatus === 'published' && row.lat !== null && row.lon !== null && row.lat !== '' && row.lon !== '' && Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lon)) && Math.abs(Number(row.lat)) <= 90 && Math.abs(Number(row.lon)) <= 180;
+  // locationFlag: set from data/atlas/location-quality.json (outside recorded district or shared coordinate).
+  const validPoint = (row) => row.coordinateStatus === 'published' && row.locationFlag !== true && row.lat !== null && row.lon !== null && row.lat !== '' && row.lon !== '' && Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lon)) && Math.abs(Number(row.lat)) <= 90 && Math.abs(Number(row.lon)) <= 180;
   const areaFields = { division: 'division_name', district: 'district_name', upazila: 'upazila_name' };
   const matchesArea = (row, area) => Object.entries(area).every(([key, value]) => { if (!areaFields[key]) throw new Error('Unknown area level'); return !value || row[areaFields[key]] === value; });
   function areaValues(index, level, parents = {}) {

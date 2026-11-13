@@ -1,5 +1,32 @@
+/* Page shell for the atlas (moved from the removed research.css). */
+.atlas-main{max-width:1440px;margin:auto;padding:30px 28px 70px;color:#203c38}
+.atlas-intro{max-width:900px}
+.atlas-intro h1{font-size:clamp(2rem,4vw,3.4rem);line-height:1.13;margin:14px 0 20px}
+.atlas-main p{line-height:1.65}
+.atlas-note{background:#f0f5f2;border-left:3px solid #708f80;padding:12px 16px;font-size:.93rem}
+.atlas-jump{display:flex;flex-wrap:wrap;gap:22px;padding:20px 0;border-bottom:1px solid #d4e1da}
+.atlas-panel{margin-top:30px;padding:25px;background:#fff;border:1px solid #d4e1da;border-radius:8px;scroll-margin-top:20px}
+.atlas-panel h2{font-size:1.45rem;margin:0 0 16px}
+.atlas-filters{display:flex;flex-wrap:wrap;gap:16px;align-items:end;margin:20px 0}
+.atlas-main label{display:flex;flex-direction:column;gap:7px;font-size:.86rem;font-weight:600}
+.atlas-main select,.atlas-main input[type=search],.atlas-main input[type=number]{padding:10px;border:1px solid #91aca0;border-radius:4px;background:white;max-width:100%;min-height:42px}
+.atlas-main select{max-width:320px}
+.atlas-main button{padding:9px 14px;border:1px solid #9bb2a7;background:#f8faf8;color:#214a3c;border-radius:4px;cursor:pointer;min-height:40px}
+.atlas-main button:hover,.atlas-main button[aria-pressed=true]{background:#d9e8df}
+.atlas-main button:focus-visible,.atlas-main a:focus-visible{outline:3px solid #bd791d;outline-offset:3px}
+.atlas-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.atlas-kpis article{padding:16px;background:#f3f7f4;border-top:3px solid #39745d}
+.atlas-kpis strong{display:block;font-size:1.9rem;font-variant-numeric:tabular-nums}
+.atlas-kpis span{font-size:.8rem}
+.atlas-main details{margin:18px 0}
+.atlas-main summary{cursor:pointer;font-weight:600}
+.atlas-main [hidden]{display:none!important}
+.atlas-main a{color:#146448;text-underline-offset:3px}
+.header nav{flex-wrap:wrap}
+@media(max-width:800px){.atlas-main{padding:20px 12px}.atlas-panel{padding:18px 12px}.atlas-kpis{grid-template-columns:1fr 1fr}.atlas-filters>label{width:100%}.atlas-main select{max-width:100%;width:100%}.atlas-intro h1{font-size:2.1rem}}
+
 /* Distance atlas: layout for the choropleth, its detail panel and legend.
-   Everything else reuses research.css and charts.css. */
+   Everything else reuses charts.css. */
 .atlas-map-row { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; margin: 16px 0 24px; }
 #atlas-map { height: 620px; border: 1px solid #d9e3db; border-radius: 8px; background: #f7f8f4; }
 .atlas-detail { border: 1px solid #d9e3db; border-radius: 8px; background: #fff; padding: 16px; font-size: 13px; align-self: start; }
@@ -24,3 +51,9 @@
   #atlas-map { height: 460px; }
   #atlas-main .figure-grid { grid-template-columns: 1fr; }
 }
+.atlas-methods { padding-left: 18px; line-height: 1.6; }
+.atlas-methods li { margin-bottom: 8px; }
+.atlas-code { margin: -6px 0 10px; font-size: 12px; color: #5e756c; font-variant-numeric: tabular-nums; }
+#atlas-map.loading { opacity: 0.55; transition: opacity 0.2s; }
+.atlas-filters label span { font-weight: 600; }
+.figure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }

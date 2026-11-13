@@ -3,11 +3,11 @@
 A free map and directory for finding healthcare institutions across Bangladesh.
 
 **[Open the website](https://bipul-roy-ai.github.io/Health_care_accessibility/)** ·
-**[National overview map](https://bipul-roy-ai.github.io/Health_care_accessibility/overview.html)** ·
-**[Healthcare statistics](https://bipul-roy-ai.github.io/Health_care_accessibility/statistics.html)** ·
-**[Analysis maps & tables](https://bipul-roy-ai.github.io/Health_care_accessibility/analysis.html)** ·
-**[Hospital research](https://bipul-roy-ai.github.io/Health_care_accessibility/research.html)** ·
-**[Distance atlas](https://bipul-roy-ai.github.io/Health_care_accessibility/atlas.html)** ·
+**[Map](https://bipul-roy-ai.github.io/Health_care_accessibility/overview.html)** ·
+**[Statistics](https://bipul-roy-ai.github.io/Health_care_accessibility/statistics.html)** ·
+**[Availability](https://bipul-roy-ai.github.io/Health_care_accessibility/analysis.html)** ·
+**[Distance](https://bipul-roy-ai.github.io/Health_care_accessibility/atlas.html)** ·
+**[Access study](https://bipul-roy-ai.github.io/Health_care_accessibility/accessibility.html)** ·
 **[Emergency & helplines](https://bipul-roy-ai.github.io/Health_care_accessibility/helplines.html)**
 
 ## What you can find
@@ -82,8 +82,12 @@ The separate [Analysis page](analysis.html) presents the completed DGHS/BBS avai
 
 The statistical pages now use responsive SVG figures with labelled axes and SVG downloads. The Analysis page adds care-tier counts, coordinate-completeness comparisons, division/district/ADM3 rankings and a count-versus-completeness scatter plot. Its five advanced-analysis modules expose the actual input-readiness report; no travel, coverage, referral or site-selection result is simulated. The selected motorised scenario reports 30, 60 and 120 minute thresholds. Union/ADM4 remains unavailable because the supplied archive is ADM3.
 
-## Hospital research and Distance atlas
+## Distance and location quality
 
-[Hospital research](research.html) explores the 8,363 active hospital-type DGHS listings: a district map, linked filters, eight charts and a place probe that lists the five nearest hospitals with 1/5/10 km rings. See [its methods](docs/HOSPITAL_RESEARCH.md).
+The [Distance page](atlas.html) measures straight-line distance from a 1 km national grid to the nearest DGHS hospital and primary-care facility, by division, district, upazila and union (5,160 unions), with disparity statistics. Figures are shares of land area, not population, and are not travel times.
 
-[Distance atlas](atlas.html) measures straight-line distance from a national 2 km grid to the nearest of the 6,027 mapped hospitals, and summarises it for 544 upazilas/thanas, 64 districts and 8 divisions, alongside hospital points, approved beds and establishment decades. Figures are shares of land area, not population, and are not travel times. See [its methods](docs/DISTANCE_ATLAS.md).
+The same build audits facility coordinates: a point is used only if it lies within 1 km of its recorded district and is not shared with facilities recorded in other areas. Flagged points (listed in `data/atlas/flagged-locations.csv`) are hidden on every map and excluded from distances, but stay in all counts. See [methods](docs/DISTANCE_ATLAS.md).
+
+## Languages
+
+Every page has an English / বাংলা switch. The choice is remembered across pages (`i18n.js`). Bangla text sits beside the English in `data-bn` attributes; corrections are welcome. DGHS facility, type and upazila/union names stay as published by DGHS and BBS.

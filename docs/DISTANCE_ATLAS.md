@@ -1,42 +1,55 @@
-# Distance atlas
+# Distance and location quality
 
-`atlas.html` shows how far each part of Bangladesh is, in a straight line, from the nearest mapped hospital in the DGHS registry, summarised for 544 upazilas/thanas (ADM3), 64 districts and 8 divisions. It complements [Hospital research](HOSPITAL_RESEARCH.md), which measures from a single chosen place.
+`atlas.html` (the **Distance** page) shows straight-line distance to the nearest DGHS hospital and primary-care facility for every division, district, upazila/thana and union in Bangladesh. `scripts/build_atlas.py` also produces the facility-location audit used by every map on the site.
 
-## What it shows
+## Location quality audit
 
-- Upazila choropleth with seven measures: median, 90th-percentile and nearest-any-hospital distance; hospital points, government hospital points and points per 1,000 km² inside each polygon; approved beds at mapped facilities. Click or search an upazila for all of its figures.
-- National distance curves: share of land area within 0.5–40 km of a government, any, or non-government hospital.
-- Division comparison: land within 5/10/20 km, median and 90th-percentile distance, and hospital listings per 100,000 (BBS Census 2022 division totals).
-- Approved beds by division and ownership, facilities by decade of establishment, and how many facilities report service fields.
-- Downloads: the 544-row upazila CSV, every JSON behind the page, and the upazila polygons.
+A published DGHS coordinate is used for maps and distances only if it:
 
-## Method
+1. lies within **1 km of the district recorded in the same DGHS record** (1 km allows for boundary simplification), and
+2. is **not identical** (6 decimals) to a coordinate of a facility recorded in another district or upazila. Shared coordinates across areas are placeholders: for example, 87 hospitals and diagnostic centres from different upazilas share one point near Savar.
 
-- **Hospitals** reuse `HOSPITAL_TYPES` and the government-ownership set from `scripts/build_statistics.py`, so counts match the Statistics and Hospital research pages: 8,363 active listings, 6,027 with published coordinates (557 government, 5,470 other). Jail and military hospitals are in that list even though public access is restricted.
-- **Grid:** 2 km cells over the national boundary in UTM 46N (41,924 cells). Nearest-point distances come from a k-d tree (SciPy). Cells are assigned to polygons by intersection.
-- **Boundaries:** BBS / OCHA ROAP via geoBoundaries gbOpen BGD ADM2 and ADM3 (simplified; CC BY 3.0 IGO). geoBoundaries tags boundaryYear 2020; the source dataset is HDX "as of 2015". The ADM2 file is byte-identical to `data/research/districts.geojson`. Upazilas join the study's 544 BBS pcodes by (district pcode, name), one-to-one. Display copies are rounded to 4 decimal places.
-- Registry-label counts (DGHS administrative fields) include listings without coordinates. Point counts use only published coordinates inside a polygon; 17 hospital points fall outside the simplified coastline.
+Snapshot of 2026-11-13: of 28,462 published active coordinates, **5,106 (17.9%) are flagged**: 2,508 lie outside their recorded district (1,396 by more than 20 km, up to 467 km) and 3,082 share a coordinate across areas (a record can have both). For hospitals, 1,468 of 6,027 are flagged.
+
+Flagged records stay in every count by recorded area; they are only hidden on maps (Find care, Map, Access study) and excluded from distance calculations. `data/atlas/flagged-locations.csv` lists each record, its reason, its distance from the recorded district and the district it falls in. `data/atlas/location-quality.json` holds the summary and the flagged IDs that the pages load.
+
+## Levels and boundaries
+
+| Level | Areas | Source |
+| --- | --- | --- |
+| Division | 8 | dissolved from the BBS districts, so all levels nest |
+| District | 64 | geoBoundaries gbOpen BGD ADM2 |
+| Upazila / thana | 544 | geoBoundaries ADM3, joined one-to-one to the study's BBS pcodes |
+| Union | 5,160 | geoBoundaries ADM4, assigned to the upazila containing its representative point |
+
+All boundaries come from the Bangladesh Bureau of Statistics (BBS) and OCHA ROAP via geoBoundaries (CC BY 3.0 IGO). geoBoundaries tags boundaryYear 2020; the source dataset is HDX "as of 2015". Union IDs are `<upazila pcode>-U<nnn>`, not official BBS codes. Unions are published as TopoJSON (`data/boundaries/bangladesh-unions.topojson`, 2.2 MB, 0.7 MB compressed).
+
+The earlier division layer (geoBoundaries ADM1 from Wikimedia Commons) differed from the BBS districts by 5–24% of each division's area and has been replaced.
+
+## Distance method
+
+- **Classes:** government hospitals, non-government hospitals, any hospital, primary care. Hospitals use `HOSPITAL_TYPES` from `scripts/build_statistics.py`; government = government, autonomous or semi-autonomous ownership. Primary care = community clinics, union health centres and sub-centres, UH&FWC, MCWC, urban primary-care centres, urban dispensaries, school health and family-planning clinics.
+- **Grid:** 1 km cells over the OpenStreetMap national outline in UTM 46N (167,700 cells). Distance from each cell centre to the nearest usable point (SciPy k-d tree). Each cell belongs to exactly one union, and so to one upazila, district and division.
+- **Per area:** median, 90th percentile and maximum distance, and the share of land within 2, 5, 10 and 20 km. Unions store median and the 5 and 10 km shares only.
+- **Disparities:** for any measure, the page reports the lowest, median and highest area value, the ratio of the mean of the top 10% of areas to the bottom 10%, and the coefficient of variation, at every level.
+- **Low confidence:** areas with fewer than 5 grid cells (246 unions; 82 small urban unions contain none).
 
 ## Limits
 
-- Shares of **land area**, not people. Uninhabited land (Sundarbans, chars, water inside coastal polygons) inflates distances in Bagerhat, Bhola, Patuakhali, Cox's Bazar and Satkhira.
-- **Straight-line kilometres**, not travel time. Rivers, ferries and roads are ignored.
-- 7 small Dhaka thanas contain no grid cell; 42 upazilas have fewer than 5 cells and are marked low-confidence.
-- Approved beds are licensed or sanctioned beds, not functional beds or service capacity. Only 11.7% of active facilities report emergency/ambulance/IPD fields, and 37.1% report an establishment year.
-- A listing does not confirm a hospital is open or offers a given service.
+- Shares of **land area**, not people. Uninhabited land (Sundarbans, chars, rivers) inflates distances.
+- **Straight-line** kilometres, not travel time.
+- Approved beds are sanctioned or licensed beds, not functional capacity; service fields are reported for few facilities.
+- A registry listing does not confirm that a facility is open or offers a service.
 
 ## Rebuild
 
-The atlas is a dated snapshot. The daily registry workflow does not rebuild it; when `data/dghs/index.json` changes, `tests/test_atlas.py` skips the snapshot check with a reminder.
+The atlas and audit are a dated snapshot. The daily registry workflow does not rebuild them; when `data/dghs/index.json` changes, `tests/test_atlas.py` skips its snapshot check with a reminder.
 
 ```sh
-pip install shapely pyproj scipy numpy
-# geoBoundaries gbOpen BGD simplified GeoJSON (Git LFS; use media.githubusercontent.com):
-#   releaseData/gbOpen/BGD/ADM2/geoBoundaries-BGD-ADM2_simplified.geojson
-#   releaseData/gbOpen/BGD/ADM3/geoBoundaries-BGD-ADM3_simplified.geojson
-python3 scripts/build_atlas.py --adm2 ADM2.geojson --adm3 ADM3.geojson
+pip install -r scripts/requirements-geospatial.txt
+# geoBoundaries gbOpen BGD simplified GeoJSON (Git LFS; download via media.githubusercontent.com):
+#   releaseData/gbOpen/BGD/ADM2/geoBoundaries-BGD-ADM2_simplified.geojson  (and ADM3, ADM4)
+python3 scripts/build_atlas.py --adm2 ADM2.geojson --adm3 ADM3.geojson --adm4 ADM4.geojson
 python3 -m unittest tests.test_atlas
 BASE_URL=http://127.0.0.1:8000 node tests/atlas.cjs
 ```
-
-No pharmacy data and no figures, data or code from Al Jubaer's #30DayMapChallenge series are used; the series is credited as inspiration.

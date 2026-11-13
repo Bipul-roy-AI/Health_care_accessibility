@@ -35,7 +35,14 @@
     const selected = matchingType.filter((f) => selectedDivision === 'all' || canonical(f.registry.division) === selectedDivision);
     const mapped = selected.filter(FacilityDetails.hasCoordinates);
     const outside = selected.filter((f) => f.registry.coordinateStatus === 'outside').length;
-    $('#boundary-summary').textContent = language === 'bn' ? `${number(outside)}টি সীমানার বাইরের স্থান দেখানো হয়নি। সব প্রতিষ্ঠানের মূল তথ্য অনুসন্ধানে ও মোট সংখ্যায় আছে।` : `${number(outside)} outside-boundary coordinates withheld from this view. All institution records remain searchable and included in totals; original coordinates are retained for review.`;
+    const misplaced = selected.filter((f) => f.registry.locationFlag).length;
+    $('#boundary-summary').innerHTML = '';
+    $('#boundary-summary').append(language === 'bn'
+      ? `দেখানো হয়নি: ${number(outside)}টি বাংলাদেশের সীমানার বাইরে, ${number(misplaced)}টি নথিভুক্ত জেলার বাইরে বা একাধিক এলাকার একই স্থানাঙ্কে। সব প্রতিষ্ঠান মোট সংখ্যায় আছে। `
+      : `Not plotted: ${number(outside)} outside Bangladesh, ${number(misplaced)} outside their recorded district or on a coordinate shared across areas. All records stay in the totals. `);
+    const auditLink = document.createElement('a'); auditLink.href = './data/atlas/flagged-locations.csv'; auditLink.download = '';
+    auditLink.textContent = language === 'bn' ? 'চিহ্নিত স্থানের তালিকা (CSV)' : 'Flagged locations (CSV)';
+    $('#boundary-summary').append(auditLink);
     $('#overview-total').textContent = number(selected.length); $('#overview-mapped').textContent = number(mapped.length); $('#overview-unmapped').textContent = number(selected.length - mapped.length);
     $('#overview-divisions').textContent = number(new Set(selected.map((f) => canonical(f.registry.division)).filter((name) => name !== 'unspecified')).size);
     const counts = new Map(Object.values(aliases).map((name) => [name, { total: 0, mapped: 0 }]));
