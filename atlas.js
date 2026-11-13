@@ -61,7 +61,8 @@
     return a.parent_name ? `${name} · ${place(a.parent_name)}` : name;
   };
 
-  const get = (path) => fetch(path).then((r) => { if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`); return r.json(); });
+  // no-cache: always revalidate, so a browser never mixes a new page with old data files.
+  const get = (path) => fetch(path, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`); return r.json(); });
   function rows(target, data) {
     $(target).replaceChildren(...data.map((values) => {
       const tr = document.createElement('tr');
@@ -222,6 +223,9 @@
     const [distance, quality, profiles, manifest, ...areaFiles] = await Promise.all([
       get('./data/atlas/distance.json'), get('./data/atlas/location-quality.json'), get('./data/atlas/profile-aggregates.json'),
       get('./data/atlas/manifest.json'), ...levels.map((k) => get(`./data/atlas/areas-${k}.json`))]);
+    if (!manifest.levels || !distance.points || !distance.national?.primary_care || !quality.flagged_ids) {
+      throw new Error(T('the data files are an older version; please reload the page (Ctrl+F5)', 'তথ্যের ফাইল পুরোনো সংস্করণের; পৃষ্ঠাটি আবার লোড করুন (Ctrl+F5)'));
+    }
     state.data = { distance, quality, profiles, manifest, areas: {}, index: {} };
     levels.forEach((k, i) => { state.data.areas[k] = areaFiles[i].areas; state.data.index[k] = new Map(areaFiles[i].areas.map((a) => [a.pcode, a])); });
 
@@ -261,6 +265,13 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    main().catch((error) => { $('#atlas-status').textContent = T('The data could not be loaded. Please refresh. ', 'তথ্য লোড হয়নি। পৃষ্ঠাটি রিফ্রেশ করুন। ') + `(${error.message})`; });
+    main().catch((error) => {
+      // Show the problem instead of empty sections.
+      $('#atlas-content').hidden = true;
+      const status = $('#atlas-status');
+      status.hidden = false;
+      status.classList.add('atlas-error');
+      status.textContent = T('The data could not be loaded: ', 'তথ্য লোড হয়নি: ') + error.message;
+    });
   });
 })();

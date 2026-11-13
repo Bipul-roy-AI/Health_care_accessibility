@@ -27,7 +27,7 @@
   const cache = new Map();
   function loadGeometry(source) {
     if (!cache.has(source.url)) {
-      cache.set(source.url, fetch(source.url).then((response) => {
+      cache.set(source.url, fetch(source.url, { cache: 'no-cache' }).then((response) => {
         if (!response.ok) throw new Error(`boundary fetch failed: ${source.url}`);
         return response.json();
       }).then((data) => (source.topology ? window.topojson.feature(data, data.objects[source.topology]) : data)));

@@ -20,7 +20,7 @@
     async load() {
       const [response, country, quality] = await Promise.all([fetch('./data/dghs/index.json', { cache: 'no-cache', credentials: 'omit' }), CountryBoundary.load(),
         // Location audit (scripts/build_atlas.py): points placed outside their recorded district or on a coordinate shared across areas.
-        fetch('./data/atlas/location-quality.json', { credentials: 'omit' }).then((r) => r.ok ? r.json() : null).catch(() => null)]);
+        fetch('./data/atlas/location-quality.json', { cache: 'no-cache', credentials: 'omit' }).then((r) => r.ok ? r.json() : null).catch(() => null)]);
       const flagged = new Set(Array.isArray(quality?.flagged_ids) ? quality.flagged_ids.map(String) : []);
       if (!response.ok) throw new Error('Registry index unavailable');
       const data = await response.json();
