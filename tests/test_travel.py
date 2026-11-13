@@ -16,6 +16,21 @@ except ImportError:  # optional geospatial stack
 
 @unittest.skipUnless(HAVE, "rasterio and scikit-image are needed")
 class Travel(unittest.TestCase):
+    def test_snap_cells_moves_edge_points_to_valid_cells(self):
+        from build_travel import snap_cells
+        valid = np.ones((5, 5), bool)
+        valid[:, 0] = False                                   # masked column (outside the boundary)
+        valid[4, :] = False
+        row, col = snap_cells(valid, [2, 4, 0, -1], [0, 2, 3, -1], max_cells=1)
+        self.assertEqual((row[0], col[0]), (2, 1))            # snapped one cell east
+        self.assertEqual((row[1], col[1]), (3, 2))            # snapped one cell north
+        self.assertEqual((row[2], col[2]), (0, 3))            # already valid, unchanged
+        self.assertEqual(row[3], -1)                          # outside the raster stays outside
+        far = np.zeros((5, 5), bool)
+        far[0, 0] = True
+        r, c = snap_cells(far, [4], [4], max_cells=2)
+        self.assertEqual((r[0], c[0]), (-1, -1))              # too far from any valid cell
+
     def test_uniform_speed_matches_distance(self):
         from build_travel import travel_minutes
         friction = np.full((21, 21), 0.002)                  # 0.002 min/m = 30 km/h
@@ -56,3 +71,4 @@ class Travel(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

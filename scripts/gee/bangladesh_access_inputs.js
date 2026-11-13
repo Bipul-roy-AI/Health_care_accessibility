@@ -19,7 +19,9 @@
 // years within an era; across eras compare patterns, not exact areas.
 //
 // Sources:
-//   Friction: Malaria Atlas Project friction surface 2019 (Weiss et al., 2020, Nature Medicine), CC BY 4.0.
+//   Friction: Malaria Atlas Project friction surfaces 2019, motorized and walking-only (Weiss et al., 2020,
+//             Nature Medicine), CC BY 4.0, from the MAP publisher catalog in Earth Engine.
+//   Boundary: geoBoundaries v6.0.0 ADM0 (CGAZ), CC BY 4.0. Everything outside Bangladesh is no data.
 //   Radar: Copernicus Sentinel-1 GRD (VH). Method adapted from the UN-SPIDER Recommended Practice
 //          on Sentinel-1 flood mapping: dry-season median vs flood-time image, ratio threshold,
 //          permanent water (JRC GSW seasonality >= 10 months), slope > 5 degrees and isolated pixels removed.
@@ -34,7 +36,8 @@ var RATIO = 1.25;                 // after/before VH in dB (negative): > 1.25 me
 var MAX_VH_AFTER = -18;           // dB; flooded pixels must also be dark after the event
 var MIN_CONNECTED = 8;            // pixels at 100 m; removes speckle (3 at 250 m)
 
-var bd = ee.FeatureCollection('FAO/GAUL/2015/level0').filter(ee.Filter.eq('ADM0_NAME', 'Bangladesh'));
+// Bangladesh international boundary: geoBoundaries v6 ADM0 (CGAZ, clipped to US Department of State international boundaries).
+var bd = ee.FeatureCollection('WM/geoLab/geoBoundaries/600/ADM0').filter(ee.Filter.eq('shapeGroup', 'BGD'));
 var region = bd.geometry().bounds().buffer(5000).bounds();
 
 // Flood events (window = when water was at or near its peak). Edit or add rows as needed.
@@ -50,10 +53,15 @@ var EVENTS = [
 ];
 
 // ---------- 1. Travel-speed (friction) surfaces ----------
-var friction = ee.Image('Oxford/MAP/friction_surface_2019')
-  .select(['friction', 'friction_walking_only'], ['motorized', 'walking']).toFloat();
-Export.image.toDrive({image: friction.clip(region), description: 'bd_friction_2019_1km', folder: FOLDER,
-  fileNamePrefix: 'bd_friction_2019_1km', region: region, crs: CRS, scale: 1000, maxPixels: 1e10});
+// The Earth Engine copy 'Oxford/MAP/friction_surface_2019' is deprecated (its asset fails to export);
+// the Malaria Atlas Project publishes the same 2019 surfaces in its own catalog.
+var motorized = ee.Image('projects/malariaatlasproject/assets/accessibility/friction_surface/2019_v5_1').select(0).rename('motorized');
+var walking = ee.Image('projects/malariaatlasproject/assets/accessibility/friction_surface/2019_v5_1_walking_only').select(0).rename('walking');
+// Masked to Bangladesh: travel cannot route through India or Myanmar. Outside = -9999 (no data).
+var friction = motorized.addBands(walking).toFloat().clipToCollection(bd).unmask(-9999);
+Export.image.toDrive({image: friction, description: 'bd_friction_2019_1km', folder: FOLDER,
+  fileNamePrefix: 'bd_friction_2019_1km', region: region, crs: CRS, scale: 1000, maxPixels: 1e10,
+  formatOptions: {noData: -9999}});
 
 // ---------- 2. Flood extents (Sentinel-1) ----------
 var perm = ee.Image('JRC/GSW1_4/GlobalSurfaceWater').select('seasonality').gte(10).unmask(0);
@@ -112,19 +120,21 @@ function gfdYear(year) {
 
 var years = [];
 for (var y = 2000; y <= 2025; y++) years.push(y <= 2018 ? gfdYear(y) : sentinelYear(y));
-var yearImage = ee.Image.cat(years).addBands(perm.rename('perm_water').toByte());
-var eventImage = ee.Image.cat(EVENTS.map(eventMap)).addBands(perm.rename('perm_water').toByte());
+// Masked to Bangladesh: outside the boundary = 255 (no data), like unobserved pixels.
+var yearImage = ee.Image.cat(years).addBands(perm.rename('perm_water').toByte()).clipToCollection(bd).unmask(255).toByte();
+var eventImage = ee.Image.cat(EVENTS.map(eventMap)).addBands(perm.rename('perm_water').toByte()).clipToCollection(bd).unmask(255).toByte();
 
-Export.image.toDrive({image: yearImage.clip(region), description: 'bd_floods_years', folder: FOLDER,
+Export.image.toDrive({image: yearImage, description: 'bd_floods_years', folder: FOLDER,
   fileNamePrefix: 'bd_floods_years', region: region, crs: CRS, scale: YEAR_SCALE, maxPixels: 1e11,
-  formatOptions: {cloudOptimized: true}});
-Export.image.toDrive({image: eventImage.clip(region), description: 'bd_floods_events', folder: FOLDER,
+  formatOptions: {cloudOptimized: true, noData: 255}});
+Export.image.toDrive({image: eventImage, description: 'bd_floods_events', folder: FOLDER,
   fileNamePrefix: 'bd_floods_events', region: region, crs: CRS, scale: EVENT_SCALE, maxPixels: 1e11,
-  formatOptions: {cloudOptimized: true}});
+  formatOptions: {cloudOptimized: true, noData: 255}});
 
 // ---------- Quick look ----------
 Map.centerObject(bd, 7);
 var frequency = yearImage.select('y.*').eq(1).reduce(ee.Reducer.sum());
+Map.addLayer(ee.Image().byte().paint(bd, 1, 2), {palette: ['000000']}, 'Bangladesh boundary');
 Map.addLayer(frequency.selfMask(), {min: 1, max: 15, palette: ['c6dbef', '6baed6', '2171b5', '08306b']}, 'Years flooded 2000-2025', true);
 EVENTS.forEach(function (e) {
   Map.addLayer(eventImage.select(e.id).eq(1).selfMask(), {palette: ['d7301f']}, e.id, false);

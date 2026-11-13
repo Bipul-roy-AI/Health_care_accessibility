@@ -74,6 +74,23 @@ def cells_of(transform, shape, x, y):
     return row, col
 
 
+def snap_cells(valid, row, col, max_cells=2):
+    """Move points on no-data cells (outside the boundary mask, coast edges) to the nearest valid cell
+    within max_cells; points farther away get -1."""
+    from scipy.ndimage import distance_transform_edt
+    row, col = np.array(row, int), np.array(col, int)
+    dist, (near_r, near_c) = distance_transform_edt(~valid, return_indices=True)
+    ok = row >= 0
+    bad = ok.copy()
+    bad[ok] = ~valid[row[ok], col[ok]]
+    idx = np.where(bad)[0]
+    close = dist[row[idx], col[idx]] <= max_cells
+    keep, drop = idx[close], idx[~close]
+    row[keep], col[keep] = near_r[row[keep], col[keep]], near_c[row[keep], col[keep]]
+    row[drop], col[drop] = -1, -1
+    return row, col
+
+
 def travel_minutes(friction, starts, cell):
     """Minutes from every cell to the nearest start over a minutes-per-metre surface."""
     from skimage.graph import MCP_Geometric
@@ -110,10 +127,11 @@ def build(ctx) -> dict:
         raise SystemExit(f"friction raster bands {list(bands)}; expected motorized, walking")
 
     xy, weight, area_of, levels = ctx["xy"], ctx["weight"], ctx["area_of"], ctx["levels"]
-    prow, pcol = cells_of(transform, shape, xy[:, 0], xy[:, 1])
+    valid = np.isfinite(bands["motorized"]) & (bands["motorized"] > 0)
+    prow, pcol = snap_cells(valid, *cells_of(transform, shape, xy[:, 0], xy[:, 1]))
     inside = prow >= 0
     facility = {k: np.array(v) for k, v in ctx["class_points"].items() if k in MODES}
-    fac_cells = {k: cells_of(transform, shape, v[:, 0], v[:, 1]) for k, v in facility.items()}
+    fac_cells = {k: snap_cells(valid, *cells_of(transform, shape, v[:, 0], v[:, 1])) for k, v in facility.items()}
 
     def sample(minutes):
         out = np.full(len(weight), np.nan)
@@ -180,8 +198,8 @@ def build(ctx) -> dict:
                 is_year = band_id.startswith("y")
                 band = np.where(perm == 1, 0, arrays[band_id])
                 frac = area_flood_fraction(band, fl_transform, transform, shape)
-                flooded_cell = frac["flooded"] >= FLOODED_SHARE
-                observed_share = float(frac["observed"][np.isfinite(bands["motorized"])].mean())
+                flooded_cell = (frac["flooded"] >= FLOODED_SHARE) & valid   # inside Bangladesh only
+                observed_share = float(frac["observed"][valid].mean())
                 people_flooded = sample(flooded_cell.astype(float)) == 1
                 if is_year:
                     years_flooded += people_flooded
