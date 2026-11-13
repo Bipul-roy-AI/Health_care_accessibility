@@ -261,9 +261,6 @@ def assign(gx, gy, areas, transform):
     result = np.full(gx.shape[0], -1, dtype=int)
     cell_idx, poly_idx = tree.query(cells, predicate="intersects")
     result[cell_idx[::-1]] = poly_idx[::-1]  # first match wins
-    for i in np.flatnonzero(result == -1):
-        nearest = tree.query_nearest(cells[i])
-        result[i] = int(nearest[0])
     return result
 
 
@@ -386,11 +383,15 @@ def main() -> int:
                 if f["usable"]:
                     counter["usable"] += 1
 
-    # Distance grid.
+    # Distance grid: 1 km cells whose centre lies in a union. The OSM country outline also
+    # covers territorial sea, so cells outside every union polygon (sea, estuary) are dropped.
     gx, gy = grid_cells(to_utm)
+    union_of = assign(gx, gy, unions, to_utm)
+    on_land = union_of >= 0
+    gx, gy, union_of = gx[on_land], gy[on_land], union_of[on_land]
     cells = np.column_stack([gx, gy])
     distances = {c: cKDTree(np.array(points[c])).query(cells, k=1)[0] / 1000.0 for c in DISTANCE_CLASSES}
-    assignment = {"union": assign(gx, gy, unions, to_utm)}
+    assignment = {"union": union_of}
     union_parent = np.array([upazilas.index(u["parent"]) for u in unions])
     upazila_parent = np.array([districts.index(u["parent"]) for u in upazilas])
     district_parent = np.array([divisions.index(d["parent"]) for d in districts])

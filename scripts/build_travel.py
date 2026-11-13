@@ -14,6 +14,12 @@ Method
   build_access (union census population spread over 1 km cells) is sampled at
   the travel-time raster. Motorized for hospitals, walking for primary care.
 
+  Water: the friction surface has no value on wide rivers (Padma, Meghna, Jamuna reaches)
+  and on the sea, which would leave Sandwip, Hatiya and other estuary islands with no
+  route to the mainland. Cells with no value inside Bangladesh, and sea cells of the
+  Meghna estuary within 10 km of land, take WATER_MIN_PER_M (about 10 km/h, no waiting
+  time). Cells outside Bangladesh on land stay impassable.
+
   Flood scenario for each event: facilities whose own pixel is flooded are closed;
   land cells at least half flooded take WADE_MIN_PER_M (about 1.5 km/h: wading or
   a country boat) if that is slower than normal; travel time is recomputed.
@@ -31,6 +37,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data/access"
 WADE_MIN_PER_M = 0.04          # minutes per metre, about 1.5 km/h
+WATER_MIN_PER_M = 0.006        # minutes per metre, about 10 km/h: boat, trawler or ferry, no waiting time
+COAST_BOX = (89.6, 21.0, 92.0, 23.3)   # lon/lat box of the estuary and offshore islands, clear of India and Myanmar
+TRIPURA_CUT = (91.3, 22.85)            # inside the box, north-east of this corner is too close to Tripura (India)
+COAST_REACH_CELLS = 10                 # sea cells used for crossings lie within 10 km of Bangladesh land
 FLOODED_SHARE = 0.5            # a 1 km cell counts as flooded at >= 50 % flooded area
 MODES = {                      # class -> (friction band, limit in minutes)
     "any_hospital": ("motorized", 60),
@@ -91,6 +101,24 @@ def snap_cells(valid, row, col, max_cells=2):
     return row, col
 
 
+def fill_water(band, transform, inside):
+    """Give boat friction to no-data water cells: inside Bangladesh (rivers, lakes) and
+    estuary sea cells within COAST_REACH_CELLS of land in the coastal box."""
+    from rasterio.warp import transform as warp
+    from scipy.ndimage import binary_dilation
+    band = band.copy()
+    nodata = ~(np.isfinite(band) & (band > 0))
+    rows, cols = np.indices(band.shape)
+    x, y = transform * (cols.ravel() + 0.5, rows.ravel() + 0.5)
+    lon, lat = (np.asarray(v).reshape(band.shape) for v in warp("EPSG:32646", "EPSG:4326", x, y))
+    lo0, la0, lo1, la1 = COAST_BOX
+    box = (lon >= lo0) & (lon <= lo1) & (lat >= la0) & (lat <= la1) & ~((lon > TRIPURA_CUT[0]) & (lat > TRIPURA_CUT[1]))
+    near_land = binary_dilation(~nodata, iterations=COAST_REACH_CELLS)
+    water = nodata & (inside | (box & near_land))
+    band[water] = WATER_MIN_PER_M
+    return band, water
+
+
 def travel_minutes(friction, starts, cell):
     """Minutes from every cell to the nearest start over a minutes-per-metre surface."""
     from skimage.graph import MCP_Geometric
@@ -126,7 +154,15 @@ def build(ctx) -> dict:
     if set(bands) < {"motorized", "walking"}:
         raise SystemExit(f"friction raster bands {list(bands)}; expected motorized, walking")
 
-    xy, weight, area_of, levels = ctx["xy"], ctx["weight"], ctx["area_of"], ctx["levels"]
+    area_of, levels = ctx["area_of"], ctx["levels"]
+    xy, weight = ctx["xy"], ctx["weight"]
+    in_bd = np.zeros(shape, bool)                      # cells holding population grid points
+    r0, c0 = cells_of(transform, shape, xy[:, 0], xy[:, 1])
+    in_bd[r0[r0 >= 0], c0[r0 >= 0]] = True
+    water_cells = 0
+    for name in ("motorized", "walking"):
+        bands[name], water = fill_water(bands[name], transform, in_bd)
+        water_cells = int(water.sum())
     valid = np.isfinite(bands["motorized"]) & (bands["motorized"] > 0)
     prow, pcol = snap_cells(valid, *cells_of(transform, shape, xy[:, 0], xy[:, 1]))
     inside = prow >= 0
@@ -198,8 +234,8 @@ def build(ctx) -> dict:
                 is_year = band_id.startswith("y")
                 band = np.where(perm == 1, 0, arrays[band_id])
                 frac = area_flood_fraction(band, fl_transform, transform, shape)
-                flooded_cell = (frac["flooded"] >= FLOODED_SHARE) & valid   # inside Bangladesh only
-                observed_share = float(frac["observed"][valid].mean())
+                flooded_cell = (frac["flooded"] >= FLOODED_SHARE) & in_bd   # land inside Bangladesh only
+                observed_share = float(frac["observed"][in_bd].mean())
                 people_flooded = sample(flooded_cell.astype(float)) == 1
                 if is_year:
                     years_flooded += people_flooded
@@ -257,11 +293,14 @@ def build(ctx) -> dict:
                                  "closed_if": "facility's own flood pixel is flooded",
                                  "loses_access": "within the limit normally, beyond it during the flood",
                                  "years": "a year's map combines all of that year's floods, so access losses are an upper bound",
+                                 "events": "event maps keep the lowest radar backscatter in each event window and compare it with the January-March dry season, so they also count normal monsoon inundation and flooded rice fields; they show surface water during the event, not only the flood itself",
+                                 "wading": "everyone in a flooded cell is assumed to move at about 1.5 km/h; boats, raised roads and bridges are not modelled, so access losses are a stress test, not a count of people cut off",
                                  "eras": "2000-2018 MODIS (Global Flood Database, mapped events only) and 2019-2025 Sentinel-1 radar differ in resolution and detection; compare within an era"}
 
     OUT.mkdir(exist_ok=True)
     payload = {"generatedAt": ctx["generated"], "friction_source": "Malaria Atlas Project friction surface 2019 (Weiss et al., 2020), CC BY 4.0",
                "modes": {k: {"band": v[0], "limit_min": v[1]} for k, v in MODES.items()}, "national": national,
+               "water": {"min_per_m": WATER_MIN_PER_M, "kmh": round(0.06 / WATER_MIN_PER_M, 1), "cells_filled": water_cells},
                "per_area": {lv: per_area[lv] for lv in ("division", "district", "upazila")}}
     (OUT / "travel.json").write_text(json.dumps(payload, separators=(",", ":")) + "\n", encoding="utf-8")
     (OUT / "travel-union.json").write_text(json.dumps({"generatedAt": ctx["generated"], **per_area["union"]}, separators=(",", ":")) + "\n", encoding="utf-8")

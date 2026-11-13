@@ -16,6 +16,26 @@ except ImportError:  # optional geospatial stack
 
 @unittest.skipUnless(HAVE, "rasterio and scikit-image are needed")
 class Travel(unittest.TestCase):
+    def test_fill_water_bridges_rivers_and_estuary_only(self):
+        from rasterio.transform import from_origin
+        from build_travel import WATER_MIN_PER_M, fill_water
+        # 1 km cells around Hatiya (about 91.1 E, 22.3 N): UTM 46N x 304 km, y 2467 km
+        t = from_origin(295000, 2477000, 1000, 1000)
+        band = np.full((20, 20), 0.003)
+        band[:, 8:11] = np.nan                       # sea channel, outside the population grid
+        band[2, 2] = np.nan                          # a river cell inside Bangladesh
+        inside = ~np.isnan(band)
+        inside[2, 2] = True
+        out, water = fill_water(band, t, inside)
+        self.assertTrue(water[2, 2] and water[5, 9])
+        self.assertAlmostEqual(out[5, 9], WATER_MIN_PER_M)
+        # the same channel far from the estuary (Thakurgaon, near India) stays impassable
+        t_nw = from_origin(30000, 2893000, 1000, 1000)
+        out_nw, water_nw = fill_water(band, t_nw, inside)
+        self.assertTrue(water_nw[2, 2])
+        self.assertFalse(water_nw[5, 9])
+        self.assertTrue(np.isnan(out_nw[5, 9]))
+
     def test_snap_cells_moves_edge_points_to_valid_cells(self):
         from build_travel import snap_cells
         valid = np.ones((5, 5), bool)
