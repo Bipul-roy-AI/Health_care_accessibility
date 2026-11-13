@@ -24,6 +24,8 @@ Flagged records stay in every count by recorded area; they are only hidden on ma
 
 All boundaries come from the Bangladesh Bureau of Statistics (BBS) and OCHA ROAP via geoBoundaries (CC BY 3.0 IGO). geoBoundaries tags boundaryYear 2020; the source dataset is HDX "as of 2015". Union IDs are `<upazila pcode>-U<nnn>`, not official BBS codes. Unions are published as TopoJSON (`data/boundaries/bangladesh-unions.topojson`, 2.2 MB, 0.7 MB compressed).
 
+The map can show a reference basemap under the polygons: grey OpenStreetMap (default), standard OpenStreetMap, OpenTopoMap terrain, or none. Basemaps are for orientation only and are not used in any calculation. With a basemap on, fills are drawn at 72% opacity so roads, rivers and relief show through.
+
 The earlier division layer (geoBoundaries ADM1 from Wikimedia Commons) differed from the BBS districts by 5–24% of each division's area and has been replaced.
 
 ## Distance method
