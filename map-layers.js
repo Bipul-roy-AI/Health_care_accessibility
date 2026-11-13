@@ -94,7 +94,7 @@
       if (!state.layers.has(id)) {
         const data = await loadBoundary(def);
         state.layers.set(id, L.geoJSON(data, { pane: 'boundaries', renderer: def.topology ? canvas : svg, interactive: false,
-                                               style: { ...def.style, fill: false, opacity: 0.9 } }));
+                                               style: { ...def.style, fill: false, opacity: 0.9, className: `boundary-${def.id}` } }));
       }
       if (state.on.has(id)) state.layers.get(id).addTo(map);
     }

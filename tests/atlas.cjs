@@ -68,6 +68,41 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
     assert.match(text, /src="\.\/i18n\.js/, `${name} loads i18n.js`);
   }
 
+  // Dark mode: follows the device setting, the header button switches and remembers it on every page.
+  const darkContext = await browser.newContext({ viewport: { width: 1360, height: 900 }, colorScheme: 'dark' });
+  await darkContext.route((url) => TILE_HOSTS.test(url.hostname), (route) => route.fulfill({ contentType: 'image/png', body: BLANK_PNG }));
+  const dark = await darkContext.newPage();
+  watch(dark, true);
+  await dark.goto(base + '/index.html');
+  assert.equal(await dark.getAttribute('html', 'data-theme'), 'dark');
+  assert.equal(await dark.evaluate(() => getComputedStyle(document.body).backgroundColor), 'rgb(15, 26, 23)');
+  assert.equal(await dark.getAttribute('#theme', 'aria-pressed'), 'true');
+  await dark.click('#theme');
+  assert.equal(await dark.getAttribute('html', 'data-theme'), 'light');
+  await dark.click('#theme');
+  for (const name of PAGES) {
+    await dark.goto(`${base}/${name}`);
+    assert.equal(await dark.getAttribute('html', 'data-theme'), 'dark', name);
+    assert.ok(await dark.$('#theme'), `${name} has the theme button`);
+    const bg = await dark.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    assert.equal(bg, 'rgb(15, 26, 23)', `${name} body background`);
+  }
+  // Charts take the dark chrome; their downloads keep light fallbacks.
+  await dark.goto(base + '/accessibility.html');
+  await dark.waitForSelector('#c-rank svg');
+  assert.equal(await dark.$eval('#c-rank svg', (svg) => getComputedStyle(svg).backgroundColor), 'rgb(22, 35, 31)');
+  assert.match(await dark.$eval('#c-rank svg', (svg) => svg.getAttribute('style')), /var\(--chart-bg, white\)/);
+  await dark.click('#language');
+  assert.match(await dark.getAttribute('#theme', 'aria-label'), /হালকা/);
+  await dark.click('#language');
+  await dark.setViewportSize({ width: 390, height: 844 });
+  assert.ok(await dark.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2), 'no overflow with the theme button on mobile');
+  await darkContext.close();
+  const light = await context.newPage();
+  await light.goto(base + '/index.html');
+  assert.equal(await light.getAttribute('html', 'data-theme'), 'light');
+  await light.close();
+
   // An outdated data file must produce a visible message, never empty sections.
   const stale = await context.newPage();
   await stale.route('**/data/atlas/distance.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ classes: {}, national: {} }) }));
@@ -79,5 +114,5 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
   if (errors.length) console.error(errors.join("\n"));
   assert.deepEqual(errors, []);
   await browser.close();
-  console.log('PASS: Distance page redirects to Access (hash kept); English/Bangla on all 6 pages with persistence; 6-item navigation; stale-data message.');
+  console.log('PASS: Distance page redirects to Access (hash kept); English/Bangla on all 6 pages with persistence; 6-item navigation; dark mode (device setting, toggle, persistence, charts, mobile); stale-data message.');
 })().catch((error) => { console.error(error); process.exit(1); });

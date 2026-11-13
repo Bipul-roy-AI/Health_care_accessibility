@@ -55,6 +55,10 @@ come from **geoBoundaries (CC0)**. The national boundary is from
 The site shows snapshot dates and distinguishes missing information. Check current
 services and entrances with the institution before travelling.
 
+## Light and dark mode
+
+Every page has a light/dark button next to the language button. The site follows the device setting until a visitor chooses, and the choice is remembered (`theme.js`). Dark colours come from `dark.css`, which `scripts/build_dark_css.py` generates from the other stylesheets (CI checks it is up to date). Charts switch through CSS variables, and downloaded figures keep the light colours.
+
 ## DGHS accessibility study
 
 The [Access study page](accessibility.html) combines the **BBS Population and Housing Census 2022** (union/ward tables, adjusted to the BBS post-enumeration-check division totals) with the DGHS registry. From division to union it shows the share of people within 2, 5, 10 and 20 km (straight line) of government hospitals, any hospital, primary care, upazila health complexes and blood banks; facilities and beds per person; population-weighted Gini coefficients and Lorenz curves; Moran's I and local cluster (LISA) maps; correlations with census literacy, sanitation, internet use and indigenous population; and community clinics and union centres against the government's planning norms. It also models **travel time** (Malaria Atlas Project 2019 friction surface, least-time routes, boats on rivers and the estuary) and **flood-disrupted access** from satellite flood maps for 2000–2025 (Global Flood Database 2000–2018, Sentinel-1 2019–2025, eight named floods), produced by the Earth Engine script `scripts/gee/bangladesh_access_inputs.js`. The flood map can overlay the satellite flood maps themselves (`scripts/build_flood_overlays.py`). The map has a basemap switcher, boundary outlines and an optional facility overlay. See [methods](docs/ACCESS_STUDY.md).

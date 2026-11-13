@@ -74,7 +74,7 @@
   Promise.all([registry.load(), fetch('./data/boundaries/bangladesh-divisions.geojson', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error('Boundary file unavailable'); return r.json(); })]).then(([records, geometry]) => {
     if (geometry.type !== 'FeatureCollection' || geometry.features?.length !== 8 || new Set(geometry.features.map((f) => canonical(f.properties?.shapeName))).size !== 8 || geometry.features.some((f) => canonical(f.properties?.shapeName) === 'unspecified')) throw new Error('Invalid division boundaries');
     institutions = records; geojson = geometry;
-    L.geoJSON(registry.country.geometry, { style: { color: '#173f35', weight: 2, fill: false }, interactive: false }).addTo(map);
+    L.geoJSON(registry.country.geometry, { style: { color: '#173f35', weight: 2, fill: false, className: 'boundary-division' }, interactive: false }).addTo(map);
     boundaries = L.geoJSON(geojson, { onEachFeature: (feature, layer) => layer.on('click', () => selectDivision(canonical(feature.properties.shapeName))) }).addTo(map);
     populateDivisions(); ready = true; $('#overview-status').textContent = ''; render();
   }).catch(() => { $('#overview-status').textContent = t('overviewFailed'); $('#overview-status').classList.add('error'); });

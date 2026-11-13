@@ -10,9 +10,23 @@
     if (text !== undefined) node.textContent = text;
     return node;
   }
+  // Chart chrome follows the page theme through CSS variables (dark.css); the hex fallbacks are the
+  // light theme, so a downloaded SVG (no variables outside the page) always opens in light colours.
+  const CHROME = { '#38594f': '--chart-text', '#627a70': '--chart-muted', '#e1e9e3': '--chart-grid', '#f0f4f0': '--chart-track',
+                   '#176b58': '--chart-bar', '#21473f': '--chart-title', '#fff': '--chart-bg', '#ffffff': '--chart-bg', '#8a4a12': '--chart-ref' };
+  function themable(svg) {
+    for (const node of svg.querySelectorAll('[fill],[stroke]')) {
+      for (const prop of ['fill', 'stroke']) {
+        const value = (node.getAttribute(prop) || '').toLowerCase();
+        if (CHROME[value]) node.style.setProperty(prop, `var(${CHROME[value]}, ${value})`);
+      }
+      const style = node.getAttribute('style');
+      if (style && style.includes('stroke:#fff')) node.setAttribute('style', style.replace('stroke:#fff', 'stroke:var(--chart-bg, #fff)'));
+    }
+  }
   const nice = (value) => { if (!(value > 0)) return 1; const power = 10 ** Math.floor(Math.log10(value)), scaled = value / power; return [1, 2, 5, 10].find((v) => v >= scaled) * power; };
   function base(width, height, title) {
-    const svg = element('svg', { xmlns: ns, viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': title, class: 'data-chart', style: 'font-family:system-ui,sans-serif;background:white;color:#21473f' });
+    const svg = element('svg', { xmlns: ns, viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': title, class: 'data-chart', style: 'font-family:system-ui,sans-serif;background:var(--chart-bg, white);color:var(--chart-title, #21473f)' });
     svg.append(element('title', {}, title));
     return svg;
   }
@@ -222,6 +236,7 @@
       text(svg, 'Active listings in area', width / 2, height - 9, { 'text-anchor': 'middle' });
       text(svg, 'Coordinates available (%)', 0, 0, { transform: `translate(13 ${height / 2}) rotate(-90)`, 'text-anchor': 'middle', 'font-size': 11 });
     }
+    themable(root);
     target.replaceChildren(root, download(root, title));
   }
   function render(kind, target, rows, options = {}) {
