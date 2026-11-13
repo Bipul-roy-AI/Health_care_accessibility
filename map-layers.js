@@ -42,9 +42,10 @@
     const state = { basemap: null, tiles: null, on: new Set(), layers: new Map() };
     let canvas = null, svg = null;
     if (options.boundaries) {
-      map.createPane('boundaries').style.zIndex = 350; // above tiles (200), below data (400)
+      // Below point data (400) by default; above choropleth fills when boundariesAbove is set.
+      map.createPane('boundaries').style.zIndex = options.boundariesAbove ? 450 : 350;
       map.getPane('boundaries').style.pointerEvents = 'none';
-      map.attributionControl.addAttribution(BOUNDARY_ATTRIBUTION);
+      if (options.boundaryAttribution !== false) map.attributionControl.addAttribution(BOUNDARY_ATTRIBUTION);
       canvas = L.canvas({ pane: 'boundaries', padding: 0.3 });
       svg = L.svg({ pane: 'boundaries', padding: 0.3 });
     }

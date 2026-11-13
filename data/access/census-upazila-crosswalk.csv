@@ -1,0 +1,601 @@
+district,census_upazila_or_thana,census_population_2022,pcode_2015,upazila_2015,match
+Bagerhat,Bagerhat Sadar Upazila,288673,BD400108,Bagerhat Sadar,exact
+Bagerhat,Chitalmari Upazila,153033,BD400114,Chitalmari,exact
+Bagerhat,Fakirhat Upazila,159019,BD400134,Fakirhat,exact
+Bagerhat,Kachua Upazila,107423,BD400138,Kachua,exact
+Bagerhat,Mollahat Upazila,144615,BD400156,Mollahat,exact
+Bagerhat,Mongla Upazila,158470,BD400158,Mongla,exact
+Bagerhat,Morelganj Upazila,304865,BD400160,Morrelganj,spelling
+Bagerhat,Rampal Upazila,176058,BD400173,Rampal,exact
+Bagerhat,Sharankhola Upazila,120920,BD400177,Sarankhola,spelling
+Bandarban,Alikadam Upazila,63800,BD200304,Alikadam,exact
+Bandarban,Bandarban Sadar Upazila,111096,BD200314,Bandarban Sadar,exact
+Bandarban,Lama Upazila,139689,BD200351,Lama,exact
+Bandarban,Naikkhongchhari Upazila,76477,BD200373,Naikhongchhari,spelling
+Bandarban,Rowangchhari Upazila,27721,BD200389,Rowangchhari,exact
+Bandarban,Ruma Upazila,32533,BD200391,Ruma,exact
+Bandarban,Thanchi Upazila,29790,BD200395,Thanchi,exact
+Barguna,Amtali Upazila,214446,BD100409,Amtali,exact
+Barguna,Bamna Upazila,78942,BD100419,Bamna,exact
+Barguna,Barguna Sadar Upazila,294375,BD100428,Barguna Sadar,exact
+Barguna,Betagi Upazila,125472,BD100447,Betagi,exact
+Barguna,Patharghata Upazila,177893,BD100485,Patharghata,exact
+Barguna,Taltali Upazila,119403,BD100409,Amtali,parent
+Barishal,Agailjhara Upazila,156423,BD100602,Agailjhara,exact
+Barishal,Babuganj Upazila,154558,BD100603,Babuganj,exact
+Barishal,Bakerganj Upazila,356022,BD100607,Bakerganj,exact
+Barishal,Banaripara Upazila,169876,BD100610,Banari Para,spelling
+Barishal,Barishal Sadar Thana,419484,BD100651,Barisal Sadar (Kotwali),rename
+Barishal,Barishal Sadar Upazila,237211,BD100651,Barisal Sadar (Kotwali),rename
+Barishal,Gaurnadi Upazila,205878,BD100632,Gaurnadi,exact
+Barishal,Hijla Upazila,150669,BD100636,Hizla,spelling
+Barishal,Mehendiganj Upazila,283890,BD100662,Mehendiganj,exact
+Barishal,Muladi Upazila,181929,BD100669,Muladi,exact
+Barishal,Ujirpur Upazila,254506,BD100694,Wazirpur,spelling
+Bhola,Bhola Sadar Upazila,444838,BD100918,Bhola Sadar,exact
+Bhola,Borhanuddin Upazila,265437,BD100921,Burhanuddin,spelling
+Bhola,Charfasson Upazila,518817,BD100925,Char Fasson,spelling
+Bhola,Daulatkhan Upazila,181813,BD100929,Daulatkhan,exact
+Bhola,Lalmohan Upazila,297692,BD100954,Lalmohan,exact
+Bhola,Monpura Upazila,89745,BD100965,Manpura,spelling
+Bhola,Tazumuddin Upazila,134176,BD100991,Tazumuddin,exact
+Bogura,Adamdighi Upazila,206797,BD501006,Adamdighi,exact
+Bogura,Bogura Sadar Upazila,657790,BD501020,Bogra Sadar,spelling
+Bogura,Dhunat Upazila,307521,BD501027,Dhunat,exact
+Bogura,Dupchachia Upazila,195075,BD501033,Dhupchanchia,spelling
+Bogura,Gabtali Upazila,344902,BD501040,Gabtali,exact
+Bogura,Kahaloo Upazila,234585,BD501054,Kahaloo,exact
+Bogura,Nandigram Upazila,200294,BD501067,Nandigram,exact
+Bogura,Sariakandi Upazila,276199,BD501081,Sariakandi,exact
+Bogura,Shajahanpur Upazila,333676,BD501085,Shajahanpur,exact
+Bogura,Sherpur Upazila,383539,BD501088,Sherpur,exact
+Bogura,Shibganj Upazila,400456,BD501094,Shibganj,exact
+Bogura,Sonatala Upazila,193463,BD501095,Sonatola,spelling
+Brahmanbaria,Akhaura Upazila,168472,BD201202,Akhaura,exact
+Brahmanbaria,Ashuganj Upazila,210356,BD201233,Ashuganj,exact
+Brahmanbaria,Banchharampur Upazila,335118,BD201204,Banchharampur,exact
+Brahmanbaria,Bijoynagar Upazila,290431,BD201207,Bijoynagar,exact
+Brahmanbaria,Brahmanbaria Sadar Upazila,677243,BD201213,Brahmanbaria Sadar,exact
+Brahmanbaria,Kasba Upazila,357961,BD201263,Kasba,exact
+Brahmanbaria,Nabinagar Upazila,555839,BD201285,Nabinagar,exact
+Brahmanbaria,Nasirnagar Upazila,346774,BD201290,Nasirnagar,exact
+Brahmanbaria,Sarail Upazila,364369,BD201294,Sarail,exact
+Chandpur,Chandpur Sadar Upazila,534599,BD201322,Chandpur Sadar,exact
+Chandpur,Faridganj Upazila,433248,BD201345,Faridganj,exact
+Chandpur,Haimchar Upazila,124833,BD201347,Haim Char,spelling
+Chandpur,Hajiganj Upazila,360367,BD201349,Hajiganj,exact
+Chandpur,Kachua Upazila,405497,BD201358,Kachua,exact
+Chandpur,Matlab Dakkhin Upazila,226721,BD201376,Matlab Dakshin,spelling
+Chandpur,Matlab Uttar Upazila,295821,BD201379,Matlab Uttar,exact
+Chandpur,Shahrasti Upazila,254662,BD201395,Shahrasti,exact
+Chapainawabganj,Bholahat Upazila,113314,BD507018,Bholahat,exact
+Chapainawabganj,Chapainawabganj Sadar Upazila,583475,BD507066,Nawabganj Sadar,rename
+Chapainawabganj,Gomastapur Upazila,304184,BD507037,Gomastapur,exact
+Chapainawabganj,Nachole Upazila,167678,BD507056,Nachole,exact
+Chapainawabganj,Shibganj Upazila,666877,BD507088,Shibganj,exact
+Chattogram,Akbarshah Thana,151686,BD201555,Pahartali,approximate
+Chattogram,Anwara Upazila,319482,BD201504,Anowara,spelling
+Chattogram,Bakalia Thana,226143,BD201510,Bakalia,exact
+Chattogram,Banshkhali Upazila,537593,BD201508,Banshkhali,exact
+Chattogram,Bayejid Bostami Thana,392242,BD201506,Bayejid Bostami,exact
+Chattogram,Boalkhali Upazila,258688,BD201512,Boalkhali,exact
+Chattogram,Chalk Bazar Thana,116998,BD201541,Kotwali,approximate
+Chattogram,Chandanaish Upazila,252242,BD201518,Chandanaish,exact
+Chattogram,Chandgaon Thana,312244,BD201519,Chandgaon,exact
+Chattogram,Chattogram Port Thana,171054,BD201520,Chittagong Port,spelling
+Chattogram,Doublemooring Thana,249344,BD201528,Double Mooring,spelling
+Chattogram,Epz Thana,256208,BD201565,Patenga,approximate
+Chattogram,Fatikchhari Upazila,642089,BD201533,Fatikchhari,exact
+Chattogram,Halishahar Thana,234450,BD201535,Halishahar,exact
+Chattogram,Hathazari Upazila,498182,BD201537,Hathazari,exact
+Chattogram,Karnaphuli Upazila,203705,BD201561,Patiya,parent
+Chattogram,Khulshi Thana,207795,BD201543,Khulshi,exact
+Chattogram,Kotwali Thana,231872,BD201541,Kotwali,exact
+Chattogram,Lohagara Upazila,328220,BD201547,Lohagara,exact
+Chattogram,Mirsarai Upazila,472794,BD201553,Mirsharai,spelling
+Chattogram,Pahartali Thana,190030,BD201555,Pahartali,exact
+Chattogram,Panchlaish Thana,219903,BD201557,Panchlaish,exact
+Chattogram,Patenga Thana,164019,BD201565,Patenga,exact
+Chattogram,Patiya Upazila,397679,BD201561,Patiya,exact
+Chattogram,Rangunia Upazila,392904,BD201570,Rangunia,exact
+Chattogram,Raozan Upazila,396358,BD201574,Raozan,exact
+Chattogram,Sadarghat Thana,106519,BD201541,Kotwali,approximate
+Chattogram,Sandwip Upazila,327564,BD201578,Sandwip,exact
+Chattogram,Satkania Upazila,454062,BD201582,Satkania,exact
+Chattogram,Sitakunda Upazila,457396,BD201586,Sitakunda,exact
+Chuadanga,Alamdanga Upazila,368189,BD401807,Alamdanga,exact
+Chuadanga,Chuadanga Sadar Upazila,350528,BD401823,Chuadanga Sadar,exact
+Chuadanga,Damurhuda Upazila,317552,BD401831,Damurhuda,exact
+Chuadanga,Jibannagar Upazila,197785,BD401855,Jiban Nagar,spelling
+Cox'S Bazar,Chakaria Upazila,571280,BD202216,Chakaria,exact
+Cox'S Bazar,Coxs Bazar Sadar Upazila,417365,BD202224,Cox's Bazar Sadar,exact
+Cox'S Bazar,Eidgaon Upazila,149566,BD202224,Cox's Bazar Sadar,parent
+Cox'S Bazar,Kutubdia Upazila,143622,BD202245,Kutubdia,exact
+Cox'S Bazar,Maheshkhali Upazila,385510,BD202249,Maheshkhali,exact
+Cox'S Bazar,Pekua Upazila,214357,BD202256,Pekua,exact
+Cox'S Bazar,Ramu Upazila,344545,BD202266,Ramu,exact
+Cox'S Bazar,Teknaf Upazila,333865,BD202290,Teknaf,exact
+Cox'S Bazar,Ukhia Upazila,263158,BD202294,Ukhia,exact
+Cumilla,Adarsha Sadar Thana,283438,BD201967,Comilla Adarsha Sadar,spelling
+Cumilla,Adarsha Sadar Upazila,388436,BD201967,Comilla Adarsha Sadar,spelling
+Cumilla,Barura Upazila,456341,BD201909,Barura,exact
+Cumilla,Brahmanpara Upazila,232628,BD201915,Brahman Para,spelling
+Cumilla,Burichang Upazila,349633,BD201918,Burichang,exact
+Cumilla,Chandina Upazila,394874,BD201927,Chandina,exact
+Cumilla,Chauddagram Upazila,501815,BD201931,Chauddagram,exact
+Cumilla,Daudkandi Upazila,406405,BD201936,Daudkandi,exact
+Cumilla,Debidwar Upazila,471927,BD201940,Debidwar,exact
+Cumilla,Homna Upazila,227534,BD201954,Homna,exact
+Cumilla,Laksam Upazila,333729,BD201972,Laksam,exact
+Cumilla,Lalmai Upazila,215011,BD201933,Comilla Sadar Dakshin,parent
+Cumilla,Manoharganj Upazila,275715,BD201974,Manoharganj,exact
+Cumilla,Meghna Upazila,118806,BD201975,Meghna,exact
+Cumilla,Muradnagar Upazila,582950,BD201981,Muradnagar,exact
+Cumilla,Nangalkot Upazila,427895,BD201987,Nangalkot,exact
+Cumilla,Sadar Dakkhin Thana,156795,BD201933,Comilla Sadar Dakshin,spelling
+Cumilla,Sadar Dakkhin Upazila,184331,BD201933,Comilla Sadar Dakshin,spelling
+Cumilla,Titas Upazila,203953,BD201994,Titas,exact
+Dhaka,Adabar Thana,215246,BD302602,Adabor,spelling
+Dhaka,Badda Thana,375604,BD302604,Badda,exact
+Dhaka,Banani Thana,184476,BD302626,Gulshan,approximate
+Dhaka,Bangshal Thana,176026,BD302605,Bangshal,exact
+Dhaka,Bhasantek Thana,117971,BD302630,Kafrul,approximate
+Dhaka,Bhatara Thana,324304,BD302604,Badda,approximate
+Dhaka,Bimanbandar Thana,7424,BD302606,Biman Bandar,spelling
+Dhaka,Cantonment Thana,135785,BD302608,Cantonment,exact
+Dhaka,Chakbazar Thana,123053,BD302609,Chak Bazar,spelling
+Dhaka,Dakkhinkhan Thana,396942,BD302610,Dakshinkhan,spelling
+Dhaka,Darussalam Thana,211296,BD302611,Darus Salam,spelling
+Dhaka,Demra Thana,278836,BD302612,Demra,exact
+Dhaka,Dhamrai Upazila,517135,BD302614,Dhamrai,exact
+Dhaka,Dhanmondi Thana,26790,BD302616,Dhanmondi,exact
+Dhaka,Dhanmondi Thana,75150,BD302616,Dhanmondi,exact
+Dhaka,Dohar Upazila,250114,BD302618,Dohar,exact
+Dhaka,Gendaria Thana,140307,BD302624,Gendaria,exact
+Dhaka,Gulshan Thana,110216,BD302626,Gulshan,exact
+Dhaka,Hatirjheel Thana,79974,BD302690,Tejgaon,approximate
+Dhaka,Hazaribag Thana,200476,BD302628,Hazaribagh,spelling
+Dhaka,Jatrabari Thana,492180,BD302629,Jatrabari,exact
+Dhaka,Kadamtali Thana,424217,BD302632,Kadamtali,exact
+Dhaka,Kafrul Thana,339789,BD302630,Kafrul,exact
+Dhaka,Kalabagan Thana,114258,BD302633,Kalabagan,exact
+Dhaka,Kamrangichar Thana,372302,BD302634,Kamrangir Char,spelling
+Dhaka,Keraniganj Upazila,1011063,BD302638,Keraniganj,exact
+Dhaka,Khilgaon Thana,380747,BD302636,Khilgaon,exact
+Dhaka,Khilkhet Thana,176429,BD302637,Khilkhet,exact
+Dhaka,Kotwali Thana,49085,BD302640,Kotwali,exact
+Dhaka,Lalbag Thana,186025,BD302642,Lalbagh,spelling
+Dhaka,Mirpur Thana,546212,BD302648,Mirpur,exact
+Dhaka,Mohammadpur Thana,527789,BD302650,Mohammadpur,exact
+Dhaka,Motijheel Thana,83588,BD302654,Motijheel,exact
+Dhaka,Mugda Thana,208974,BD302668,Sabujbagh,approximate
+Dhaka,Nawabganj Upazila,348807,BD302662,Nawabganj,spelling
+Dhaka,Newmarket Thana,54220,BD302663,New Market,spelling
+Dhaka,Pallabi Thana,597592,BD302664,Pallabi,exact
+Dhaka,Paltan Thana,53914,BD302665,Paltan,exact
+Dhaka,Ramna Thana,56759,BD302666,Ramna,exact
+Dhaka,Ramna Thana,143698,BD302666,Ramna,exact
+Dhaka,Rampura Thana,160814,BD302667,Rampura,exact
+Dhaka,Rupnagar Thana,178030,BD302664,Pallabi,approximate
+Dhaka,Sabujbag Thana,258518,BD302668,Sabujbagh,spelling
+Dhaka,Savar Upazila,2311796,BD302672,Savar,exact
+Dhaka,Shah Ali Thana,151760,BD302674,Shah Ali,exact
+Dhaka,Shahbag Thana,63765,BD302675,Shahbagh,spelling
+Dhaka,Shahjahanpur Thana,111777,BD302654,Motijheel,approximate
+Dhaka,Shere Bangla Nagar Thana,17033,BD302680,Sher-e-bangla Nagar,spelling
+Dhaka,Shere Bangla Nagar Thana,142643,BD302680,Sher-e-bangla Nagar,spelling
+Dhaka,Shyampur Thana,173805,BD302676,Shyampur,exact
+Dhaka,Sutrapur Thana,85033,BD302688,Sutrapur,exact
+Dhaka,Tejgaon Shilpa Elaka Thana,108661,BD302692,Tejgaon Ind. Area,rename
+Dhaka,Tejgaon Thana,123160,BD302690,Tejgaon,exact
+Dhaka,Turag Thana,266064,BD302693,Turag,exact
+Dhaka,Uttara Purba Thana,35395,BD302695,Uttara,parent
+Dhaka,Uttarkhan Thana,126149,BD302696,Uttar Khan,spelling
+Dhaka,Uttra Pashchim Thana,180510,BD302695,Uttara,parent
+Dhaka,Wari Thana,125015,BD302688,Sutrapur,approximate
+Dinajpur,Birampur Upazila,184144,BD552710,Birampur,exact
+Dinajpur,Birganj Upazila,356152,BD552712,Birganj,exact
+Dinajpur,Birol Upazila,281554,BD552717,Biral,spelling
+Dinajpur,Bochaganj Upazila,171718,BD552721,Bochaganj,exact
+Dinajpur,Chirirbandar Upazila,323880,BD552730,Chirirbandar,exact
+Dinajpur,Dinajpur Sadar Upazila,549184,BD552764,Dinajpur Sadar,exact
+Dinajpur,Fulbari Upazila,194569,BD552738,Fulbari,exact
+Dinajpur,Ghoraghat Upazila,131413,BD552743,Ghoraghat,exact
+Dinajpur,Hakimpur Upazila,95972,BD552747,Hakimpur,exact
+Dinajpur,Kaharole Upazila,174564,BD552756,Kaharole,exact
+Dinajpur,Khansama Upazila,197402,BD552760,Khansama,exact
+Dinajpur,Nababganj Upazila,254036,BD552769,Nawabganj,spelling
+Dinajpur,Parbatipur Upazila,400648,BD552777,Parbatipur,exact
+Faridpur,Alfadanga Upazila,119631,BD302903,Alfadanga,exact
+Faridpur,Bhanga Upazila,293857,BD302910,Bhanga,exact
+Faridpur,Boalmari Upazila,268150,BD302918,Boalmari,exact
+Faridpur,Char Bhadrasan Upazila,70923,BD302921,Char Bhadrasan,exact
+Faridpur,Faridpur Sadar Upazila,567657,BD302947,Faridpur Sadar,exact
+Faridpur,Madhukhali Upazila,231997,BD302956,Madhukhali,exact
+Faridpur,Nagarkanda Upazila,222938,BD302962,Nagarkanda,exact
+Faridpur,Sadarpur Upazila,201511,BD302984,Sadarpur,exact
+Faridpur,Saltha Upazila,186215,BD302990,Saltha,exact
+Feni,Chhagalnaiya Upazila,208232,BD203014,Chhagalnaiya,exact
+Feni,Daganbhuiyan Upazila,276915,BD203025,Daganbhuiyan,exact
+Feni,Feni Sadar Upazila,634321,BD203029,Feni Sadar,exact
+Feni,Fulgazi Upazila,125444,BD203041,Fulgazi,exact
+Feni,Parashuram Upazila,113317,BD203051,Parshuram,spelling
+Feni,Sonagazi Upazila,290667,BD203094,Sonagazi,exact
+Gaibandha,Fulchhari Upazila,166662,BD553221,Fulchhari,exact
+Gaibandha,Gaibandha Sadar Upazila,499196,BD553224,Gaibandha Sadar,exact
+Gaibandha,Gobindaganj Upazila,543144,BD553230,Gobindaganj,exact
+Gaibandha,Palashbari Upazila,267438,BD553267,Palashbari,exact
+Gaibandha,Sadullapur Upazila,313628,BD553282,Sadullapur,exact
+Gaibandha,Saghata Upazila,289628,BD553288,Saghatta,spelling
+Gaibandha,Sundarganj Upazila,482537,BD553291,Sundarganj,exact
+Gazipur,Basan Thana,260177,BD303330,Gazipur Sadar,parent
+Gazipur,Gachha Thana,386980,BD303330,Gazipur Sadar,parent
+Gazipur,Gazipur Sadar Upazila,345801,BD303330,Gazipur Sadar,exact
+Gazipur,Joydebpur Thana,478706,BD303330,Gazipur Sadar,parent
+Gazipur,Kaliakair Upazila,694608,BD303332,Kaliakair,exact
+Gazipur,Kaliganj Upazila,310956,BD303334,Kaliganj,exact
+Gazipur,Kapasia Upazila,379107,BD303336,Kapasia,exact
+Gazipur,Kashimpur Thana,388595,BD303330,Gazipur Sadar,parent
+Gazipur,Konabari Thana,301520,BD303330,Gazipur Sadar,parent
+Gazipur,Pubail Thana,103091,BD303330,Gazipur Sadar,parent
+Gazipur,Sreepur Upazila,855263,BD303386,Sreepur,exact
+Gazipur,Tongi Pashchim Thana,314935,BD303330,Gazipur Sadar,parent
+Gazipur,Tongi Purba Thana,443711,BD303330,Gazipur Sadar,parent
+Gopalganj,Gopalganj Sadar Upazila,401160,BD303532,Gopalganj Sadar,exact
+Gopalganj,Kashiani Upazila,228161,BD303543,Kashiani,exact
+Gopalganj,Kotalipara Upazila,243726,BD303551,Kotali Para,spelling
+Gopalganj,Muksudpur Upazila,307528,BD303558,Muksudpur,exact
+Gopalganj,Tungipara Upazila,114482,BD303591,Tungi Para,spelling
+Habiganj,Ajmiriganj Upazila,126324,BD603602,Ajmiriganj,exact
+Habiganj,Bahubal Upazila,219377,BD603605,Bahubal,exact
+Habiganj,Baniachong Upazila,356425,BD603611,Baniachong,exact
+Habiganj,Chunarughat Upazila,342289,BD603626,Chunarughat,exact
+Habiganj,Habiganj Sadar Upazila,306718,BD603644,Habiganj Sadar,exact
+Habiganj,Lakhai Upazila,158717,BD603668,Lakhai,exact
+Habiganj,Madhabpur Upazila,384243,BD603671,Madhabpur,exact
+Habiganj,Nabiganj Upazila,367385,BD603677,Nabiganj,exact
+Habiganj,Shayestaganj Upazila,97408,BD603644,Habiganj Sadar,parent
+Jamalpur,Bakshiganj Upazila,239857,BD453907,Bakshiganj,exact
+Jamalpur,Dewanganj Upazila,288166,BD453915,Dewanganj,exact
+Jamalpur,Islampur Upazila,319758,BD453929,Islampur,exact
+Jamalpur,Jamalpur Sadar Upazila,668243,BD453936,Jamalpur Sadar,exact
+Jamalpur,Madarganj Upazila,285999,BD453958,Madarganj,exact
+Jamalpur,Melandaha Upazila,354521,BD453961,Melandaha,exact
+Jamalpur,Sarishabari Upazila,343194,BD453985,Sarishabari,exact
+Jashore,Abhaynagar Upazila,290143,BD404104,Abhaynagar,exact
+Jashore,Bagherpara Upazila,238106,BD404109,Bagher Para,spelling
+Jashore,Chaugachha Upazila,249280,BD404111,Chaugachha,exact
+Jashore,Jashore Sadar Upazila,844374,BD404147,Kotwali,rename
+Jashore,Jhikargachha Upazila,331137,BD404123,Jhikargachha,exact
+Jashore,Keshabpur Upazila,280932,BD404138,Keshabpur,exact
+Jashore,Manirampur Upazila,454541,BD404161,Manirampur,exact
+Jashore,Sharsha Upazila,387631,BD404190,Sharsha,exact
+Jhalokathi,Jhalokathi Sadar Upazila,217924,BD104240,Jhalokati Sadar,spelling
+Jhalokathi,Kanthalia Upazila,111663,BD104243,Kanthalia,exact
+Jhalokathi,Nalchhity Upazila,186892,BD104273,Nalchity,spelling
+Jhalokathi,Rajapur Upazila,144681,BD104284,Rajapur,exact
+Jhenaidah,Harinakundu Upazila,218857,BD404414,Harinakunda,spelling
+Jhenaidah,Jhenaidah Sadar Upazila,543906,BD404419,Jhenaidah Sadar,exact
+Jhenaidah,Kaliganj Upazila,308504,BD404433,Kaliganj,exact
+Jhenaidah,Kotchandpur Upazila,156545,BD404442,Kotchandpur,exact
+Jhenaidah,Maheshpur Upazila,371293,BD404471,Maheshpur,exact
+Jhenaidah,Shailkupa Upazila,406744,BD404480,Shailkupa,exact
+Joypurhat,Akkelpur Upazila,144693,BD503813,Akkelpur,exact
+Joypurhat,Joypurhat Sadar Upazila,315205,BD503847,Joypurhat Sadar,exact
+Joypurhat,Kalai Upazila,146055,BD503858,Kalai,exact
+Joypurhat,Khetlal Upazila,110866,BD503861,Khetlal,exact
+Joypurhat,Panchbibi Upazila,239612,BD503874,Panchbibi,exact
+Khagrachhari,Dighinala Upazila,115440,BD204643,Dighinala,exact
+Khagrachhari,Guimara Upazila,53258,BD204670,Matiranga,parent
+Khagrachhari,Khagrachhari Sadar Upazila,136141,BD204649,Khagrachhari Sadar,exact
+Khagrachhari,Lakkhichhari Upazila,27148,BD204661,Lakshmichhari,spelling
+Khagrachhari,Mahalchhari Upazila,49077,BD204665,Mahalchhari,exact
+Khagrachhari,Manikchhari Upazila,77027,BD204667,Manikchhari,exact
+Khagrachhari,Matiranga Upazila,126609,BD204670,Matiranga,exact
+Khagrachhari,Panchhari Upazila,68678,BD204677,Panchhari,exact
+Khagrachhari,Ramgarh Upazila,60741,BD204680,Ramgarh,exact
+Khulna,Batiaghata Upazila,233041,BD404712,Batiaghata,exact
+Khulna,Dacope Upazila,159369,BD404717,Dacope,exact
+Khulna,Daulatpur Thana,104132,BD404721,Daulatpur,exact
+Khulna,Dighalia Upazila,167025,BD404740,Dighalia,exact
+Khulna,Dumuria Upazila,343899,BD404730,Dumuria,exact
+Khulna,Khalishpur Thana,163856,BD404745,Khalishpur,exact
+Khulna,Khan Jahan Ali Thana,7450,BD404748,Khan Jahan Ali,exact
+Khulna,Khulna Sadar Thana,248220,BD404751,Khulna Sadar,exact
+Khulna,Koyra Upazila,220102,BD404753,Koyra,exact
+Khulna,Paikgachha Upazila,286209,BD404764,Paikgachha,exact
+Khulna,Phultala Upazila,148510,BD404769,Phultala,exact
+Khulna,Rupsa Upazila,206748,BD404775,Rupsa,exact
+Khulna,Sonadanga Thana,195899,BD404785,Sonadanga,exact
+Khulna,Terokhada Upazila,128925,BD404794,Terokhada,exact
+Kishoreganj,Austagram Upazila,151238,BD304802,Austagram,exact
+Kishoreganj,Bajitpur Upazila,269756,BD304806,Bajitpur,exact
+Kishoreganj,Bhairab Upazila,362681,BD304811,Bhairab,exact
+Kishoreganj,Hossainpur Upazila,201897,BD304827,Hossainpur,exact
+Kishoreganj,Itna Upazila,168840,BD304833,Itna,exact
+Kishoreganj,Karimganj Upazila,328288,BD304842,Karimganj,exact
+Kishoreganj,Katiadi Upazila,351466,BD304845,Katiadi,exact
+Kishoreganj,Kishoreganj Sadar Upazila,506873,BD304849,Kishoreganj Sadar,exact
+Kishoreganj,Kuliarchar Upazila,202477,BD304854,Kuliar Char,spelling
+Kishoreganj,Mithamain Upazila,125157,BD304859,Mithamain,exact
+Kishoreganj,Nikli Upazila,145887,BD304876,Nikli,exact
+Kishoreganj,Pakundia Upazila,282981,BD304879,Pakundia,exact
+Kishoreganj,Tarail Upazila,170085,BD304892,Tarail,exact
+Kurigram,Bhurungamari Upazila,255548,BD554906,Bhurungamari,exact
+Kurigram,Chilmari Upazila,131715,BD554909,Chilmari,exact
+Kurigram,Kurigram Sadar Upazila,361408,BD554952,Kurigram Sadar,exact
+Kurigram,Nageshwari Upazila,444699,BD554961,Nageshwari,exact
+Kurigram,Phulbari Upazila,186682,BD554918,Phulbari,exact
+Kurigram,Rajarhat Upazila,203060,BD554977,Rajarhat,exact
+Kurigram,Rajibpur Upazila,78383,BD554908,Char Rajibpur,rename
+Kurigram,Roumari Upazila,227513,BD554979,Raumari,spelling
+Kurigram,Ulipur Upazila,440152,BD554994,Ulipur,exact
+Kushtia,Bheramara Upazila,225058,BD405015,Bheramara,exact
+Kushtia,Daulatpur Upazila,482981,BD405039,Daulatpur,exact
+Kushtia,Khoksa Upazila,143832,BD405063,Khoksa,exact
+Kushtia,Kumarkhali Upazila,373752,BD405071,Kumarkhali,exact
+Kushtia,Kushtia Sadar Upazila,560963,BD405079,Kushtia Sadar,exact
+Kushtia,Mirpur Upazila,363106,BD405094,Mirpur,exact
+Lakshmipur,Kamalnagar Upazila,217293,BD205133,Kamalnagar,exact
+Lakshmipur,Lakshmipur Sadar Upazila,814847,BD205143,Lakshmipur Sadar,exact
+Lakshmipur,Raipur Upazila,313659,BD205158,Roypur,spelling
+Lakshmipur,Ramganj Upazila,313225,BD205165,Ramganj,exact
+Lakshmipur,Ramgati Upazila,278924,BD205173,Ramgati,exact
+Lalmonirhat,Aditmari Upazila,251229,BD555202,Aditmari,exact
+Lalmonirhat,Hatibandha Upazila,264107,BD555233,Hatibandha,exact
+Lalmonirhat,Kaliganj Upazila,277024,BD555239,Kaliganj,exact
+Lalmonirhat,Lalmonirhat Sadar Upazila,373470,BD555255,Lalmonirhat Sadar,exact
+Lalmonirhat,Patgram Upazila,262576,BD555270,Patgram,exact
+Madaripur,Dasar Upazila,75172,BD305440,Kalkini,parent
+Madaripur,Kalkini Upazila,218330,BD305440,Kalkini,exact
+Madaripur,Madaripur Sadar Upazila,396772,BD305454,Madaripur Sadar,exact
+Madaripur,Rajoir Upazila,245316,BD305480,Rajoir,exact
+Madaripur,Shibchar Upazila,357437,BD305487,Shib Char,spelling
+Magura,Magura Sadar Upazila,426396,BD405557,Magura Sadar,exact
+Magura,Mohammadpur Upazila,242808,BD405566,Mohammadpur,exact
+Magura,Shalikha Upazila,179666,BD405585,Shalikha,exact
+Magura,Sreepur Upazila,184245,BD405595,Sreepur,exact
+Manikganj,Daulatpur Upazila,167425,BD305610,Daulatpur,exact
+Manikganj,Ghior Upazila,162509,BD305622,Ghior,exact
+Manikganj,Harirampur Upazila,155469,BD305628,Harirampur,exact
+Manikganj,Manikganj Sadar Upazila,363829,BD305646,Manikganj Sadar,exact
+Manikganj,Saturia Upazila,193206,BD305670,Saturia,exact
+Manikganj,Shibalay Upazila,187462,BD305678,Shibalaya,spelling
+Manikganj,Singair Upazila,328125,BD305682,Singair,exact
+Meherpur,Gangni Upazila,322701,BD405747,Gangni,exact
+Meherpur,Meherpur Sadar Upazila,276903,BD405787,Meherpur Sadar,exact
+Meherpur,Mujibnagar Upazila,105752,BD405760,Mujib Nagar,spelling
+Moulvibazar,Baralekha Upazila,282452,BD605814,Barlekha,spelling
+Moulvibazar,Juri Upazila,162572,BD605835,Juri,exact
+Moulvibazar,Kamalganj Upazila,290108,BD605856,Kamalganj,exact
+Moulvibazar,Kulaura Upazila,397746,BD605865,Kulaura,exact
+Moulvibazar,Moulvibazar Sadar Upazila,377962,BD605874,Maulvi Bazar Sadar,spelling
+Moulvibazar,Rajnagar Upazila,250806,BD605880,Rajnagar,exact
+Moulvibazar,Sreemangal Upazila,361801,BD605883,Sreemangal,exact
+Munshiganj,Gazaria Upazila,185259,BD305924,Gazaria,exact
+Munshiganj,Louhajang Upazila,177802,BD305944,Lohajang,spelling
+Munshiganj,Munshiganj Sadar Upazila,436018,BD305956,Munshiganj Sadar,exact
+Munshiganj,Sirajdikhan Upazila,316473,BD305974,Serajdikhan,spelling
+Munshiganj,Sreenagar Upazila,293905,BD305984,Sreenagar,exact
+Munshiganj,Tongibari Upazila,215959,BD305994,Tongibari,exact
+Mymensingh,Bhaluka Upazila,583981,BD456113,Bhaluka,exact
+Mymensingh,Dhobaura Upazila,217467,BD456116,Dhobaura,exact
+Mymensingh,Fulbaria Upazila,495917,BD456120,Fulbaria,exact
+Mymensingh,Fulpur Upazila,351001,BD456181,Phulpur,spelling
+Mymensingh,Gafargaon Upazila,463253,BD456122,Gaffargaon,spelling
+Mymensingh,Gouripur Upazila,357353,BD456123,Gauripur,spelling
+Mymensingh,Haluaghat Upazila,316539,BD456124,Haluaghat,exact
+Mymensingh,Ishwarganj Upazila,404613,BD456131,Ishwarganj,exact
+Mymensingh,Muktagachha Upazila,460389,BD456165,Muktagachha,exact
+Mymensingh,Mymensingh Sadar Thana,577000,BD456152,Mymensingh Sadar,exact
+Mymensingh,Mymensingh Sadar Upazila,421422,BD456152,Mymensingh Sadar,exact
+Mymensingh,Nandail Upazila,421279,BD456172,Nandail,exact
+Mymensingh,Tarakanda Upazila,337308,BD456181,Phulpur,parent
+Mymensingh,Trishal Upazila,491483,BD456194,Trishal,exact
+Naogaon,Atrai Upazila,201459,BD506403,Atrai,exact
+Naogaon,Badalgachhi Upazila,206557,BD506406,Badalgachhi,exact
+Naogaon,Dhamoirhat Upazila,194181,BD506428,Dhamoirhat,exact
+Naogaon,Mahadebpur Upazila,308666,BD506450,Mahadebpur,exact
+Naogaon,Manda Upazila,380588,BD506447,Manda,exact
+Naogaon,Naogaon Sadar Upazila,447903,BD506460,Naogaon Sadar,exact
+Naogaon,Niamatpur Upazila,270452,BD506469,Niamatpur,exact
+Naogaon,Patnitala Upazila,250729,BD506475,Patnitala,exact
+Naogaon,Porsha Upazila,147021,BD506479,Porsha,exact
+Naogaon,Raninagar Upazila,192226,BD506485,Raninagar,exact
+Naogaon,Sapahar Upazila,184817,BD506486,Sapahar,exact
+Narail,Kalia Upazila,243166,BD406528,Kalia,exact
+Narail,Lohagara Upazila,248437,BD406552,Lohagara,exact
+Narail,Narail Sadar Upazila,297068,BD406576,Narail Sadar,exact
+Narayanganj,Araihazar Upazila,467547,BD306702,Araihazar,exact
+Narayanganj,Bandar Thana,209252,BD306706,Bandar,exact
+Narayanganj,Bandar Upazila,204786,BD306706,Bandar,exact
+Narayanganj,Narayanganj Sadar Thana,758699,BD306758,Narayanganj Sadar,exact
+Narayanganj,Narayanganj Sadar Upazila,1012144,BD306758,Narayanganj Sadar,exact
+Narayanganj,Rupganj Upazila,704869,BD306768,Rupganj,exact
+Narayanganj,Sonargaon Upazila,551841,BD306704,Sonargaon,exact
+Narsingdi,Belabo Upazila,213602,BD306807,Belabo,exact
+Narsingdi,Manohardi Upazila,298609,BD306852,Manohardi,exact
+Narsingdi,Narsingdi Sadar Upazila,852330,BD306860,Narsingdi Sadar,exact
+Narsingdi,Palash Upazila,249156,BD306863,Palash,exact
+Narsingdi,Raipura Upazila,610602,BD306864,Roypura,spelling
+Narsingdi,Shibpur Upazila,360153,BD306876,Shibpur,exact
+Natore,Bagatipara Upazila,140699,BD506909,Bagati Para,spelling
+Natore,Baraigram Upazila,308923,BD506915,Baraigram,exact
+Natore,Gurudaspur Upazila,234342,BD506941,Gurudaspur,exact
+Natore,Lalpur Upazila,306357,BD506944,Lalpur,exact
+Natore,Naldanga Upazila,135318,BD506963,Natore Sadar,parent
+Natore,Natore Sadar Upazila,352967,BD506963,Natore Sadar,exact
+Natore,Singra Upazila,381316,BD506991,Singra,exact
+Netrakona,Atpara Upazila,144855,BD457204,Atpara,exact
+Netrakona,Barhatta Upazila,182211,BD457209,Barhatta,exact
+Netrakona,Durgapur Upazila,242457,BD457218,Durgapur,exact
+Netrakona,Kalmakanda Upazila,271348,BD457240,Kalmakanda,exact
+Netrakona,Kendua Upazila,316976,BD457247,Kendua,exact
+Netrakona,Khaliajuri Upazila,96345,BD457238,Khaliajuri,exact
+Netrakona,Madan Upazila,149878,BD457256,Madan,exact
+Netrakona,Mohanganj Upazila,166421,BD457263,Mohanganj,exact
+Netrakona,Netrakona Sadar Upazila,421964,BD457274,Netrokona Sadar,spelling
+Netrakona,Purbadhala Upazila,332398,BD457283,Purbadhala,exact
+Nilphamari,Dimla Upazila,316846,BD557312,Dimla,exact
+Nilphamari,Domar Upazila,282630,BD557315,Domar,exact
+Nilphamari,Jaldhaka Upazila,386801,BD557336,Jaldhaka,exact
+Nilphamari,Kishoreganj Upazila,269332,BD557345,Kishoreganj,exact
+Nilphamari,Nilphamari Sadar Upazila,523966,BD557364,Nilphamari Sadar,exact
+Nilphamari,Saidpur Upazila,312993,BD557385,Saidpur,exact
+Noakhali,Begumganj Upazila,611106,BD207507,Begumganj,exact
+Noakhali,Chatkhil Upazila,258794,BD207510,Chatkhil,exact
+Noakhali,Companiganj Upazila,301310,BD207521,Companiganj,exact
+Noakhali,Hatiya Upazila,537366,BD207536,Hatiya,exact
+Noakhali,Kabirhat Upazila,238736,BD207547,Kabirhat,exact
+Noakhali,Noakhali Sadar Upazila,642494,BD207587,Noakhali Sadar (Sudharam),rename
+Noakhali,Senbag Upazila,310884,BD207580,Senbagh,spelling
+Noakhali,Sonaimuri Upazila,368842,BD207583,Sonaimuri,exact
+Noakhali,Subarnachar Upazila,355910,BD207585,Subarnachar,exact
+Pabna,Atgharia Upazila,178582,BD507605,Atgharia,exact
+Pabna,Bera Upazila,301494,BD507616,Bera,exact
+Pabna,Bhangura Upazila,136576,BD507619,Bhangura,exact
+Pabna,Chatmohar Upazila,334240,BD507622,Chatmohar,exact
+Pabna,Faridpur Upazila,140399,BD507633,Faridpur,exact
+Pabna,Ishwardi Upazila,390402,BD507639,Ishwardi,exact
+Pabna,Pabna Sadar Upazila,711588,BD507655,Pabna Sadar,exact
+Pabna,Santhia Upazila,410767,BD507672,Santhia,exact
+Pabna,Sujanagar Upazila,305576,BD507683,Sujanagar,exact
+Panchagarh,Atwari Upazila,141549,BD557704,Atwari,exact
+Panchagarh,Boda Upazila,275282,BD557725,Boda,exact
+Panchagarh,Debiganj Upazila,267466,BD557734,Debiganj,exact
+Panchagarh,Panchagarh Sadar Upazila,335366,BD557773,Panchagarh Sadar,exact
+Panchagarh,Tetulia Upazila,160180,BD557790,Tentulia,spelling
+Patuakhali,Bauphal Upazila,327498,BD107838,Bauphal,exact
+Patuakhali,Dashmina Upazila,130402,BD107852,Dashmina,exact
+Patuakhali,Dumki Upazila,81839,BD107855,Dumki,exact
+Patuakhali,Galachipa Upazila,300218,BD107857,Galachipa,exact
+Patuakhali,Kalapara Upazila,286993,BD107866,Kala Para,spelling
+Patuakhali,Mirzaganj Upazila,127111,BD107876,Mirzaganj,exact
+Patuakhali,Patuakhali Sadar Upazila,354816,BD107895,Patuakhali Sadar,exact
+Patuakhali,Rangabali Upazila,118377,BD107857,Galachipa,parent
+Pirojpur,Bhandaria Upazila,163654,BD107914,Bhandaria,exact
+Pirojpur,Indurkani Upazila,85454,BD107990,Zianagar,rename
+Pirojpur,Kawkhali Upazila,70786,BD107947,Kawkhali,exact
+Pirojpur,Mathbaria Upazila,277627,BD107958,Mathbaria,exact
+Pirojpur,Nazirpur Upazila,187991,BD107976,Nazirpur,exact
+Pirojpur,Nesarabad Upazila,230976,BD107987,Nesarabad (Swarupkati),rename
+Pirojpur,Pirojpur Sadar Upazila,181707,BD107980,Pirojpur Sadar,exact
+Rajbari,Baliakandi Upazila,230031,BD308207,Balia Kandi,spelling
+Rajbari,Goalanda Upazila,128796,BD308229,Goalandaghat,rename
+Rajbari,Kalukhali Upazila,172347,BD308247,Kalukhali,exact
+Rajbari,Pangsha Upazila,274110,BD308273,Pangsha,exact
+Rajbari,Rajbari Sadar Upazila,384534,BD308276,Rajbari Sadar,exact
+Rajshahi,Bagha Upazila,195888,BD508110,Bagha,exact
+Rajshahi,Bagmara Upazila,373970,BD508112,Baghmara,spelling
+Rajshahi,Boalia Thana,213467,BD508122,Boalia,exact
+Rajshahi,Chandrima Thana,62956,BD508122,Boalia,approximate
+Rajshahi,Charghat Upazila,224845,BD508125,Charghat,exact
+Rajshahi,Durgapur Upazila,197713,BD508131,Durgapur,exact
+Rajshahi,Godagari Upazila,376386,BD508134,Godagari,exact
+Rajshahi,Kashiadanga Thana,43838,BD508185,Rajpara,approximate
+Rajshahi,Matihar Thana,77573,BD508140,Matihar,exact
+Rajshahi,Mohanpur Upazila,186904,BD508153,Mohanpur,exact
+Rajshahi,Paba Upazila,368889,BD508172,Paba,exact
+Rajshahi,Puthia Upazila,224143,BD508182,Puthia,exact
+Rajshahi,Rajpara Thana,116778,BD508185,Rajpara,exact
+Rajshahi,Shah Makhdum Thana,38676,BD508190,Shah Makhdum,exact
+Rajshahi,Tanore Upazila,212983,BD508194,Tanore,exact
+Rangamati,Baghaichhari Upazila,106287,BD208407,Baghai Chhari,spelling
+Rangamati,Barkal Upazila,49708,BD208421,Barkal,exact
+Rangamati,Belaichhari Upazila,29540,BD208429,Belai Chhari,spelling
+Rangamati,Jurachhari Upazila,26932,BD208447,Jurai Chhari,spelling
+Rangamati,Kaptai Upazila,55410,BD208436,Kaptai,exact
+Rangamati,Kawkhali Upazila,66313,BD208425,Kawkhali (Betbunia),rename
+Rangamati,Langadu Upazila,90408,BD208458,Langadu,exact
+Rangamati,Naniarchar Upazila,48523,BD208475,Naniarchar,exact
+Rangamati,Rajasthali Upazila,27864,BD208478,Rajasthali,exact
+Rangamati,Rangamati Sadar Upazila,146601,BD208487,Rangamati Sadar,exact
+Rangpur,Badarganj Upazila,314865,BD558503,Badarganj,exact
+Rangpur,Gangachara Upazila,286730,BD558527,Gangachara,exact
+Rangpur,Hajirhat Thana,77227,BD558549,Rangpur Sadar,parent
+Rangpur,Haragachh Thana,62709,BD558542,Kaunia,parent
+Rangpur,Kaunia Upazila,239689,BD558542,Kaunia,exact
+Rangpur,Kotwali Thana,348129,BD558549,Rangpur Sadar,parent
+Rangpur,Mahiganj Thana,56731,BD558549,Rangpur Sadar,parent
+Rangpur,Mithapukur Upazila,538723,BD558558,Mitha Pukur,spelling
+Rangpur,Parshuram Thana,70087,BD558549,Rangpur Sadar,parent
+Rangpur,Pirgachha Upazila,326622,BD558573,Pirgachha,exact
+Rangpur,Pirganj Upazila,414845,BD558576,Pirganj,exact
+Rangpur,Rangpur Sadar Upazila,178675,BD558549,Rangpur Sadar,exact
+Rangpur,Tajhat Thana,93687,BD558549,Rangpur Sadar,parent
+Rangpur,Taraganj Upazila,160895,BD558592,Taraganj,exact
+Satkhira,Ashashuni Upazila,281758,BD408704,Assasuni,spelling
+Satkhira,Debhata Upazila,133014,BD408725,Debhata,exact
+Satkhira,Kalaroa Upazila,261270,BD408743,Kalaroa,exact
+Satkhira,Kaliganj Upazila,305495,BD408747,Kaliganj,exact
+Satkhira,Satkhira Sadar Upazila,522964,BD408782,Satkhira Sadar,exact
+Satkhira,Shyamnagar Upazila,365970,BD408786,Shyamnagar,exact
+Satkhira,Tala Upazila,326111,BD408790,Tala,exact
+Shariatpur,Bhedarganj Upazila,278306,BD308614,Bhedarganj,exact
+Shariatpur,Damudya Upazila,123639,BD308625,Damudya,exact
+Shariatpur,Gosairhat Upazila,175016,BD308636,Gosairhat,exact
+Shariatpur,Naria Upazila,260240,BD308665,Naria,exact
+Shariatpur,Shariatpur Sadar Upazila,239590,BD308669,Shariatpur Sadar,exact
+Shariatpur,Zajira Upazila,217771,BD308694,Zanjira,spelling
+Sherpur,Jhenaigati Upazila,178148,BD458937,Jhenaigati,exact
+Sherpur,Nakla Upazila,208765,BD458967,Nakla,exact
+Sherpur,Nalitabari Upazila,271933,BD458970,Nalitabari,exact
+Sherpur,Sherpur Sadar Upazila,563865,BD458988,Sherpur Sadar,exact
+Sherpur,Sreebardi Upazila,279142,BD458990,Sreebardi,exact
+Sirajganj,Belkuchi Upazila,401172,BD508811,Belkuchi,exact
+Sirajganj,Chouhali Upazila,138061,BD508827,Chauhali,spelling
+Sirajganj,Kamarkhanda Upazila,154386,BD508844,Kamarkhanda,exact
+Sirajganj,Kazipur Upazila,281442,BD508850,Kazipur,exact
+Sirajganj,Rayganj Upazila,348190,BD508861,Royganj,spelling
+Sirajganj,Shahjadpur Upazila,601633,BD508867,Shahjadpur,exact
+Sirajganj,Sirajganj Sadar Upazila,631928,BD508878,Sirajganj Sadar,exact
+Sirajganj,Tarash Upazila,211853,BD508889,Tarash,exact
+Sirajganj,Ullapara Upazila,589041,BD508894,Ullah Para,spelling
+Sunamganj,Bishwambharpur Upazila,190350,BD609018,Bishwambarpur,spelling
+Sunamganj,Chhatak Upazila,445797,BD609023,Chhatak,exact
+Sunamganj,Derai Upazila,253705,BD609029,Derai,exact
+Sunamganj,Dharmapasha Upazila,133250,BD609032,Dharampasha,spelling
+Sunamganj,Dowarabazar Upazila,260513,BD609033,Dowarabazar,exact
+Sunamganj,Jagannathpur Upazila,264198,BD609047,Jagannathpur,exact
+Sunamganj,Jamalganj Upazila,185866,BD609050,Jamalganj,exact
+Sunamganj,Madhyanagar Upazila,96237,BD609032,Dharampasha,parent
+Sunamganj,Shalla Upazila,117630,BD609086,Sulla,spelling
+Sunamganj,Shantiganj Upazila,204998,BD609027,Dakshin Sunamganj,rename
+Sunamganj,Sunamganj Sadar Upazila,318099,BD609089,Sunamganj Sadar,exact
+Sunamganj,Tahirpur Upazila,224853,BD609092,Tahirpur,exact
+Sylhet,Airport Thana,92529,BD609162,Sylhet Sadar,parent
+Sylhet,Balaganj Upazila,123352,BD609108,Balaganj,exact
+Sylhet,Beanibazar Upazila,260603,BD609117,Beani Bazar,spelling
+Sylhet,Bishwanath Upazila,237213,BD609120,Bishwanath,exact
+Sylhet,Companiganj Upazila,192350,BD609127,Companiganj,exact
+Sylhet,Dakkhin Surma Thana,41516,BD609131,Dakshin Surma,spelling
+Sylhet,Dakkhin Surma Upazila,262787,BD609131,Dakshin Surma,spelling
+Sylhet,Fenchuganj Upazila,114293,BD609135,Fenchuganj,exact
+Sylhet,Golapganj Upazila,331358,BD609138,Golabganj,spelling
+Sylhet,Gowainghat Upazila,355979,BD609141,Gowainghat,exact
+Sylhet,Jaintapur Upazila,200128,BD609153,Jaintiapur,spelling
+Sylhet,Jalalabad Thana,31685,BD609162,Sylhet Sadar,parent
+Sylhet,Kanaighat Upazila,317578,BD609159,Kanaighat,exact
+Sylhet,Kotwali Thana,263078,BD609162,Sylhet Sadar,parent
+Sylhet,Moglabazar Thana,21639,BD609131,Dakshin Surma,parent
+Sylhet,Osmaninagar Upazila,216412,BD609108,Balaganj,parent
+Sylhet,Shahparan Thana,82392,BD609162,Sylhet Sadar,parent
+Sylhet,Sylhet Sadar Upazila,444914,BD609162,Sylhet Sadar,exact
+Sylhet,Zakiganj Upazila,267317,BD609194,Zakiganj,exact
+Tangail,Basail Upazila,188936,BD309309,Basail,exact
+Tangail,Bhuanpur Upazila,217327,BD309319,Bhuapur,spelling
+Tangail,Delduar Upazila,218745,BD309323,Delduar,exact
+Tangail,Dhanbari Upazila,189129,BD309325,Dhanbari,exact
+Tangail,Ghatail Upazila,448742,BD309328,Ghatail,exact
+Tangail,Gopalpur Upazila,270333,BD309338,Gopalpur,exact
+Tangail,Kalihati Upazila,449477,BD309347,Kalihati,exact
+Tangail,Madhupur Upazila,337393,BD309357,Madhupur,exact
+Tangail,Mirzapur Upazila,474658,BD309366,Mirzapur,exact
+Tangail,Nagarpur Upazila,319296,BD309376,Nagarpur,exact
+Tangail,Sakhipur Upazila,322345,BD309385,Sakhipur,exact
+Tangail,Tangail Sadar Upazila,601227,BD309395,Tangail Sadar,exact
+Thakurgaon,Baliadangi Upazila,208350,BD559408,Baliadangi,exact
+Thakurgaon,Haripur Upazila,159516,BD559451,Haripur,exact
+Thakurgaon,Pirganj Upazila,265159,BD559482,Pirganj,exact
+Thakurgaon,Ranishankail Upazila,244078,BD559486,Ranisankail,spelling
+Thakurgaon,Thakurgaon Sadar Upazila,656792,BD559494,Thakurgaon Sadar,exact

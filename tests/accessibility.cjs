@@ -1,69 +1,111 @@
 'use strict';
+// Browser checks for the Access study page (population access, BBS Census 2022 x DGHS).
+//   BASE_URL=http://127.0.0.1:8000 node tests/accessibility.cjs
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { chromium } = require('playwright');
+const TILE_HOSTS = /(^|\.)(tile\.openstreetmap\.org|tile\.opentopomap\.org)$/;
+const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=', 'base64');
+
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || (fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : chromium.executablePath()), headless: true, args: ['--no-sandbox'] });
+  const base = process.env.BASE_URL || 'http://127.0.0.1:8000';
+  const summary = JSON.parse(fs.readFileSync('data/access/summary.json', 'utf8'));
+  const districts = JSON.parse(fs.readFileSync('data/access/areas-district.json', 'utf8')).areas;
+  const upazilas = JSON.parse(fs.readFileSync('data/access/areas-upazila.json', 'utf8')).areas;
   try {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    const context = await browser.newContext({ viewport: { width: 1280, height: 1000 }, acceptDownloads: true });
+    const page = await context.newPage();
     const external = [], errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.route('**/*', (route) => {
+    page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
+    await context.route('**/*', (route) => {
       const url = new URL(route.request().url());
-      // Basemap tiles are the only allowed external requests; answer them with a blank PNG.
-      if (/(^|\.)(tile\.openstreetmap\.org|tile\.opentopomap\.org)$/.test(url.hostname)) return route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=', 'base64') });
-      if (!['127.0.0.1','localhost'].includes(url.hostname)) { external.push(url.href); return route.abort(); }
+      if (TILE_HOSTS.test(url.hostname)) return route.fulfill({ contentType: 'image/png', body: BLANK_PNG });
+      if (!['127.0.0.1', 'localhost'].includes(url.hostname)) { external.push(url.href); return route.abort(); }
       return route.continue();
     });
-    const data = JSON.parse(fs.readFileSync('data/dghs/index.json','utf8'));
-    const flagged = new Set(JSON.parse(fs.readFileSync('data/atlas/location-quality.json','utf8')).flagged_ids.map(String));
-    const expected = (types) => { const rows=data.records.filter((r) => String(r.is_active)==='1' && types.includes(r.facility_type_name)); return { total: rows.length.toLocaleString('en-BD'), mapped: rows.filter((r) => r.coordinateStatus==='published' && !flagged.has(String(r.id)) && r.lat!=null && r.lon!=null && Number.isFinite(Number(r.lat)) && Number.isFinite(Number(r.lon))).length.toLocaleString('en-BD') }; };
-    const community=expected(['Community Clinic']), union=expected(['Union Health Sub Center','Union Health Center','Union Health & Family Welfare Center (UH&FWC)']);
-    const base = process.env.BASE_URL || 'http://127.0.0.1:8000';
     await page.goto(base + '/accessibility.html');
-    await page.waitForFunction((value) => document.querySelector('#access-total').textContent === value, community.total);
-    assert.equal(await page.locator('#access-mapped').textContent(), community.mapped);
-    assert.match(await page.locator('#access-status').textContent(), /points shown/);
-    // Reference layers: grey basemap plus division and district outlines by default; unions load on demand.
+    await page.evaluate(() => localStorage.removeItem('shasthopath-language'));
+    await page.reload();
+    await page.waitForSelector('#atlas-content:not([hidden])', { timeout: 30000 });
+    await page.waitForFunction((n) => document.querySelectorAll('#access-map .leaflet-overlay-pane path.leaflet-interactive').length === n, districts.length, { timeout: 30000 });
+
+    // Headline numbers come straight from summary.json.
+    const nat = summary.national.access;
+    assert.equal(await page.textContent('#k-public5'), nat.public_hospital.within['5'].toFixed(1) + '%');
+    assert.equal(await page.textContent('#k-primary2'), nat.primary_care.within['2'].toFixed(1) + '%');
+    assert.equal((await page.textContent('#k-cc')).replace(/,/g, ''), String(summary.national.union_people_per_cc));
+
+    // Reference layers: grey basemap and division outlines above the fills.
     await page.waitForSelector('#access-map .light-basemap-tiles img.leaflet-tile', { state: 'attached' });
-    await page.waitForFunction(() => document.querySelectorAll('#access-map .leaflet-boundaries-pane path').length === 8 + 64);
-    await page.check('#access-map input[data-boundary="union"]');
-    await page.waitForSelector('#access-map .leaflet-boundaries-pane canvas');
-    await page.uncheck('#access-map input[data-boundary="union"]');
-    await page.uncheck('#access-map input[data-boundary="district"]');
     await page.waitForFunction(() => document.querySelectorAll('#access-map .leaflet-boundaries-pane path').length === 8);
-    await page.selectOption('#access-map .map-layer-control select', 'none');
-    await page.waitForFunction(() => !document.querySelector('#access-map img.leaflet-tile'));
-    await page.selectOption('#access-tier', 'union');
-    assert.equal(await page.locator('#access-total').textContent(), union.total);
-    assert.equal(await page.locator('#access-mapped').textContent(), union.mapped);
+    assert.equal(await page.$eval('#access-map .leaflet-boundaries-pane', (p) => getComputedStyle(p).zIndex), '450');
+
+    // Ranking: 20 least-served districts for the default measure, worst first.
+    const worst = [...districts].sort((a, b) => a.within.public_hospital['5'] - b.within.public_hospital['5'])[0];
+    assert.equal(await page.locator('#c-rank .chart-observation').count(), 20);
+    assert.equal(Number(await page.locator('#c-rank .chart-observation').first().getAttribute('data-value')), worst.within.public_hospital['5']);
+
+    // Selecting an area fills the detail panel.
+    await page.fill('#a-search', worst.name); await page.dispatchEvent('#a-search', 'change');
+    await page.waitForFunction((name) => document.querySelector('#a-detail h3')?.textContent === name, worst.name);
+    assert.equal(await page.locator('#a-detail .access-within tr').count(), 6);
+
+    // Facility overlay follows the measure.
+    await page.check('#a-points');
+    await page.waitForFunction(() => Number(document.querySelector('#a-points').dataset.count) > 0);
+    assert.equal(Number(await page.getAttribute('#a-points', 'data-count')), nat.public_hospital.points);
+
+    // Analysis sections.
+    assert.ok(await page.$('#c-lorenz svg'));
+    assert.equal(await page.locator('#c-lorenz svg path[fill="none"]').count(), 5);
+    assert.equal(await page.locator('#t-gini tr').count(), 5);
+    assert.equal(await page.locator('#t-moran tr').count(), 4);
+    assert.equal(await page.locator('#c-social .chart-observation').count(), upazilas.length);
+    assert.equal(await page.locator('#t-corr tr').count(), 4);
+    assert.equal(await page.locator('#t-tiers tr').count(), 9);
+
+    // Cluster map: upazila level, categorical legend.
+    await page.click('#t-moran tr:first-child button');
+    await page.waitForFunction((n) => document.querySelectorAll('#access-map .leaflet-overlay-pane path.leaflet-interactive').length === n, upazilas.length, { timeout: 30000 });
+    assert.match(await page.textContent('#access-map .choropleth-legend'), /Low–low cluster/);
+    const ll = upazilas.filter((u) => u.lisa.within5_public_hospital === 'LL').length;
+    assert.match(await page.textContent('#lisa-low'), new RegExp(`${ll} upazilas`));
+
+    // Union level loads on demand and draws on a canvas.
+    await page.selectOption('#a-level', 'union');
+    await page.waitForFunction(() => document.querySelector('#access-map canvas') && !document.querySelector('#access-map.loading'), null, { timeout: 60000 });
+
+    // CSV export.
     const pending = page.waitForEvent('download');
-    await page.click('#access-download');
+    await page.click('#d-upazila');
     const file = await pending;
-    assert.match(file.suggestedFilename(), /dghs_union_division_counts\.csv/);
-    const division = data.records.find((r) => String(r.is_active) === '1' && r.facility_type_name === 'Community Clinic').division_name;
-    await page.selectOption('#access-tier', 'community');
-    await page.selectOption('#access-division', division);
-    const localCount = data.records.filter((r) => String(r.is_active) === '1' && r.facility_type_name === 'Community Clinic' && r.division_name === division).length.toLocaleString('en-BD');
-    assert.equal(await page.locator('#access-total').textContent(), localCount);
-    assert.equal(await page.locator('#access-divisions tr').count(), 1);
-    assert.equal(Number(await page.locator('#access-count-chart .chart-observation').getAttribute('data-value')),Number(localCount.replaceAll(',','')));
-    assert.equal(await page.locator('#access-completeness-chart .chart-observation').count(),1);
-    const areaDownload = page.waitForEvent('download');
-    await page.click('#access-download');
-    const areaFile = await areaDownload;
-    const areaCSV = fs.readFileSync(await areaFile.path(),'utf8');
-    assert.match(areaCSV, /selected_division/);
-    assert(areaCSV.includes(division));
+    assert.equal(file.suggestedFilename(), 'bangladesh-health-access-upazila.csv');
+    const text = fs.readFileSync(await file.path(), 'utf8');
+    assert.equal(text.trim().split('\n').length, upazilas.length + 1);
+
+    // Bangla.
+    await page.click('#language');
+    assert.equal(await page.getAttribute('html', 'lang'), 'bn');
+    assert.equal(await page.textContent('h1'), 'জনগণের স্বাস্থ্যসেবা প্রবেশগম্যতা');
+    assert.match(await page.textContent('#k-public5'), /[০-৯]/);
+    assert.match(await page.textContent('#access-map .map-layer-control'), /বেসম্যাপ/);
+
+    // Narrow screens: no horizontal overflow.
     await page.setViewportSize({ width: 390, height: 844 });
+    await page.waitForTimeout(500);
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2));
-    assert(await page.locator('nav[aria-label="Main navigation"] a[href="./analysis.html"]').isVisible());
+
     assert.deepEqual(external, []);
     assert.deepEqual(errors, []);
-    await page.route('**/data/dghs/index.json', (route) => route.fulfill({ status: 503, body: 'unavailable' }));
-    await page.reload();
-    await page.waitForFunction(() => document.querySelector('#access-status').classList.contains('error'));
-    assert(await page.locator('#access-download').isDisabled());
-    console.log('PASS: DGHS tiers/area filters, narrow layout, no external sources, unavailable data handling');
+
+    // Missing data is reported, not shown as an empty page.
+    const broken = await context.newPage();
+    await broken.route('**/data/access/summary.json', (route) => route.fulfill({ status: 503, body: 'unavailable' }));
+    await broken.goto(base + '/accessibility.html');
+    await broken.waitForSelector('#atlas-status.atlas-error');
+    assert.ok(await broken.$('#atlas-content[hidden]'));
+    console.log('PASS: Access study (BBS population x DGHS): KPIs, layers, ranking, detail, points, inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
   } finally { await browser.close(); }
-})().catch((error) => { console.error(error); process.exitCode = 1; });
+})();
