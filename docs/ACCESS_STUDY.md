@@ -39,23 +39,76 @@ Spot checks: district (Thakurgaon 1,533,895) and all five Thakurgaon upazilas ma
 
 | Facility class | Mapped points | People ≤ 2 km | ≤ 5 km | ≤ 10 km | ≤ 20 km | Mean km |
 |---|---:|---:|---:|---:|---:|---:|
-| Government hospitals | 510 | 11.8% | 40.1% | 81.9% | 98.8% | 6.65 |
-| Any hospital | 4,559 | 31.8% | 68.2% | 95.1% | 99.6% | 4.07 |
-| Primary care | 11,880 | 65.7% | 94.5% | 98.9% | 99.7% | 2.07 |
-| Upazila health complexes | 387 | 5.1% | 24.5% | 68.9% | 98.4% | 8.33 |
-| Blood banks | 143 | 8.0% | 15.4% | 22.8% | 37.7% | 31.17 |
+| Government hospitals | 510 | 12.0% | 40.7% | 82.5% | 99.2% | 6.51 |
+| Any hospital | 4,559 | 32.3% | 69.0% | 95.8% | 99.9% | 3.92 |
+| Primary care | 11,880 | 66.4% | 95.4% | 99.7% | 100.0% | 1.92 |
+| Upazila health complexes | 387 | 5.2% | 24.9% | 69.7% | 98.8% | 8.18 |
+| Blood banks | 143 | 8.2% | 15.8% | 23.3% | 37.9% | 31.06 |
+
+*Grid correction (November 2026):* the OSM country outline used for the 1 km grid includes territorial sea. Cells outside every union polygon were previously assigned to the nearest union and given population, which put about 2% of people at sea (91% of Patenga's). Those cells are now dropped (167,700 → 139,750 cells). People-based shares rose by up to 0.9 points; land-based shares rose more (government hospital within 10 km of land: 60.7% → 70.9%).
 
 - **Inequality:** the upazila Gini is 0.36 for government hospitals per person, 0.40 for all hospitals, 0.26 for primary care and 0.58 for government beds. District Gini values are lower (0.18–0.30), so district averages hide much of the inequality.
-- **Clustering:** Moran's I is 0.53 for people within 5 km of a government hospital and 0.69 for primary care per person. Low–low clusters for hospital access appear in the Chittagong Hill Tracts, the Sylhet–Netrokona haor belt and the north-west.
+- **Clustering:** Moran's I is 0.54 for people within 5 km of a government hospital and 0.69 for primary care per person. Low–low clusters for hospital access appear in the Chittagong Hill Tracts, the Sylhet–Netrokona haor belt and the north-west.
 - **Primary care:** there are 9,004 union residents per listed community clinic nationally. 207 of 483 upazilas with unions have more than 9,000 per clinic.
 
 ## People versus land
 
-The page also keeps the area-based view of the former Distance page (*Basis → Land*; data in `data/atlas/`). The *People versus land* chart plots, for each class, the share of people and the share of land within 0.5–40 km. People sit nearer to facilities than land does: the median person is 6.0 km from a government hospital, the median square kilometre of land 8.5 km, because forests, rivers, chars and hills hold land but few people. Land figures answer a geographic question (how evenly is the network spread over the territory); people figures answer the access question.
+The page also keeps the area-based view of the former Distance page (*Basis → Land*; data in `data/atlas/`). The *People versus land* chart plots, for each class, the share of people and the share of land within 0.5–40 km. People sit nearer to facilities than land does: the median person is 5.9 km from a government hospital, the median square kilometre of land 7.6 km, because forests, rivers, chars and hills hold land but few people. Land figures answer a geographic question (how evenly is the network spread over the territory); people figures answer the access question.
+
+## Travel time
+
+Inputs come from `scripts/gee/bangladesh_access_inputs.js`, run in Google Earth Engine and exported at 1 km in EPSG:32646. All exports are clipped to the geoBoundaries v6 ADM0 outline of Bangladesh (outside = no data), so routes cannot pass through India or Myanmar.
+
+1. **Friction.** Malaria Atlas Project 2019 friction surfaces, motorized and walking-only, in minutes per metre (Weiss et al., 2020), read from the MAP catalogue in Earth Engine. The older `Oxford/MAP/friction_surface_2019` copy is deprecated and would not export.
+2. **Water.** The surface has no value on the widest river reaches and the sea, which would cut off Sandwip, Hatiya and the Meghna chars. No-data cells inside Bangladesh, and estuary sea within 10 km of land (89.6–92.0° E, 21.0–23.3° N, away from Tripura), take 0.006 min/m (about 10 km/h by boat) with no waiting time.
+3. **Routes.** Least-time accumulation from every usable facility of a class (scikit-image `MCP_Geometric`, 8 neighbours). Points on no-data cells snap to the nearest valid cell within 2 km. Motorized for hospitals, UHCs and blood banks; walking for primary care. The population grid is sampled at the result.
+
+| Facilities | Travel | Median min | ≤ 30 min | ≤ 60 min | ≤ 120 min |
+|---|---|---:|---:|---:|---:|
+| Any hospital | motorized | 7.2 | 94.2% | 98.9% | 99.8% |
+| Government hospitals | motorized | 12.5 | 89.0% | 98.4% | 99.8% |
+| Upazila health complexes | motorized | 16.1 | 87.0% | 98.4% | 99.8% |
+| Blood banks | motorized | 49.6 | 33.2% | 58.6% | 90.8% |
+| Primary care | walking | 17.0 | 74.5% | 92.9% | 99.3% |
+
+About 9,000 people remain on cells with no route. The least-served upazilas within 60 minutes of any hospital are Barkal, Belai Chhari, Baghai Chhari, Langadu and Jurai Chhari (Rangamati), Thanchi and Ruma (Bandarban), and Mithamain and Itna (haor basin).
+
+**Limits.** The friction surface describes 2019 roads, so later roads and bridges (including the Padma Bridge, 2022) are missing. Ferry waits are ignored, so island times are optimistic. At 1 km a walk across one cell takes about 12 minutes, so walking times under about 15 minutes are coarse.
+
+## Flood-disrupted access
+
+Flooding differs by place and year, so the study uses floods observed from satellites rather than one design flood.
+
+- **2000–2018:** Global Flood Database (`GLOBAL_FLOOD_DB/MODIS_EVENTS/V1`; Tellman et al., 2021). The maximum extent of all events that the database mapped over Bangladesh in each year, at 250 m.
+- **2019–2025:** Sentinel-1 VH (Torres et al., 2012) change detection, following the UN-SPIDER recommended practice: after/before ratio > 1.25 against a January–March reference, VH after < −18 dB, permanent water (JRC GSW seasonality ≥ 10 months; Pekel et al., 2016) and HydroSHEDS slopes > 5° removed, small isolated patches dropped. Yearly bands combine monthly medians from April to October (250 m). The eight named events use the minimum composite within each event window (100 m).
+- **Named events:** July–August 2019, June–August 2020, May 2022, June 2022, June 2024, August 2024, October 2024 and May–June 2025, with dates from ReliefWeb, UN Bangladesh, the Dartmouth Flood Observatory and news reports (links in `scripts/build_travel.py`).
+- **Normal monsoon water.** Compared only with the dry season, every event map was dominated by the haor basin, which is under water every monsoon. For example, the August 2024 eastern flash flood ranked Sunamganj and Kishoreganj above Feni. For the named events, pixels flooded in at least 4 of the other 6 Sentinel-1 years are therefore removed. The count is leave-one-out, so a flood cannot hide itself. After this step the events fall where they were reported: Feni and Cumilla in August 2024, Sherpur and Netrokona in October 2024, Jamalpur and Gaibandha in 2019, Sylhet division in 2022. `surface_water_km2` keeps the area before removal. The yearly maps keep all water.
+
+**Scenario.** A 1 km cell counts as flooded when at least half of it is flooded. A facility whose own flood pixel is flooded is closed. Flooded cells take max(friction, 0.04 min/m), about 1.5 km/h of wading. Travel time is recomputed, and a person "loses access" when they were within the limit before the flood (60 min for hospitals, 60 min walking for primary care) but not during it.
+
+| Flood | Flooded beyond normal monsoon (km²) | People in flooded cells | Hospitals flooded | Lose hospital ≤ 60 min |
+|---|---:|---:|---:|---:|
+| Jul–Aug 2019 | 12,485 | 13.7 M | 110 | 3.0 M |
+| Jun–Aug 2020 | 26,010 | 28.4 M | 197 | 8.4 M |
+| May 2022 | 1,185 | 1.1 M | 23 | 0.2 M |
+| Jun 2022 | 6,297 | 7.0 M | 47 | 2.0 M |
+| Jun 2024 | 5,097 | 4.7 M | 42 | 1.3 M |
+| Aug 2024 | 3,941 | 4.0 M | 77 | 0.4 M |
+| Oct 2024 | 1,162 | 1.1 M | 17 | 0.1 M |
+| May–Jun 2025 | 1,095 | 1.1 M | 19 | 0.1 M |
+
+Across the 26 yearly maps, 34.7% of people live in a 1 km cell flooded at least once, 12.8% in five or more years and 6.7% in ten or more.
+
+**Limits.**
+- **Eras differ.** The two eras are not comparable: MODIS years include only database events at 250 m, while Sentinel-1 years map every month.
+- **Revisit gaps.** Sentinel-1 revisits every 6–12 days (12 days after Sentinel-1B failed in December 2021), so short flash floods can be missed.
+- **Rice fields.** Some flooded rice fields remain in the maps.
+- **Wading assumption.** The scenario ignores boats, raised roads and embankments, so losses are a stress test of where the network is fragile, not a count of people cut off.
+- **Upper bounds.** Yearly losses are upper bounds, because a whole year's floods are applied at once.
 
 ## Limitations
 
-- **Not travel time:** distances are straight lines, not roads, rivers, ferries or seasonal flooding.
+- **Straight lines unless stated:** the distance measures are straight lines; travel time and floods are modelled as described above.
 - **Shares are lower bounds:** excluded or missing coordinates remove some real facilities, so the shares within a distance are underestimated.
 - **Population spread:** people are assumed evenly spread within each union, and city-corporation ward populations are estimated by area.
 - **Boundary mismatch:** 2022 census units are placed on 2015 boundaries. The 14 approximate metropolitan thanas affect only within-city detail.
@@ -71,6 +124,14 @@ Bangladesh Bureau of Statistics. (2024–2025). *Population and housing census 2
 
 Islam, K. (2017). Community clinic: Combining care and empowering community: A story to share from Bangladesh. *International Journal of Integrated Care, 17*(5), A311. https://doi.org/10.5334/ijic.3693
 
+Pekel, J.-F., Cottam, A., Gorelick, N., & Belward, A. S. (2016). High-resolution mapping of global surface water and its long-term changes. *Nature, 540*(7633), 418–422. https://doi.org/10.1038/nature20584
+
 Runfola, D., et al. (2020). geoBoundaries: A global database of political administrative boundaries. *PLOS ONE, 15*(4), e0231866. https://doi.org/10.1371/journal.pone.0231866
+
+Tellman, B., Sullivan, J. A., Kuhn, C., Kettner, A. J., Doyle, C. S., Brakenridge, G. R., Erickson, T. A., & Slayback, D. A. (2021). Satellite imaging reveals increased proportion of population exposed to floods. *Nature, 596*(7870), 80–86. https://doi.org/10.1038/s41586-021-03695-w
+
+Torres, R., Snoeij, P., Geudtner, D., Bibby, D., Davidson, M., Attema, E., Potin, P., Rommen, B., Floury, N., Brown, M., Navas Traver, I., Deghaye, P., Duesmann, B., Rosich, B., Miranda, N., Bruno, C., L'Abbate, M., Croci, R., Pietropaolo, A., Huchler, M., & Rostan, F. (2012). GMES Sentinel-1 mission. *Remote Sensing of Environment, 120*, 9–24. https://doi.org/10.1016/j.rse.2011.05.028
+
+Weiss, D. J., Nelson, A., Vargas-Ruiz, C. A., Gligorić, K., Bavadekar, S., Gabrilovich, E., Bertozzi-Villa, A., Rozier, J., Gibson, H. S., Shekel, T., Kamath, C., Lieber, A., Schulman, K., Shao, Y., Qarkaxhija, V., Nandi, A. K., Keddie, S. H., Rumisha, S., Amratia, P., … Gething, P. W. (2020). Global maps of travel time to healthcare facilities. *Nature Medicine, 26*(12), 1835–1838. https://doi.org/10.1038/s41591-020-1059-1
 
 World Health Organization. (2021, October 25). *Bangladesh: Community health workers at the heart of a stronger health system and the fight against COVID-19*. https://extranet.who.int/uhcpartnership/story/bangladesh-community-health-workers-heart-stronger-health-system-and-fight-against-covid-19

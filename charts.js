@@ -146,6 +146,35 @@
       function closestX(points, value) { let best = points[0]; for (const point of points) if (Math.abs(point[0] - value) < Math.abs(best[0] - value)) best = point; return best[0]; }
       wrap(options.axisLabel || L('Value', 'মান'), Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, width / 2, bottom + 34 + i * 13, { 'text-anchor': 'middle', 'font-size': 11 }));
       text(svg, options.yLabel || '', 0, 0, { transform: `translate(12 ${(top + bottom) / 2}) rotate(-90)`, 'text-anchor': 'middle', 'font-size': 11 });
+    } else if (kind === 'columns') {
+      // Vertical columns for a time series: rows {label, value, color?, display?, detail?}; options.legend [{label, color}],
+      // options.labelEvery (x labels), yLabel, axisLabel, digits, maximum.
+      const legend = options.legend || [], height = 300 + (legend.length ? 22 : 0), left = 54, right = width - 16, top = 18, bottom = 238;
+      const maximum = options.maximum ?? nice(Math.max(...rows.map((r) => r.value), 0));
+      svg = canvas(height);
+      for (let i = 0; i <= 4; i++) {
+        const y = bottom - (bottom - top) * i / 4, value = maximum * i / 4;
+        svg.append(element('line', { x1: left, x2: right, y1: y, y2: y, stroke: '#e1e9e3' }));
+        text(svg, fmt(value, options.digits ?? (maximum < 10 ? 1 : 0)), left - 6, y + 4, { 'text-anchor': 'end', 'font-size': 10 });
+      }
+      const step = (right - left) / rows.length, bar = Math.max(2, step - 2), every = options.labelEvery || Math.ceil(rows.length / Math.max(1, Math.floor((right - left) / 34)));
+      rows.forEach((row, i) => {
+        const x = left + i * step + (step - bar) / 2, h = maximum > 0 ? Math.max(0, Math.min(1, row.value / maximum)) * (bottom - top) : 0;
+        const value = row.display ?? fmt(row.value, options.digits ?? 0);
+        const group = element('g', { class: 'chart-observation', 'data-label': row.label, 'data-value': row.value });
+        group.append(element('title', {}, `${row.label}: ${value}${row.detail ? '; ' + row.detail : ''}`));
+        group.append(element('rect', { x: left + i * step, y: top, width: step, height: bottom - top, fill: 'transparent' }));
+        group.append(element('rect', { x, y: bottom - h, width: bar, height: h, rx: Math.min(2, bar / 2), fill: row.color || '#176b58' }));
+        svg.append(group);
+        if (i % every === 0 || i === rows.length - 1 && (rows.length - 1) % every > every / 2) text(svg, row.label, x + bar / 2, bottom + 15, { 'text-anchor': 'middle', 'font-size': 10 });
+      });
+      wrap(options.axisLabel || '', Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, (left + right) / 2, bottom + 34 + i * 13, { 'text-anchor': 'middle', 'font-size': 11 }));
+      text(svg, options.yLabel || '', 0, 0, { transform: `translate(12 ${(top + bottom) / 2}) rotate(-90)`, 'text-anchor': 'middle', 'font-size': 11 });
+      legend.forEach((item, i) => {
+        const x = left + i * Math.max(150, (right - left) / legend.length), y = bottom + 56;
+        svg.append(element('rect', { x, y, width: 12, height: 10, rx: 2, fill: item.color }));
+        text(svg, item.label, x + 17, y + 9, { 'font-size': 10 });
+      });
     } else if (kind === 'xy') {
       // General scatter: options.xLabel, yLabel, xmax, ymax, digits, refX/refY {value,label}; rows {label, x, y, color?, detail?}.
       const height = 340, left = 50, right = width - 20, top = 24, bottom = height - 56;
@@ -201,7 +230,7 @@
     const clean = kind === 'lines'
       ? rows.filter((r) => Array.isArray(r.points) && r.points.length > 1 && r.points.every((p) => Number.isFinite(p[0]) && Number.isFinite(p[1])))
       : kind === 'xy' ? rows.filter((r) => Number.isFinite(r.x) && Number.isFinite(r.y))
-      : rows.filter((r) => kind === 'bars' ? Number.isFinite(r.value) && r.value >= 0 : Number.isFinite(r.x) && r.x >= 0 && Number.isFinite(r.y) && r.y >= 0 && r.y <= 100);
+      : rows.filter((r) => kind === 'bars' || kind === 'columns' ? Number.isFinite(r.value) && r.value >= 0 : Number.isFinite(r.x) && r.x >= 0 && Number.isFinite(r.y) && r.y >= 0 && r.y <= 100);
     let state = states.get(target);
     if (!state) {
       state = {}; states.set(target, state);
@@ -226,5 +255,5 @@
     if (!headers || new Set(headers).size !== headers.length || rows.some((r) => r.length !== headers.length)) throw new Error('Invalid CSV columns');
     return rows.map((r) => Object.fromEntries(headers.map((h, i) => [h, r[i]])));
   }
-  window.HealthCharts = { bars: (target, rows, options) => render('bars', target, rows, options), scatter: (target, rows, options) => render('scatter', target, rows, options), lines: (target, rows, options) => render('lines', target, rows, options), xy: (target, rows, options) => render('xy', target, rows, options), csv };
+  window.HealthCharts = { bars: (target, rows, options) => render('bars', target, rows, options), scatter: (target, rows, options) => render('scatter', target, rows, options), lines: (target, rows, options) => render('lines', target, rows, options), xy: (target, rows, options) => render('xy', target, rows, options), columns: (target, rows, options) => render('columns', target, rows, options), csv };
 })();

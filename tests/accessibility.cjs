@@ -94,6 +94,42 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     await page.selectOption('#a-basis', 'people');
     await page.waitForFunction(() => document.querySelector('#a-metric').value === 'within5_public');
 
+    // Travel time: national table and curves from travel.json; travel basis on the map.
+    const travel = JSON.parse(fs.readFileSync('data/access/travel.json', 'utf8'));
+    assert.equal(await page.locator('#t-travel tr').count(), 5);
+    assert.equal(await page.locator('#t-travel tr').first().locator('td').nth(1).textContent(), travel.national.any_hospital.median_min.toFixed(1));
+    assert.equal(await page.locator('#c-travel svg path[fill="none"]').count(), 4);
+    await page.selectOption('#a-basis', 'travel');
+    await page.waitForFunction(() => document.querySelector('#a-metric').value === 'tmean_any');
+    const tp = travel.per_area.district, tmean = tp.travel.any_hospital.mean_min;
+    const slowest = Math.max(...tmean);
+    assert.equal(Number(await page.locator('#c-rank .chart-observation').first().getAttribute('data-value')), slowest);
+    const slowName = districts.find((d) => d.pcode === tp.pcodes[tmean.indexOf(slowest)]).name;
+    await page.fill('#a-search', slowName); await page.dispatchEvent('#a-search', 'change');
+    await page.waitForFunction(() => /Travel time \(people\)/.test(document.querySelector('#a-detail').textContent));
+    const travelCsv = page.waitForEvent('download');
+    await page.click('#a-export');
+    assert.equal((await travelCsv).suggestedFilename(), 'bangladesh-health-travel-floods-district.csv');
+
+    // Floods: yearly charts (26 years), named-event table, event selector on the map.
+    const floods = JSON.parse(fs.readFileSync('data/access/floods.json', 'utf8'));
+    assert.equal(floods.years.length, 26);
+    assert.equal(await page.locator('#c-flood-years .chart-observation').count(), 26);
+    assert.equal(await page.locator('#c-flood-lost .chart-observation').count(), 26);
+    assert.equal(await page.locator('#t-events tr').count(), floods.events.length);
+    assert.ok(floods.events.every((e) => e.flooded_km2 <= e.surface_water_km2));
+    const ev = floods.events[5];
+    await page.click(`#t-events tr:nth-child(6) .flood-map-btn`);
+    await page.waitForFunction((id) => document.querySelector('#a-flood').value === id && !document.querySelector('#access-map.loading'), ev.id);
+    assert.equal(await page.$eval('#a-basis', (e) => e.value), 'floods');
+    assert.equal(await page.$eval('#a-flood-wrap', (e) => e.hidden), false);
+    const fd = floods.per_area.district, lostTop = Math.max(...fd.pcodes.map((p, i) => fd[ev.id].lost_hospital[i] / districts.find((d) => d.pcode === p).population * 100));
+    assert.ok(Math.abs(Number(await page.locator('#c-rank .chart-observation').first().getAttribute('data-value')) - lostTop) < 1e-9);
+    await page.selectOption('#a-metric', 'f_years');
+    assert.equal(await page.$eval('#a-flood-wrap', (e) => e.hidden), true);
+    await page.selectOption('#a-basis', 'people');
+    await page.waitForFunction(() => document.querySelector('#a-metric').value === 'within5_public');
+
     // Cluster map: upazila level, categorical legend.
     await page.click('#t-moran tr:first-child button');
     await page.waitForFunction((n) => document.querySelectorAll('#access-map .leaflet-overlay-pane path.leaflet-interactive').length === n, upazilas.length, { timeout: 30000 });
@@ -134,6 +170,6 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     await broken.goto(base + '/accessibility.html');
     await broken.waitForSelector('#atlas-status.atlas-error');
     assert.ok(await broken.$('#atlas-content[hidden]'));
-    console.log('PASS: Access page (BBS population x DGHS): KPIs, layers, ranking, detail, points, people vs land curves, location quality, land basis + CSV, inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
+    console.log('PASS: Access page (BBS population x DGHS): KPIs, layers, ranking, detail, points, people vs land curves, location quality, land basis + CSV, travel time + CSV, floods (years, events, map selector), inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
   } finally { await browser.close(); }
 })();

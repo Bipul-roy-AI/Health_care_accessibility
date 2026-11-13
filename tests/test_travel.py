@@ -36,6 +36,19 @@ class Travel(unittest.TestCase):
         self.assertFalse(water_nw[5, 9])
         self.assertTrue(np.isnan(out_nw[5, 9]))
 
+    def test_seasonal_water_is_leave_one_out(self):
+        from rasterio.transform import from_origin
+        from build_travel import seasonal_water
+        t = from_origin(0, 1000, 100, 100)
+        years = {y: np.zeros((2, 2), bool) for y in range(2019, 2026)}
+        for y in (2019, 2020, 2021, 2022):
+            years[y][0, 0] = True                     # flooded in 4 years: normal monsoon water
+        for y in (2020, 2021, 2022):
+            years[y][0, 1] = True                     # 3 years only
+        self.assertTrue(seasonal_water(years, t, 2024, t, (2, 2))[0, 0])
+        self.assertFalse(seasonal_water(years, t, 2022, t, (2, 2))[0, 0])   # the event's own year does not count
+        self.assertFalse(seasonal_water(years, t, 2024, t, (2, 2))[0, 1])
+
     def test_snap_cells_moves_edge_points_to_valid_cells(self):
         from build_travel import snap_cells
         valid = np.ones((5, 5), bool)

@@ -17,3 +17,7 @@
 @media (max-width: 800px) { .access-kpis { grid-template-columns: 1fr 1fr; } }
 #atlas-main .analysis-table { position: relative; }
 .atlas-methods a { overflow-wrap: anywhere; }
+.flood-map-btn { min-height: 30px; padding: 3px 10px; font-size: 12px; }
+#t-events a { overflow-wrap: anywhere; }
+#c-flood-freq { margin-top: 18px; }
+@media (max-width: 800px) { #floods .analysis-table table, #travel .analysis-table table { min-width: 680px; } #t-events th[scope="row"] { min-width: 170px; } }

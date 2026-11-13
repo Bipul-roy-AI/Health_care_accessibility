@@ -41,6 +41,8 @@ WATER_MIN_PER_M = 0.006        # minutes per metre, about 10 km/h: boat, trawler
 COAST_BOX = (89.6, 21.0, 92.0, 23.3)   # lon/lat box of the estuary and offshore islands, clear of India and Myanmar
 TRIPURA_CUT = (91.3, 22.85)            # inside the box, north-east of this corner is too close to Tripura (India)
 COAST_REACH_CELLS = 10                 # sea cells used for crossings lie within 10 km of Bangladesh land
+SEASONAL_YEARS = 4             # event pixels flooded in >= 4 of the other 6 Sentinel-1 years are normal monsoon water
+SENTINEL_YEARS = range(2019, 2026)
 FLOODED_SHARE = 0.5            # a 1 km cell counts as flooded at >= 50 % flooded area
 MODES = {                      # class -> (friction band, limit in minutes)
     "any_hospital": ("motorized", 60),
@@ -143,6 +145,28 @@ def area_flood_fraction(flood_band, flood_transform, target_transform, target_sh
     return out
 
 
+def sentinel_years(flood_files):
+    """Sentinel-1 yearly bands (y2019..y2025) from whichever flood file holds them, with their grid."""
+    import rasterio
+    for path in flood_files:
+        with rasterio.open(path) as src:
+            names = list(src.descriptions)
+            if all(f"y{y}" in names for y in SENTINEL_YEARS):
+                return {y: src.read(names.index(f"y{y}") + 1) == 1 for y in SENTINEL_YEARS}, src.transform
+    return None, None
+
+
+def seasonal_water(years, year_transform, year, target_transform, target_shape):
+    """Pixels on the target grid flooded in >= SEASONAL_YEARS of the Sentinel-1 years other than `year`
+    (leave-one-out), i.e. water that comes back most monsoons rather than this flood."""
+    from rasterio.warp import Resampling, reproject
+    count = sum(v.astype(np.uint8) for y, v in years.items() if y != year)
+    dest = np.zeros(target_shape, np.uint8)
+    reproject(count, dest, src_transform=year_transform, src_crs="EPSG:32646", dst_transform=target_transform,
+              dst_crs="EPSG:32646", resampling=Resampling.nearest)
+    return dest >= SEASONAL_YEARS
+
+
 def build(ctx) -> dict:
     fr = read_raster(ctx["friction"])
     transform, shape = fr["transform"], fr["shape"]
@@ -222,6 +246,7 @@ def build(ctx) -> dict:
         per_level = {lv: defaultdict(dict) for lv in levels}
         years_flooded = np.zeros(len(weight))
         years_seen = np.zeros(len(weight))
+        s1_years, s1_transform = sentinel_years(flood_files)
         for path in flood_files:
             with rasterio.open(path) as src:
                 if src.crs is None or src.crs.to_epsg() != 32646:
@@ -233,6 +258,12 @@ def build(ctx) -> dict:
             for band_id in sorted(n for n in arrays if n and n[0] in "fy" and n[1:5].isdigit()):
                 is_year = band_id.startswith("y")
                 band = np.where(perm == 1, 0, arrays[band_id])
+                surface_km2 = None
+                if not is_year and s1_years is not None:
+                    # Events: keep only water beyond the normal monsoon extent.
+                    surface = area_flood_fraction(band, fl_transform, transform, shape)
+                    surface_km2 = round(float(((surface["flooded"] >= FLOODED_SHARE) & in_bd).sum()) * cell * cell / 1e6)
+                    band = np.where(seasonal_water(s1_years, s1_transform, int(band_id[1:5]), fl_transform, fl_shape), 0, band)
                 frac = area_flood_fraction(band, fl_transform, transform, shape)
                 flooded_cell = (frac["flooded"] >= FLOODED_SHARE) & in_bd   # land inside Bangladesh only
                 observed_share = float(frac["observed"][in_bd].mean())
@@ -263,6 +294,7 @@ def build(ctx) -> dict:
                           "sensor": "MODIS" if is_year and year <= 2018 else "Sentinel-1",
                           "coverage_pct": round(100 * observed_share, 1),
                           "flooded_km2": round(float(flooded_cell.sum()) * cell * cell / 1e6),
+                          **({"surface_water_km2": surface_km2} if surface_km2 is not None else {}),
                           "people_in_flooded_cells": round(float(weight[people_flooded].sum())),
                           "facilities_flooded": closed,
                           "people_losing_access": {k: round(float(weight[lost[k]].sum())) for k in MODES},
@@ -292,8 +324,9 @@ def build(ctx) -> dict:
         floods["assumptions"] = {"flooded_cell_share": FLOODED_SHARE, "wade_min_per_m": WADE_MIN_PER_M,
                                  "closed_if": "facility's own flood pixel is flooded",
                                  "loses_access": "within the limit normally, beyond it during the flood",
-                                 "years": "a year's map combines all of that year's floods, so access losses are an upper bound",
-                                 "events": "event maps keep the lowest radar backscatter in each event window and compare it with the January-March dry season, so they also count normal monsoon inundation and flooded rice fields; they show surface water during the event, not only the flood itself",
+                                 "year_losses": "a year's map combines all of that year's floods, so access losses are an upper bound",
+                                 "events": "event maps compare the lowest radar backscatter in each event window with the January-March dry season; water that also appears in at least 4 of the other 6 Sentinel-1 years (normal monsoon water: haors, beels, floodplain) is removed, so events show water beyond the usual monsoon extent. surface_water_km2 is the area before that step",
+                                 "years": "yearly maps keep all flood water, including normal monsoon inundation, so the haor basin counts as flooded almost every year",
                                  "wading": "everyone in a flooded cell is assumed to move at about 1.5 km/h; boats, raised roads and bridges are not modelled, so access losses are a stress test, not a count of people cut off",
                                  "eras": "2000-2018 MODIS (Global Flood Database, mapped events only) and 2019-2025 Sentinel-1 radar differ in resolution and detection; compare within an era"}
 

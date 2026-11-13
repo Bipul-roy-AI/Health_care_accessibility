@@ -118,13 +118,82 @@
       value: (a) => (a.area_km2 > 0 ? landPoints(a, 'primary_care') / a.area_km2 * 100 : NaN),
       en: 'Primary-care locations per 100 km²', bn: 'প্রতি ১০০ বর্গকিমিতে প্রাথমিক স্বাস্থ্যসেবা', note: ['Usable primary-care locations inside the area, per land area.', 'এলাকার ভেতরে ব্যবহারযোগ্য প্রাথমিক স্বাস্থ্যসেবার অবস্থান, ভূমির আয়তন অনুযায়ী।'] }
   );
+  // Travel time (Malaria Atlas Project friction, least-time routes) and floods (satellite flood maps 2000-2025): data/access/travel*.json, floods*.json.
+  const num = (v) => (v === null || v === undefined ? NaN : Number(v));
+  const tv = (level, pcode, k, field, t) => {
+    const d = state.data.travelLv[level], i = d?.idx.get(pcode);
+    if (i === undefined) return NaN;
+    return num(field === 'mean' ? d.travel[k].mean_min[i] : d.travel[k].within[t][i]);
+  };
+  const fv = (level, pcode, key) => { const d = state.data.floodLv[level], i = d?.idx.get(pcode); return i === undefined || !d[key] ? NaN : num(d[key][i]); };
+  const fe = (level, pcode, field) => { const d = state.data.floodLv[level], i = d?.idx.get(pcode), e = d?.[state.flood]; return i === undefined || !e || !e[field] ? NaN : num(e[field][i]); };
+  const MODE = { motorized: ['motorized', 'যান্ত্রিক যানবাহনে'], walking: ['walking', 'হেঁটে'] };
+  const tWithin = (k, t) => (a, level) => tv(level, a.pcode, k, 'within', t);
+  const TRAVEL_NOTE = ['Modelled minutes over the 2019 friction surface; people shares.', '২০১৯ সালের ঘর্ষণ পৃষ্ঠে আনুমানিক মিনিট; মানুষের অংশ।'];
+  MEASURES.push(
+    { id: 'tmean_any', basis: 'travel', klass: 'any_hospital', levels: ALL, digits: 1, ramp: 'amber', worse: 'high', value: (a, level) => tv(level, a.pcode, 'any_hospital', 'mean'),
+      en: 'Average minutes to the nearest hospital, motorized', bn: 'যান্ত্রিক যানবাহনে নিকটতম হাসপাতালের গড় সময় (মিনিট)', note: ['Population-weighted mean; people with no route are left out.', 'জনসংখ্যা-ভারিত গড়; যাদের পথ নেই তারা বাদ।'] },
+    { id: 'tmean_primary', basis: 'travel', klass: 'primary_care', levels: ALL, digits: 1, ramp: 'amber', worse: 'high', value: (a, level) => tv(level, a.pcode, 'primary_care', 'mean'),
+      en: 'Average walking minutes to primary care', bn: 'প্রাথমিক স্বাস্থ্যসেবায় হেঁটে যাওয়ার গড় সময় (মিনিট)', note: ['Population-weighted mean; people with no route are left out.', 'জনসংখ্যা-ভারিত গড়; যাদের পথ নেই তারা বাদ।'] },
+    { id: 't60_any', basis: 'travel', klass: 'any_hospital', levels: ALL, digits: 1, ramp: 'green', worse: 'low', value: tWithin('any_hospital', '60'),
+      en: 'People within 60 minutes of any hospital, motorized (%)', bn: 'যান্ত্রিক যানবাহনে যেকোনো হাসপাতাল থেকে ৬০ মিনিটের মধ্যে মানুষ (%)', note: TRAVEL_NOTE },
+    { id: 't60_public', basis: 'travel', klass: 'public_hospital', levels: ALL, digits: 1, ramp: 'green', worse: 'low', value: tWithin('public_hospital', '60'),
+      en: 'People within 60 minutes of a government hospital, motorized (%)', bn: 'যান্ত্রিক যানবাহনে সরকারি হাসপাতাল থেকে ৬০ মিনিটের মধ্যে মানুষ (%)', note: TRAVEL_NOTE },
+    { id: 't30_uhc', basis: 'travel', klass: 'uhc', levels: ALL, digits: 1, ramp: 'green', worse: 'low', value: tWithin('uhc', '30'),
+      en: 'People within 30 minutes of an upazila health complex, motorized (%)', bn: 'যান্ত্রিক যানবাহনে উপজেলা স্বাস্থ্য কমপ্লেক্স থেকে ৩০ মিনিটের মধ্যে মানুষ (%)', note: TRAVEL_NOTE },
+    { id: 't120_blood', basis: 'travel', klass: 'blood_bank', levels: ALL, digits: 1, ramp: 'green', worse: 'low', value: tWithin('blood_bank', '120'),
+      en: 'People within 2 hours of a listed blood bank, motorized (%)', bn: 'যান্ত্রিক যানবাহনে তালিকাভুক্ত ব্লাড ব্যাংক থেকে ২ ঘণ্টার মধ্যে মানুষ (%)', note: TRAVEL_NOTE },
+    { id: 't30_primary', basis: 'travel', klass: 'primary_care', levels: ALL, digits: 1, ramp: 'green', worse: 'low', value: tWithin('primary_care', '30'),
+      en: 'People within a 30-minute walk of primary care (%)', bn: 'প্রাথমিক স্বাস্থ্যসেবা থেকে ৩০ মিনিট হাঁটা দূরত্বে মানুষ (%)', note: TRAVEL_NOTE },
+    { id: 't60_primary', basis: 'travel', klass: 'primary_care', levels: ALL, digits: 1, ramp: 'green', worse: 'low', value: tWithin('primary_care', '60'),
+      en: 'People within a 60-minute walk of primary care (%)', bn: 'প্রাথমিক স্বাস্থ্যসেবা থেকে ৬০ মিনিট হাঁটা দূরত্বে মানুষ (%)', note: TRAVEL_NOTE },
+    { id: 'f_years', basis: 'floods', klass: null, levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most often flooded', 'সবচেয়ে বেশিবার প্লাবিত'], value: (a, level) => fv(level, a.pcode, 'years_flooded_mean'),
+      en: 'Years flooded, 2000–2025 (average per person, of 26)', bn: 'প্লাবিত বছর, ২০০০–২০২৫ (জনপ্রতি গড়, ২৬টির মধ্যে)',
+      note: ['How many of the 26 yearly flood maps cover each person\'s 1 km cell (at least half flooded). Mixes MODIS (2000–2018) and Sentinel-1 (2019–2025).', '২৬টি বার্ষিক বন্যার মানচিত্রের কতটিতে প্রত্যেকের ১ কিমি ঘর (অন্তত অর্ধেক) প্লাবিত। MODIS (২০০০–২০১৮) ও সেন্টিনেল-১ (২০১৯–২০২৫) মিশ্রিত।'] },
+    { id: 'f_ge5', basis: 'floods', klass: null, levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most often flooded', 'সবচেয়ে বেশিবার প্লাবিত'], value: (a, level) => fv(level, a.pcode, 'flooded_ge5_pct'),
+      en: 'People flooded in 5 or more of the 26 years (%)', bn: '২৬ বছরের মধ্যে ৫ বা বেশি বছর প্লাবিত মানুষ (%)',
+      note: ['Share of people whose 1 km cell was at least half flooded in five or more yearly maps.', 'যাদের ১ কিমি ঘর অন্তত ৫টি বার্ষিক মানচিত্রে অর্ধেক বা বেশি প্লাবিত, সেই মানুষের অংশ।'] },
+    { id: 'f_flooded', basis: 'floods', event: true, klass: null, levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most affected', 'সবচেয়ে বেশি আক্রান্ত'], value: (a, level) => fe(level, a.pcode, 'flooded_pct'),
+      en: 'People in flooded cells, selected flood (%)', bn: 'প্লাবিত ঘরে মানুষ, বাছাই করা বন্যা (%)',
+      note: ['Share of people whose 1 km cell is at least half flooded.', 'যাদের ১ কিমি ঘর অন্তত অর্ধেক প্লাবিত, সেই মানুষের অংশ।'] },
+    { id: 'f_lost_hosp', basis: 'floods', event: true, klass: 'any_hospital', levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most affected', 'সবচেয়ে বেশি আক্রান্ত'],
+      value: (a, level) => { const v = fe(level, a.pcode, 'lost_hospital'); return a.population > 0 ? v / a.population * 100 : NaN; },
+      en: 'People losing hospital access within 60 minutes, selected flood (%)', bn: 'বাছাই করা বন্যায় ৬০ মিনিটে হাসপাতালে পৌঁছানোর সুযোগ হারানো মানুষ (%)',
+      note: ['Within 60 minutes of any hospital normally, but not during the flood (flooded facilities closed, wading speed in flooded cells). A stress test, not a count.', 'স্বাভাবিক সময়ে যেকোনো হাসপাতাল ৬০ মিনিটের মধ্যে, কিন্তু বন্যায় নয় (প্লাবিত প্রতিষ্ঠান বন্ধ, প্লাবিত ঘরে হেঁটে পানি পেরোনোর গতি)। চাপ-পরীক্ষা, প্রকৃত গণনা নয়।'] },
+    { id: 'f_lost_primary', basis: 'floods', event: true, klass: 'primary_care', levels: ALL, digits: 1, ramp: 'blue', worse: 'high', rank: ['Most affected', 'সবচেয়ে বেশি আক্রান্ত'],
+      value: (a, level) => { const v = fe(level, a.pcode, 'lost_primary'); return a.population > 0 ? v / a.population * 100 : NaN; },
+      en: 'People losing primary care within a 60-minute walk, selected flood (%)', bn: 'বাছাই করা বন্যায় ৬০ মিনিট হাঁটা দূরত্বে প্রাথমিক সেবা হারানো মানুষ (%)',
+      note: ['Within a 60-minute walk normally, but not during the flood.', 'স্বাভাবিক সময়ে ৬০ মিনিট হাঁটা দূরত্বে, কিন্তু বন্যায় নয়।'] }
+  );
+  const EVENT_BN = {
+    f2019_07: ['জুলাই–আগস্ট ২০১৯', 'উত্তরাঞ্চলের বর্ষার বন্যা, ২৮ জেলা'], f2020_07: ['জুন–আগস্ট ২০২০', 'বর্ষার বন্যা: উত্তর, উত্তর-পূর্ব ও দক্ষিণ-পূর্ব'],
+    f2022_05: ['মে ২০২২', 'সিলেটে প্রথম আকস্মিক বন্যা'], f2022_06: ['জুন ২০২২', 'সিলেট বিভাগের আকস্মিক বন্যা, ৯ জেলা'],
+    f2024_06: ['জুন ২০২৪', 'সিলেট ও হাওর অঞ্চলের বন্যা'], f2024_08: ['আগস্ট ২০২৪', 'পূর্বাঞ্চলের আকস্মিক বন্যা, ১১ জেলা'],
+    f2024_10: ['অক্টোবর ২০২৪', 'শেরপুর, ময়মনসিংহ ও নেত্রকোনায় আকস্মিক বন্যা'], f2025_06: ['মে–জুন ২০২৫', 'সিলেট বিভাগ, নেত্রকোনা, নোয়াখালী, ভোলা ও পার্বত্য চট্টগ্রাম']
+  };
+  const ERA = { MODIS: ['#2563eb', 'Global Flood Database (MODIS)', 'গ্লোবাল ফ্লাড ডেটাবেস (MODIS)'], 'Sentinel-1': ['#c2611e', 'Sentinel-1 radar', 'সেন্টিনেল-১ রাডার'] };
+  const floodRecord = (id) => [...(state.data.floods?.events || []), ...(state.data.floods?.years || [])].find((e) => e.id === id);
+  const floodLabel = (e) => (e.id.startsWith('y')
+    ? `${N(e.year).replace(/[,٬]/g, '')} · ${T('whole year', 'পুরো বছর')} · ${T(ERA[e.sensor][1], ERA[e.sensor][2])}`
+    : `${T(e.when, EVENT_BN[e.id]?.[0] || e.when)} · ${T(e.note, EVENT_BN[e.id]?.[1] || e.note)}`);
   const basisOf = (m) => m.basis || 'people';
 
-  const state = { level: 'district', measure: 'within5_public', basis: 'people', data: null, map: null, points: null, pointsLayer: null, lisaKey: 'within5_any_hospital' };
+  const state = { level: 'district', measure: 'within5_public', basis: 'people', data: null, map: null, points: null, pointsLayer: null, lisaKey: 'within5_any_hospital', flood: 'f2020_07' };
   const areasOf = (level) => state.data.areas[level] || [];
   const byPcode = (level) => state.data.index[level] || new Map();
   const landOf = (level) => state.data.land[level] || [];
   const listFor = (level) => (state.basis === 'land' ? landOf(level) : areasOf(level));
+  async function ensureTravel(level) {
+    if (!state.data.travel) return;
+    if (!state.data.travelLv[level]) {
+      const d = level === 'union' ? await get('./data/access/travel-union.json') : state.data.travel.per_area[level];
+      state.data.travelLv[level] = { idx: new Map(d.pcodes.map((p, i) => [p, i])), travel: d.travel };
+    }
+    if (state.data.floods && !state.data.floodLv[level]) {
+      const d = level === 'union' ? await get('./data/access/floods-union.json') : state.data.floods.per_area[level];
+      state.data.floodLv[level] = { ...d, idx: new Map(d.pcodes.map((p, i) => [p, i])) };
+    }
+  }
   const indexFor = (level) => (state.basis === 'land' ? state.data.landIndex[level] : state.data.index[level]) || new Map();
   async function ensureLand(level) {
     if (state.data.land[level]) return;
@@ -134,6 +203,10 @@
   }
   const measure = () => MEASURES.find((m) => m.id === state.measure) || MEASURES[0];
   const areaLabel = (a, level) => (level === 'union' ? `${a.name} · ${a.upazila || a.parent_name || ''}` : level === 'upazila' ? `${a.name} · ${place(a.parent_name)}` : place(a.name));
+  const TRAVEL_SOURCE = () => T('Source: Malaria Atlas Project friction surface 2019 (Weiss et al., 2020); DGHS facility registry; BBS Census 2022. Least-time routes; boats at 10 km/h on water.',
+    'উৎস: ম্যালেরিয়া অ্যাটলাস প্রজেক্টের ঘর্ষণ পৃষ্ঠ ২০১৯ (Weiss et al., 2020); DGHS প্রতিষ্ঠান রেজিস্ট্রি; বিবিএস জনশুমারি ২০২২। সবচেয়ে কম সময়ের পথ; পানিতে নৌকা ঘণ্টায় ১০ কিমি।');
+  const FLOOD_SOURCE = () => T('Source: Global Flood Database (Tellman et al., 2021) 2000–2018; Sentinel-1 radar 2019–2025, processed in Google Earth Engine; travel time as above.',
+    'উৎস: গ্লোবাল ফ্লাড ডেটাবেস (Tellman et al., 2021) ২০০০–২০১৮; সেন্টিনেল-১ রাডার ২০১৯–২০২৫, গুগল আর্থ ইঞ্জিনে প্রক্রিয়াকৃত; যাতায়াতের সময় ওপরের মতো।');
   const SOURCE = () => T('Source: BBS Census 2022 (PEC-adjusted by division); DGHS facility registry; geoBoundaries. Straight-line distance.',
     'উৎস: বিবিএস জনশুমারি ২০২২ (বিভাগভিত্তিক PEC সমন্বয়); DGHS প্রতিষ্ঠান রেজিস্ট্রি; geoBoundaries। সরলরৈখিক দূরত্ব।');
 
@@ -164,17 +237,28 @@
     $('#a-level').replaceChildren(...ALL.map((k) => option(k, lvl(k))));
     $('#a-level').value = level;
     $('#a-basis').value = state.basis;
+    $('#a-basis option[value="travel"]').disabled = !state.data.travel;
+    $('#a-basis option[value="floods"]').disabled = !state.data.floods;
     const list = MEASURES.filter((m) => m.levels.includes(level) && basisOf(m) === state.basis);
     if (!list.some((m) => m.id === state.measure)) state.measure = list[0].id;
     $('#a-metric').replaceChildren(...list.map((m) => option(m.id, T(m.en, m.bn))));
     $('#a-metric').value = state.measure;
     $('#a-names').replaceChildren(...listFor(level).map((a) => option(areaLabel(a, level), '')));
+    const fl = state.data.floods;
+    $('#a-flood-wrap').hidden = !(measure().event && fl);
+    if (fl) {
+      const group = (label, list) => { const g = document.createElement('optgroup'); g.label = label; g.append(...list.map((e) => option(e.id, floodLabel(e)))); return g; };
+      $('#a-flood').replaceChildren(group(T('Named floods (Sentinel-1)', 'নামকৃত বন্যা (সেন্টিনেল-১)'), fl.events),
+        group(T('Whole years, 2000–2025', 'পুরো বছর, ২০০০–২০২৫'), [...fl.years].reverse()));
+      $('#a-flood').value = state.flood;
+    }
     $('#a-export').textContent = T(`Download ${LEVELS[level].en.toLowerCase()} table (CSV) ↓`, `${LEVELS[level].bn} সারণি ডাউনলোড (CSV) ↓`);
   }
 
   function paint() {
     const m = measure(), level = state.level, list = listFor(level), isLand = basisOf(m) === 'land';
-    $('#a-metric-note').textContent = T(...m.note) + (isLand ? ' ' + T('Land basis: shares of 1 km grid cells, not of people.', 'ভূমি ভিত্তি: ১ কিমি গ্রিড ঘরের অংশ, মানুষের নয়।') : '') + (level === 'union' && !isLand
+    const fr = m.event ? floodRecord(state.flood) : null;
+    $('#a-metric-note').textContent = (fr ? floodLabel(fr) + '. ' : '') + T(...m.note) + (fr && fr.id.startsWith('y') && level === 'union' && m.id !== 'f_flooded' ? ' ' + T('Access losses for whole years are published down to upazila.', 'পুরো বছরের প্রবেশগম্যতা হারানোর হিসাব উপজেলা পর্যন্ত প্রকাশিত।') : '') + (isLand ? ' ' + T('Land basis: shares of 1 km grid cells, not of people.', 'ভূমি ভিত্তি: ১ কিমি গ্রিড ঘরের অংশ, মানুষের নয়।') : '') + (level === 'union' && !isLand
       ? ' ' + T('Union populations: matched by name to the census where possible, otherwise estimated from the upazila total by area (city wards).', 'ইউনিয়নের জনসংখ্যা: সম্ভব হলে নামে জনশুমারির সাথে মেলানো, নইলে উপজেলার মোট থেকে আয়তন অনুযায়ী অনুমান (সিটি ওয়ার্ড)।') : '');
     if (m.lisa) {
       state.map.setMetric({ legendTitle: T(m.en, m.bn), categories: LISA.map((c) => ({ key: c.key, color: c.color, label: T(c.en, c.bn) })),
@@ -194,12 +278,12 @@
         : (level !== 'union' || a.source !== 'estimated') && (a.population || 0) > 0));
       if (m.worse) usable.sort((a, b) => (m.worse === 'high' ? m.value(b, level) - m.value(a, level) : m.value(a, level) - m.value(b, level)));
       else usable.sort((a, b) => m.value(b, level) - m.value(a, level));
-      $('#c-rank-title').textContent = m.worse
+      $('#c-rank-title').textContent = m.rank ? T(`${m.rank[0]}: 20 ${LEVELS[level].en.toLowerCase()} areas · ${m.en}`, `${m.rank[1]}: ২০টি ${LEVELS[level].bn} · ${m.bn}`) : m.worse
         ? T(`Least served: 20 ${LEVELS[level].en.toLowerCase()} areas · ${m.en}`, `সবচেয়ে কম সেবাপ্রাপ্ত ২০টি ${LEVELS[level].bn} · ${m.bn}`)
         : T(`Highest 20 ${LEVELS[level].en.toLowerCase()} areas · ${m.en}`, `সর্বোচ্চ ২০টি ${LEVELS[level].bn} · ${m.bn}`);
       window.HealthCharts.bars($('#c-rank'), usable.slice(0, 20).map((a) => ({ label: areaLabel(a, level), value: Number(m.value(a, level)), display: N(Number(m.value(a, level)), m.digits),
         detail: isLand ? N(a.area_km2) + T(' km²', ' বর্গকিমি') : T('population ', 'জনসংখ্যা ') + N(a.population) })),
-        { title: T(m.en, m.bn), axisLabel: T(m.en, m.bn), digits: m.digits, source: SOURCE() });
+        { title: T(m.en, m.bn) + (fr ? ' · ' + floodLabel(fr) : ''), axisLabel: T(m.en, m.bn), digits: m.digits, source: basisOf(m) === 'travel' ? TRAVEL_SOURCE() : basisOf(m) === 'floods' ? FLOOD_SOURCE() : SOURCE() });
     }
     drawPoints();
   }
@@ -251,8 +335,37 @@
       }
       nodes.push(table);
     }
+    nodes.push(...travelBlock(level, a.pcode));
     nodes.push(...landBlock(ground));
     box.replaceChildren(...nodes);
+  }
+
+  function travelBlock(level, pcode) {
+    if (!state.data.travelLv[level]) return [];
+    const head = document.createElement('h4'); head.textContent = T('Travel time (people)', 'যাতায়াতের সময় (মানুষ)');
+    const table = document.createElement('table'); table.className = 'access-within';
+    const top = document.createElement('tr');
+    [T('Within', 'মধ্যে'), '30', '60', '120'].forEach((t, i) => { const th = document.createElement('th'); th.textContent = i ? N(Number(t)) + T(' min', ' মিনিট') : t; top.append(th); });
+    table.append(top);
+    for (const k of ['any_hospital', 'public_hospital', 'uhc', 'blood_bank', 'primary_care']) {
+      const tr = document.createElement('tr'), th = document.createElement('th');
+      th.textContent = cls(k) + (k === 'primary_care' ? T(' (walk)', ' (হেঁটে)') : ''); tr.append(th);
+      ['30', '60', '120'].forEach((t) => { const td = document.createElement('td'); td.textContent = pct(tv(level, pcode, k, 'within', t)); tr.append(td); });
+      table.append(tr);
+    }
+    const out = [head, table];
+    if (state.data.floodLv[level]) {
+      const fhead = document.createElement('h4'); fhead.textContent = T('Floods 2000–2025', 'বন্যা ২০০০–২০২৫');
+      const items = [[T('Years flooded (average, of 26)', 'প্লাবিত বছর (গড়, ২৬টির মধ্যে)'), N(fv(level, pcode, 'years_flooded_mean'), 1)],
+        [T('People flooded in 1+ years', '১ বা বেশি বছর প্লাবিত মানুষ'), pct(fv(level, pcode, 'flooded_ge1_pct'))],
+        [T('People flooded in 5+ years', '৫ বা বেশি বছর প্লাবিত মানুষ'), pct(fv(level, pcode, 'flooded_ge5_pct'))]];
+      const fr = floodRecord(state.flood);
+      if (fr) items.push([`${floodLabel(fr)} · ${T('people in flooded cells', 'প্লাবিত ঘরে মানুষ')}`, pct(fe(level, pcode, 'flooded_pct'))]);
+      const dl = document.createElement('dl');
+      items.forEach(([t, v]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = t; dd.textContent = v; dl.append(dt, dd); });
+      out.push(fhead, dl);
+    }
+    return out;
   }
 
   function landBlock(g) {
@@ -275,13 +388,14 @@
       $('#access-map').classList.add('loading');
       await ensureLand(level);
     }
-    if (state.basis === 'people' && level === 'union' && !state.data.areas.union) {
+    if (state.basis !== 'land' && level === 'union' && !state.data.areas.union) {
       $('#access-map').classList.add('loading');
       const file = await get('./data/access/areas-union.json');
       const cols = file.columns;
       state.data.areas.union = file.rows.map((r) => Object.fromEntries(cols.map((c, i) => [c, r[i]])));
       state.data.index.union = new Map(state.data.areas.union.map((a) => [a.pcode, a]));
     }
+    if (state.basis === 'travel' || state.basis === 'floods') { $('#access-map').classList.add('loading'); await ensureTravel(level); }
     fillSelects();
     detail(null);
     $('#access-map').classList.add('loading');
@@ -412,8 +526,12 @@
        'দূরত্ব: প্রতিটি ইউনিয়নের জনসংখ্যা ইউনিয়নের ১ কিমি গ্রিড ঘরগুলোতে সমানভাবে ছড়ানো, এবং প্রতিটি ঘর থেকে নিকটতম ব্যবহারযোগ্য DGHS স্থানাঙ্কের সরলরৈখিক দূরত্ব মাপা হয়েছে। নিজের জেলার বাইরে থাকা বা একাধিক এলাকায় একই স্থানাঙ্কের বিন্দু বাদ (নিচে অবস্থানের মান দেখুন)। বাদ পড়া বা অনুপস্থিত স্থানাঙ্কের কারণে কিছু প্রকৃত প্রতিষ্ঠান বাদ যায়, তাই নির্দিষ্ট দূরত্বের মধ্যে মানুষের অংশ ন্যূনতম হিসাব। সড়ক, নদী বা ফেরিতে প্রকৃত যাত্রা দীর্ঘতর ও ধীর।'],
       [`Facility counts per person use every active DGHS listing recorded in the area (coordinates not needed); ${N(m.dghs_unmatched_listings)} listings have an upazila label that matches no upazila in its district. Union counts use mapped points only.`,
        `জনপ্রতি প্রতিষ্ঠানের হিসাবে এলাকায় নথিভুক্ত প্রতিটি সক্রিয় DGHS তালিকা ব্যবহৃত (স্থানাঙ্ক লাগে না); ${N(m.dghs_unmatched_listings)}টি তালিকার উপজেলার নাম তার জেলার কোনো উপজেলার সাথে মেলে না। ইউনিয়নের সংখ্যা শুধু মানচিত্রের বিন্দু থেকে।`],
-      ['Not measured: opening hours, staff, medicines, cost, quality, travel time, seasonal flooding, and private or NGO facilities missing from the DGHS registry. Results describe areas, not individuals (ecological fallacy).',
-       'যা মাপা হয়নি: খোলার সময়, জনবল, ওষুধ, খরচ, মান, যাত্রার সময়, মৌসুমি বন্যা, এবং DGHS রেজিস্ট্রিতে না থাকা বেসরকারি বা এনজিও প্রতিষ্ঠান। ফলাফল এলাকার, ব্যক্তির নয় (ইকোলজিক্যাল ফ্যালাসি)।']
+      ['Travel time: least-time routes (scikit-image minimum-cost path, 8 neighbours) from every usable facility over the Malaria Atlas Project 2019 friction surface at 1 km, masked to Bangladesh so no route crosses India or Myanmar. People on a cell without a friction value are moved to the nearest valid cell within 2 km. Wide rivers and estuary sea have no friction value and are crossed at 10 km/h by boat, with no waiting time.',
+       'যাতায়াতের সময়: প্রতিটি ব্যবহারযোগ্য প্রতিষ্ঠান থেকে ম্যালেরিয়া অ্যাটলাস প্রজেক্টের ২০১৯ সালের ১ কিমি ঘর্ষণ পৃষ্ঠে সবচেয়ে কম সময়ের পথ (scikit-image, ৮ প্রতিবেশী), বাংলাদেশের সীমানায় সীমিত, তাই কোনো পথ ভারত বা মিয়ানমার দিয়ে যায় না। ঘর্ষণের মান নেই এমন ঘরের মানুষকে ২ কিমির মধ্যে নিকটতম বৈধ ঘরে সরানো হয়েছে। চওড়া নদী ও মোহনার সমুদ্রে মান নেই; সেগুলো নৌকায় ঘণ্টায় ১০ কিমি গতিতে, অপেক্ষা ছাড়া, পার হওয়া ধরা হয়েছে।'],
+      ['Floods: 2000–2018 from the Global Flood Database (MODIS, events that the database mapped over Bangladesh); 2019–2025 from Sentinel-1 VH radar, change detection against a January–March reference (ratio above 1.25 and backscatter below −18 dB), with permanent water (JRC Global Surface Water, 10+ months a year) and slopes above 5° removed and small patches dropped. For the named floods, pixels flooded in at least 4 of the other 6 Sentinel-1 years are treated as normal monsoon water and removed (leave-one-out, so a flood does not hide itself). All layers were clipped to the geoBoundaries outline of Bangladesh in Google Earth Engine. A 1 km cell counts as flooded when at least half of it is flooded.',
+       'বন্যা: ২০০০–২০১৮ গ্লোবাল ফ্লাড ডেটাবেস থেকে (MODIS, ডেটাবেসে বাংলাদেশের মানচিত্রিত ঘটনা); ২০১৯–২০২৫ সেন্টিনেল-১ VH রাডার থেকে, জানুয়ারি–মার্চের সাথে পরিবর্তন শনাক্তকরণ (অনুপাত ১.২৫-এর বেশি এবং ব্যাকস্ক্যাটার −১৮ dB-এর কম), স্থায়ী পানি (JRC গ্লোবাল সারফেস ওয়াটার, বছরে ১০+ মাস) ও ৫°-এর বেশি ঢাল বাদ, ছোট টুকরো বাদ। নামকৃত বন্যায়, অন্য ৬টি সেন্টিনেল-১ বছরের অন্তত ৪টিতে প্লাবিত পিক্সেল স্বাভাবিক বর্ষার পানি হিসেবে বাদ (নিজের বছর বাদ দিয়ে গণনা, তাই কোনো বন্যা নিজেকে লুকায় না)। সব স্তর গুগল আর্থ ইঞ্জিনে geoBoundaries-এর বাংলাদেশ সীমানায় কাটা। কোনো ১ কিমি ঘরের অন্তত অর্ধেক প্লাবিত হলে ঘরটি প্লাবিত ধরা হয়েছে।'],
+      ['Not measured: opening hours, staff, medicines, cost, quality, ferry waiting times, flood depth and duration, and private or NGO facilities missing from the DGHS registry. Results describe areas, not individuals (ecological fallacy).',
+       'যা মাপা হয়নি: খোলার সময়, জনবল, ওষুধ, খরচ, মান, ফেরির অপেক্ষা, বন্যার গভীরতা ও স্থায়িত্ব, এবং DGHS রেজিস্ট্রিতে না থাকা বেসরকারি বা এনজিও প্রতিষ্ঠান। ফলাফল এলাকার, ব্যক্তির নয় (ইকোলজিক্যাল ফ্যালাসি)।']
     ];
     $('#m-list').replaceChildren(...items.map(([en, bn]) => { const li = document.createElement('li'); li.textContent = T(en, bn); return li; }));
     const sources = [
@@ -423,6 +541,11 @@
       ['geoBoundaries gbOpen BGD ADM2–ADM4 (BBS/OCHA; CC BY 3.0 IGO)', 'geoBoundaries gbOpen BGD ADM2–ADM4 (BBS/OCHA; CC BY 3.0 IGO)', 'https://www.geoboundaries.org/'],
       ['World Health Organization (2021). Bangladesh: community health workers at the heart of a stronger health system (one community clinic per 6,000 people)', 'বিশ্ব স্বাস্থ্য সংস্থা (২০২১), প্রতি ৬,০০০ জনে একটি কমিউনিটি ক্লিনিক', 'https://extranet.who.int/uhcpartnership/story/bangladesh-community-health-workers-heart-stronger-health-system-and-fight-against-covid-19'],
       ['Islam, K. (2017). Community clinic: combining care and empowering community. International Journal of Integrated Care, 17(5), A311', 'ইসলাম, খ. (২০১৭), ইন্টারন্যাশনাল জার্নাল অফ ইন্টিগ্রেটেড কেয়ার', 'https://doi.org/10.5334/ijic.3693'],
+      ['Weiss, D. J., Nelson, A., Vargas-Ruiz, C. A., et al. (2020). Global maps of travel time to healthcare facilities. Nature Medicine, 26(12), 1835–1838 (friction surfaces, CC BY 4.0)', 'Weiss ও সহকর্মী (২০২০), নেচার মেডিসিন: ঘর্ষণ পৃষ্ঠ, CC BY 4.0', 'https://doi.org/10.1038/s41591-020-1059-1'],
+      ['Tellman, B., Sullivan, J. A., Kuhn, C., et al. (2021). Satellite imaging reveals increased proportion of population exposed to floods. Nature, 596(7870), 80–86 (Global Flood Database)', 'Tellman ও সহকর্মী (২০২১), নেচার: গ্লোবাল ফ্লাড ডেটাবেস', 'https://doi.org/10.1038/s41586-021-03695-w'],
+      ['Torres, R., Snoeij, P., Geudtner, D., et al. (2012). GMES Sentinel-1 mission. Remote Sensing of Environment, 120, 9–24 (Copernicus Sentinel-1 data 2019–2025)', 'Torres ও সহকর্মী (২০১২), সেন্টিনেল-১ মিশন; কোপার্নিকাস সেন্টিনেল-১ তথ্য ২০১৯–২০২৫', 'https://doi.org/10.1016/j.rse.2011.05.028'],
+      ['Pekel, J.-F., Cottam, A., Gorelick, N., & Belward, A. S. (2016). High-resolution mapping of global surface water and its long-term changes. Nature, 540(7633), 418–422 (permanent-water mask)', 'Pekel ও সহকর্মী (২০১৬), নেচার: স্থায়ী পানির মাস্ক', 'https://doi.org/10.1038/nature20584'],
+      ['Flood event dates and areas: ReliefWeb, UN Bangladesh, Dartmouth Flood Observatory and news reports, linked in the flood table', 'বন্যার তারিখ ও এলাকা: রিলিফওয়েব, জাতিসংঘ বাংলাদেশ, ডার্টমাউথ ফ্লাড অবজারভেটরি ও সংবাদ, বন্যার সারণিতে লিংক', null],
       ['Basemap © OpenStreetMap contributors; terrain © OpenTopoMap (CC-BY-SA)', 'বেসম্যাপ © OpenStreetMap; ভূপ্রকৃতি © OpenTopoMap (CC-BY-SA)', 'https://www.openstreetmap.org/copyright']
     ];
     $('#m-sources').replaceChildren(...sources.map(([en, bn, url]) => {
@@ -465,7 +588,71 @@
     $('#s-x').replaceChildren(...Object.entries(SOCIO).map(([k, v]) => option(k, T(...v)))); $('#s-x').value = x;
     $('#s-y').replaceChildren(...Object.entries(ACCESS_Y).map(([k, v]) => option(k, T(v.en, v.bn)))); $('#s-y').value = y;
   }
-  function staticSections() { kpis(); curves(); inequality(); clusters(); selects(); social(); primary(); quality(); methods(); }
+  // ---------- Travel time ----------
+  function travelSection() {
+    const t = state.data.travel;
+    if (!t) { $('#travel').hidden = true; return; }
+    const order = [['any_hospital', '#2563eb'], ['public_hospital', '#077a53'], ['blood_bank', '#c2611e'], ['primary_care', '#8b5cf6']];
+    const label = (k) => `${cls(k)} · ${T(...MODE[t.national[k].mode])}`;
+    window.HealthCharts.lines($('#c-travel'), order.map(([k, color]) => ({ label: label(k), color, points: [[0, 0], ...t.national[k].curve.filter((p) => p[0] <= 120)] })), {
+      title: T('Share of people within each travel time of the nearest facility', 'নিকটতম প্রতিষ্ঠান থেকে নির্দিষ্ট যাতায়াতের সময়ের মধ্যে মানুষের অংশ'),
+      axisLabel: T('Travel time (minutes)', 'যাতায়াতের সময় (মিনিট)'), yLabel: T('% of people', 'মানুষের %'), xmax: 120, ymax: 100, xTicks: 4,
+      xUnit: T('min', 'মিনিট'), digits: 1, endLabels: false, legendWidth: 260, source: TRAVEL_SOURCE() });
+    rows('#t-travel', ['any_hospital', 'public_hospital', 'uhc', 'blood_bank', 'primary_care'].map((k) => {
+      const n = t.national[k];
+      return [cls(k), T(...MODE[n.mode]), N(n.median_min, 1), pct(n.within['30']), pct(n.within['60']), pct(n.within['120']), N(n.unreachable_people)];
+    }));
+    const w = t.water || {};
+    $('#travel-note').textContent = T(
+      `Water: the friction surface has no value on the widest river reaches and on the sea, which would cut off Sandwip, Hatiya and the Meghna chars. Those cells, and estuary sea within 10 km of land, are crossed at about ${N(w.kmh || 10)} km/h with no waiting for a boat or ferry, so island times are optimistic. The surface describes roads in 2019: later roads and bridges, including the Padma Bridge (2022), are not in it. "No route" counts people on cells with no connection to any facility of that kind. At 1 km resolution one cell takes about 12 minutes to walk across, so walking times under about 15 minutes are coarse.`,
+      `পানি: সবচেয়ে চওড়া নদী ও সমুদ্রে ঘর্ষণ পৃষ্ঠের কোনো মান নেই, ফলে সন্দ্বীপ, হাতিয়া ও মেঘনার চর বিচ্ছিন্ন হয়ে যেত। ওই ঘরগুলো এবং স্থল থেকে ১০ কিমির মধ্যের মোহনার সমুদ্র ঘণ্টায় প্রায় ${N(w.kmh || 10)} কিমি গতিতে পার হওয়া ধরা হয়েছে, নৌকা বা ফেরির অপেক্ষা ছাড়া; তাই দ্বীপের সময় আশাবাদী। পৃষ্ঠটি ২০১৯ সালের সড়ক অনুযায়ী: পরের সড়ক ও সেতু, পদ্মা সেতুসহ (২০২২), এতে নেই। "পৌঁছানো যায় না" মানে যাদের ঘর থেকে ওই ধরনের কোনো প্রতিষ্ঠানে পথ নেই। ১ কিমি রেজোলিউশনে একটি ঘর হেঁটে পার হতে প্রায় ১২ মিনিট লাগে, তাই ১৫ মিনিটের কম হাঁটার সময় মোটা দাগের।`);
+  }
+
+  // ---------- Floods ----------
+  function floodSection() {
+    const f = state.data.floods;
+    if (!f) { $('#floods').hidden = true; return; }
+    $('#flood-caveat').textContent = T(
+      'Read with care. (1) The two satellite eras are not comparable: MODIS years count only the large events in the Global Flood Database, at 250 m, while Sentinel-1 years map every month from April to October at 10–20 m (exported at 250 m). (2) Normal monsoon water: for the eight named floods, water that also appears in at least 4 of the other 6 Sentinel-1 years (haors, beels, regularly flooded floodplain) is removed, so the events show water beyond the usual monsoon extent. The yearly maps keep all flood water, so the haor basin counts as flooded almost every year. Some flooded rice fields can remain in both. (3) The access losses assume everyone in a flooded cell wades at about 1.5 km/h; boats, raised roads and embankments are not modelled. Treat losses as a stress test of where the network is fragile, not as a count of people cut off. Yearly maps put a whole year\'s floods on the map at once, so yearly losses are an upper bound.',
+      'সাবধানে পড়ুন। (১) দুই উপগ্রহ যুগ তুলনীয় নয়: MODIS বছরগুলোতে শুধু গ্লোবাল ফ্লাড ডেটাবেসের বড় ঘটনাগুলো, ২৫০ মি-তে; সেন্টিনেল-১ বছরগুলোতে এপ্রিল থেকে অক্টোবরের প্রতি মাস, ১০–২০ মি-তে (২৫০ মি-তে রপ্তানি)। (২) স্বাভাবিক বর্ষার পানি: ৮টি নামকৃত বন্যায়, যে পানি অন্য ৬টি সেন্টিনেল-১ বছরের অন্তত ৪টিতেও দেখা যায় (হাওর, বিল, নিয়মিত প্লাবিত প্লাবনভূমি) তা বাদ দেওয়া হয়েছে, তাই ঘটনাগুলো স্বাভাবিক বর্ষার বাইরের পানি দেখায়। বার্ষিক মানচিত্রে সব বন্যার পানি থাকে, তাই হাওর অঞ্চল প্রায় প্রতি বছর প্লাবিত গণ্য হয়। দুই ক্ষেত্রেই কিছু পানিতে ডোবা ধানক্ষেত থেকে যেতে পারে। (৩) প্রবেশগম্যতা হারানোর হিসাবে ধরা হয়েছে প্লাবিত ঘরে সবাই ঘণ্টায় প্রায় ১.৫ কিমি গতিতে পানি পেরোয়; নৌকা, উঁচু সড়ক ও বাঁধ হিসাবে নেই। এটিকে নেটওয়ার্ক কোথায় ভঙ্গুর তার চাপ-পরীক্ষা হিসেবে দেখুন, বিচ্ছিন্ন মানুষের গণনা হিসেবে নয়। বার্ষিক মানচিত্রে পুরো বছরের বন্যা একসাথে থাকে, তাই বার্ষিক ক্ষতি ঊর্ধ্বসীমা।');
+    const legend = Object.values(ERA).map(([color, en, bn]) => ({ color, label: T(en, bn) }));
+    const yr = (e) => String(e.year);
+    window.HealthCharts.columns($('#c-flood-years'), f.years.map((e) => ({ label: yr(e), value: e.flooded_km2, color: ERA[e.sensor][0], display: N(e.flooded_km2) + T(' km²', ' বর্গকিমি'),
+      detail: T(`${N(e.people_in_flooded_cells / 1e6, 1)} million people in flooded cells`, `প্লাবিত ঘরে ${N(e.people_in_flooded_cells / 1e6, 1)} মিলিয়ন মানুষ`) })), {
+      title: T('Flooded land by year, 2000–2025 (1 km cells at least half flooded)', 'বছর অনুযায়ী প্লাবিত ভূমি, ২০০০–২০২৫ (অন্তত অর্ধেক প্লাবিত ১ কিমি ঘর)'),
+      yLabel: T('km²', 'বর্গকিমি'), axisLabel: T('Year', 'বছর'), legend, labelEvery: 5, source: FLOOD_SOURCE() });
+    window.HealthCharts.columns($('#c-flood-lost'), f.years.map((e) => ({ label: yr(e), value: e.people_losing_access.any_hospital / 1e6, color: ERA[e.sensor][0],
+      display: T(`${N(e.people_losing_access.any_hospital / 1e6, 2)} million`, `${N(e.people_losing_access.any_hospital / 1e6, 2)} মিলিয়ন`),
+      detail: T(`${N(e.facilities_flooded.any_hospital)} hospitals flooded`, `${N(e.facilities_flooded.any_hospital)}টি হাসপাতাল প্লাবিত`) })), {
+      title: T('People who lose a hospital within 60 minutes, by year (upper bound)', 'বছর অনুযায়ী ৬০ মিনিটের মধ্যে হাসপাতাল হারানো মানুষ (ঊর্ধ্বসীমা)'),
+      yLabel: T('Million people', 'মিলিয়ন মানুষ'), axisLabel: T('Year', 'বছর'), legend, labelEvery: 5, digits: 1, source: FLOOD_SOURCE() });
+    rows('#t-events', f.events.map((e) => {
+      const cell = document.createElement('span');
+      const link = document.createElement('a'); link.href = e.source; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = floodLabel(e);
+      cell.append(link);
+      const go = document.createElement('button'); go.type = 'button'; go.className = 'flood-map-btn'; go.textContent = T('Show', 'দেখুন');
+      go.setAttribute('aria-label', T(`Show ${e.when} on the map`, `${EVENT_BN[e.id]?.[0] || e.when} মানচিত্রে দেখুন`));
+      go.addEventListener('click', () => showFlood(e.id));
+      const lost = (k) => `${N(e.people_losing_access[k] / 1e6, 1)} ${T('M', 'মি.')}`;
+      const area = document.createElement('span'); area.textContent = N(e.flooded_km2);
+      if (e.surface_water_km2) area.title = T(`${N(e.surface_water_km2)} km² of surface water before removing normal monsoon water`, `স্বাভাবিক বর্ষার পানি বাদের আগে ${N(e.surface_water_km2)} বর্গকিমি পানি`);
+      return [cell, area, `${N(e.people_in_flooded_cells / 1e6, 1)} ${T('M', 'মি.')}`, N(e.facilities_flooded.any_hospital), N(e.facilities_flooded.primary_care), lost('any_hospital'), lost('primary_care'), go];
+    }));
+    const fq = f.frequency;
+    if (fq) window.HealthCharts.columns($('#c-flood-freq'), fq.histogram.map((v, i) => ({ label: String(i), value: v, color: '#2f74b5', display: pct(v) })), {
+      title: T(`How often people's homes flooded: share of people by number of flooded years, 2000–2025 (${N(fq.people_flooded_ge['1'], 1)}% at least once, ${N(fq.people_flooded_ge['5'], 1)}% in 5+ years)`,
+               `মানুষের বাসস্থান কতবার প্লাবিত: প্লাবিত বছরের সংখ্যা অনুযায়ী মানুষের অংশ, ২০০০–২০২৫ (${N(fq.people_flooded_ge['1'], 1)}% অন্তত একবার, ${N(fq.people_flooded_ge['5'], 1)}% ৫ বা বেশি বছর)`),
+      yLabel: T('% of people', 'মানুষের %'), axisLabel: T(`Years flooded (of ${fq.years_mapped})`, `প্লাবিত বছর (${N(fq.years_mapped)}টির মধ্যে)`), labelEvery: 2, digits: 0, source: FLOOD_SOURCE() });
+  }
+  async function showFlood(id) {
+    state.flood = id; state.basis = 'floods';
+    if (!measure().event) state.measure = 'f_lost_hosp';
+    if (state.level === 'division') state.level = 'district';
+    $('#map-section').scrollIntoView({ behavior: 'smooth' });
+    await showLevel(state.level);
+  }
+
+  function staticSections() { kpis(); curves(); travelSection(); floodSection(); inequality(); clusters(); selects(); social(); primary(); quality(); methods(); }
 
   // ---------- People versus land ----------
   function curves() {
@@ -501,6 +688,25 @@
       source: T('DGHS registry snapshot; location audit.', 'DGHS রেজিস্ট্রি স্ন্যাপশট; অবস্থান যাচাই।') });
   }
 
+  function exportTravel(level) {
+    ensureTravel(level).then(() => {
+      const list = areasOf(level), classes = ['any_hospital', 'public_hospital', 'uhc', 'blood_bank', 'primary_care'];
+      const fl = state.data.floodLv[level], ids = state.data.floods ? [...state.data.floods.events, ...state.data.floods.years].map((e) => e.id) : [];
+      const header = ['pcode', 'name', 'population',
+        ...classes.flatMap((k) => [...['30', '60', '120'].map((t) => `pct_people_within_${t}min_${k}`), `mean_min_${k}`]),
+        ...(fl ? ['years_flooded_mean_2000_2025', 'pct_people_flooded_ge1', 'pct_people_flooded_ge5', 'pct_people_flooded_ge10'] : []),
+        ...ids.flatMap((id) => [`${id}_pct_people_flooded`, `${id}_people_lose_hospital_60min`, `${id}_people_lose_primary_60min_walk`])];
+      csv(`bangladesh-health-travel-floods-${level}.csv`, header, list.map((a) => {
+        const i = fl?.idx.get(a.pcode), at = (key) => (fl && i !== undefined && fl[key] ? fl[key][i] ?? '' : '');
+        const ev = (id, key) => (fl && i !== undefined && fl[id]?.[key] ? fl[id][key][i] ?? '' : '');
+        return [a.pcode, a.name, a.population,
+          ...classes.flatMap((k) => [...['30', '60', '120'].map((t) => tv(level, a.pcode, k, 'within', t)), tv(level, a.pcode, k, 'mean')].map((v) => (Number.isFinite(v) ? v : ''))),
+          ...(fl ? [at('years_flooded_mean'), at('flooded_ge1_pct'), at('flooded_ge5_pct'), at('flooded_ge10_pct')] : []),
+          ...ids.flatMap((id) => [ev(id, 'flooded_pct'), ev(id, 'lost_hospital'), ev(id, 'lost_primary')])];
+      }));
+    });
+  }
+
   function exportLand(level) {
     ensureLand(level).then(() => {
       const classes = ['public_hospital', 'any_hospital', 'private_ngo_hospital', 'primary_care'];
@@ -520,7 +726,8 @@
         get('./data/atlas/distance.json'), get('./data/atlas/location-quality.json'), get('./data/atlas/areas-district.json'),
         ...levels.map((k) => get(`./data/access/areas-${k}.json`))]);
       if (!summary.national?.access?.blood_bank?.curve || !summary.moran || !distance.national?.primary_care?.curve) throw new Error(T('the data files are an older version; please reload the page (Ctrl+F5)', 'তথ্যের ফাইল পুরোনো সংস্করণের; পৃষ্ঠাটি আবার লোড করুন (Ctrl+F5)'));
-      state.data = { summary, sourcesUrl: sources.url, distance, quality, areas: {}, index: {},
+      const [travel, floods] = await Promise.all([get('./data/access/travel.json').catch(() => null), get('./data/access/floods.json').catch(() => null)]);
+      state.data = { summary, sourcesUrl: sources.url, distance, quality, areas: {}, index: {}, travel, floods, travelLv: {}, floodLv: {},
                      land: { district: landDistrict.areas }, landIndex: { district: new Map(landDistrict.areas.map((a) => [a.pcode, a])) } };
       levels.forEach((k, i) => { state.data.areas[k] = files[i].areas; state.data.index[k] = new Map(files[i].areas.map((a) => [a.pcode, a])); });
     } catch (error) {
@@ -536,7 +743,8 @@
     });
     $('#a-level').addEventListener('change', (e) => showLevel(e.target.value));
     $('#a-basis').addEventListener('change', (e) => { state.basis = e.target.value; showLevel(state.level); });
-    $('#a-metric').addEventListener('change', (e) => { state.measure = e.target.value; if (measure().lisa) { state.lisaKey = measure().lisa; lisaList(); } paint(); });
+    $('#a-flood').addEventListener('change', (e) => { state.flood = e.target.value; paint(); });
+    $('#a-metric').addEventListener('change', (e) => { state.measure = e.target.value; if (measure().lisa) { state.lisaKey = measure().lisa; lisaList(); } $('#a-flood-wrap').hidden = !(measure().event && state.data.floods); paint(); });
     $('#a-points').addEventListener('change', drawPoints);
     state.map.map.on('zoomend', () => { if ($('#a-points').checked) drawPoints(); });
     $('#a-search').addEventListener('change', (e) => {
@@ -544,7 +752,7 @@
       const hit = list.find((a) => areaLabel(a, state.level).toLowerCase() === q) || list.find((a) => a.name.toLowerCase() === name) || list.find((a) => a.name.toLowerCase().includes(name));
       if (hit) state.map.select(hit.pcode, true);
     });
-    $('#a-export').addEventListener('click', () => (state.basis === 'land' ? exportLand(state.level) : exportLevel(state.level)));
+    $('#a-export').addEventListener('click', () => (state.basis === 'land' ? exportLand(state.level) : state.basis === 'travel' || state.basis === 'floods' ? exportTravel(state.level) : exportLevel(state.level)));
     ALL.forEach((k) => $('#d-' + k).addEventListener('click', () => exportLevel(k)));
     $('#g-level').addEventListener('change', inequality);
     $('#s-x').addEventListener('change', social); $('#s-y').addEventListener('change', social);

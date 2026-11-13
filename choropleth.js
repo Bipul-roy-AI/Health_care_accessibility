@@ -6,7 +6,8 @@
 (() => {
   const RAMPS = {
     green: ['#e8f3ec', '#c3e2d0', '#92caac', '#5bab84', '#2d8a63', '#0c6a49'],
-    amber: ['#fdf1e0', '#f6d9ab', '#edbb74', '#df9743', '#c56f22', '#9d4e12']
+    amber: ['#fdf1e0', '#f6d9ab', '#edbb74', '#df9743', '#c56f22', '#9d4e12'],
+    blue: ['#eaf2fb', '#c6dcf2', '#93bde5', '#5a98d3', '#2f74b5', '#174f88']
   };
   const MISSING = '#e6e4dc';
   const bn = () => document.documentElement.lang === 'bn';
