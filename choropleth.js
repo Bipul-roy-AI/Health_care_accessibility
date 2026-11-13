@@ -41,6 +41,9 @@
     map.attributionControl.addAttribution('BBS/OCHA · <a href="https://www.geoboundaries.org" target="_blank" rel="noopener noreferrer">geoBoundaries</a> (CC BY 3.0 IGO)');
     const canvas = L.canvas({ padding: 0.3 });
     const state = { layer: null, metric: null, selected: null, legend: null, token: 0, thin: false };
+    // Reference basemap (shared with the other maps); fills thin out over tiles.
+    const layers = window.MapLayers.addLayerControl(map, { storageKey: 'shasthopath-atlas-basemap', basemap: options.basemap,
+      onBasemap: () => { if (state.layer) state.layer.setStyle(style); } });
     const legendControl = L.control({ position: 'bottomright' });
     legendControl.onAdd = () => { state.legend = L.DomUtil.create('div', 'choropleth-legend'); return state.legend; };
     legendControl.addTo(map);
@@ -55,7 +58,7 @@
     }
     function style(feature) {
       const selected = state.selected === feature.properties.pcode;
-      return { fillColor: fill(feature.properties.pcode), fillOpacity: 0.92, color: selected ? '#153a30' : '#ffffff',
+      return { fillColor: fill(feature.properties.pcode), fillOpacity: layers.hasTiles() ? 0.72 : 0.92, color: selected ? '#153a30' : '#ffffff',
                weight: selected ? 2.4 : state.thin ? 0.25 : 0.7, opacity: 1 };
     }
     function legend() {
@@ -122,7 +125,7 @@
       map.invalidateSize();
       if (state.layer) map.fitBounds(state.layer.getBounds(), { padding: [8, 8] });
     }
-    return { map, setLayer, setMetric, select, fit, refresh: restyle,
+    return { map, setLayer, setMetric, select, fit, refresh: restyle, setBasemap: layers.setBasemap, basemap: layers.basemap,
              layerCount: () => (state.layer ? state.layer.getLayers().length : 0) };
   }
 

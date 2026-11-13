@@ -4,6 +4,9 @@ const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const base = process.env.BASE_URL || 'http://127.0.0.1:8000';
+// Basemap tiles are the only external requests the Distance page may make; tests answer them with a blank PNG.
+const TILE_HOSTS = /(^|\.)(tile\.openstreetmap\.org|tile\.opentopomap\.org)$/;
+const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=', 'base64');
 const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html', 'atlas.html', 'accessibility.html', 'helplines.html'];
 
 (async () => {
@@ -13,11 +16,12 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
     page.on('pageerror', (e) => errors.push(`${page.url()} pageerror: ${e.message}`));
     // Pages with an OpenStreetMap basemap may fail to fetch tiles offline; script errors still count.
     page.on('console', (m) => { if (m.type() === 'error' && !(allowExternal && /Failed to load resource/.test(m.text()))) errors.push(`${page.url()} console: ${m.text()}`); });
-    if (!allowExternal) page.on('request', (r) => { const u = new URL(r.url()); if (u.origin !== new URL(base).origin) errors.push('external request: ' + u.href); });
+    if (!allowExternal) page.on('request', (r) => { const u = new URL(r.url()); if (u.origin !== new URL(base).origin && !TILE_HOSTS.test(u.hostname)) errors.push('external request: ' + u.href); });
   };
   const levels = JSON.parse(fs.readFileSync('data/atlas/manifest.json', 'utf8')).levels;
 
   const context = await browser.newContext({ viewport: { width: 1360, height: 900 }, acceptDownloads: true });
+  await context.route((url) => TILE_HOSTS.test(url.hostname), (route) => route.fulfill({ contentType: 'image/png', body: BLANK_PNG }));
   const page = await context.newPage();
   watch(page);
   await page.goto(base + '/atlas.html');
@@ -30,6 +34,18 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
   assert.equal(await page.$$eval('#c-curve svg path[fill="none"]', (p) => p.length), 4);
   assert.equal(await page.$$eval('#t-national tr', (r) => r.length), 4);
   assert.equal(await page.$$eval('#t-disparity tr', (r) => r.length), 4);
+
+  // Basemap switcher: grey OSM by default, then streets, terrain and none; fills thin out over tiles.
+  await page.waitForSelector('#atlas-map .light-basemap-tiles img.leaflet-tile', { state: 'attached' });
+  assert.equal(await page.$eval('#atlas-map .map-layer-control select', (s) => s.options.length), 4);
+  const opacity = () => page.$eval('#atlas-map path.leaflet-interactive', (p) => Number(p.getAttribute('fill-opacity')));
+  assert.ok((await opacity()) < 0.8);
+  await page.selectOption('#atlas-map .map-layer-control select', 'terrain');
+  await page.waitForSelector('#atlas-map img.leaflet-tile[src*="opentopomap"]', { state: 'attached' });
+  await page.selectOption('#atlas-map .map-layer-control select', 'none');
+  await page.waitForFunction(() => !document.querySelector('#atlas-map img.leaflet-tile'));
+  assert.ok((await opacity()) > 0.9);
+  await page.selectOption('#atlas-map .map-layer-control select', 'light');
 
   // Every level draws all of its areas; unions use a canvas.
   for (const [level, count] of [['division', levels.division], ['upazila', levels.upazila]]) {
@@ -61,6 +77,7 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
   assert.equal(await page.getAttribute('html', 'lang'), 'bn');
   assert.equal(await page.textContent('h1'), 'স্বাস্থ্যসেবার দূরত্ব');
   assert.match(await page.textContent('#k-hospitals'), /[০-৯]/);
+  assert.equal((await page.textContent('#atlas-map .map-layer-control .map-layer-row span')).trim(), 'বেসম্যাপ');
   for (const name of PAGES) {
     const p = await context.newPage(); // same context: shares the stored language
     watch(p, name === 'index.html' || name === 'overview.html');
@@ -95,6 +112,7 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
 
   // Mobile: no horizontal overflow on the Distance page.
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await mobile.route((url) => TILE_HOSTS.test(url.hostname), (route) => route.fulfill({ contentType: 'image/png', body: BLANK_PNG }));
   watch(mobile);
   await mobile.goto(base + '/atlas.html');
   await mobile.waitForSelector('#atlas-content:not([hidden])');

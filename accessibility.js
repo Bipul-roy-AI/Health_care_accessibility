@@ -4,7 +4,12 @@
   let index, result;
   const map = L.map('access-map', { preferCanvas: true }).setView([23.7, 90.1], 7);
   L.control.scale({ imperial: false }).addTo(map);
+  // Basemap and administrative outlines (division to union) under the facility points.
+  window.MapLayers.addLayerControl(map, { boundaries: true, defaultBoundaries: ['division', 'district'], storageKey: 'shasthopath-access-basemap' });
   const points = L.layerGroup().addTo(map), renderer = L.canvas({ padding: 0.3 });
+  // Dots grow with zoom so ~14,000 community clinics stay readable at national scale.
+  const radius = () => { const z = map.getZoom(); return z <= 7 ? 1.1 : z <= 8 ? 1.7 : z <= 9 ? 2.4 : z <= 11 ? 3.2 : 4.5; };
+  map.on('zoomend', () => { const r = radius(); points.eachLayer((dot) => dot.setStyle({ radius: r, weight: r < 2 ? 0 : 0.6 })); });
   const T = (en, bn) => (window.SiteI18n ? window.SiteI18n.t(en, bn) : en);
   const place = (name) => (window.NamesBn ? window.NamesBn.name(name) : name);
   const TIER_BN = { community: 'কমিউনিটি ক্লিনিক', union: 'ইউনিয়ন-স্তরের প্রতিষ্ঠান', upazila: 'উপজেলা স্বাস্থ্য কমপ্লেক্স', urban_primary: 'নগর প্রাথমিক স্বাস্থ্যকেন্দ্র' };
@@ -29,7 +34,7 @@
       const label = document.createElement('div');
       const title = document.createElement('strong'); title.textContent = row.name; label.append(title);
       label.append(document.createElement('br'), document.createTextNode(`${row.facility_type_name} · DGHS ${row.code || row.id}`));
-      L.circleMarker([Number(row.lat), Number(row.lon)], { renderer, radius: 3, color: '#176552', weight: 0.6, fillOpacity: 0.65 }).bindPopup(label).addTo(points);
+      L.circleMarker([Number(row.lat), Number(row.lon)], { renderer, radius: radius(), color: '#176552', weight: radius() < 2 ? 0 : 0.6, fillColor: '#176552', fillOpacity: 0.7 }).bindPopup(label).addTo(points);
     }
     if (!result.points.length) map.setView([23.7, 90.1], 7);
     if (result.points.length) map.fitBounds(L.latLngBounds(result.points.map((r) => [Number(r.lat), Number(r.lon)])), { padding: [15, 15], maxZoom: 9 });

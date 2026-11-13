@@ -58,3 +58,4 @@
 .atlas-filters label span { font-weight: 600; }
 .figure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .atlas-error { padding: 14px 16px; background: #fff4e6; color: #87520c; border-radius: 6px; }
+
