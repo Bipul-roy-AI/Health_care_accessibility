@@ -9,20 +9,6 @@
     amber: ['#fdf1e0', '#f6d9ab', '#edbb74', '#df9743', '#c56f22', '#9d4e12']
   };
   const MISSING = '#e6e4dc';
-  // Optional reference basemaps under the polygons. Fills turn semi-transparent
-  // when one is shown so roads, rivers, towns and relief stay readable.
-  const OSM = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors';
-  const BASEMAPS = [
-    { id: 'light', en: 'Light (grey)', bn: 'হালকা (ধূসর)', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      options: { maxZoom: 19, attribution: OSM, className: 'light-basemap-tiles' } },
-    { id: 'street', en: 'Streets', bn: 'রাস্তা', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      options: { maxZoom: 19, attribution: OSM } },
-    { id: 'terrain', en: 'Terrain', bn: 'ভূপ্রকৃতি', url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-      options: { maxZoom: 17, subdomains: 'abc', attribution: `${OSM}, SRTM · style &copy; <a href="https://opentopomap.org" target="_blank" rel="noopener noreferrer">OpenTopoMap</a> (CC-BY-SA)` } },
-    { id: 'none', en: 'No basemap', bn: 'বেসম্যাপ নেই', url: null }
-  ];
-  const BASEMAP_KEY = 'shasthopath-atlas-basemap';
-  const storedBasemap = () => { try { return localStorage.getItem(BASEMAP_KEY); } catch (_) { return null; } };
   const bn = () => document.documentElement.lang === 'bn';
   const fmt = (value, digits = 0) => Number.isFinite(value)
     ? value.toLocaleString(bn() ? 'bn-BD' : 'en-GB', { maximumFractionDigits: digits }) : (bn() ? 'তথ্য নেই' : 'no data');
@@ -54,35 +40,10 @@
     map.attributionControl.setPrefix(false);
     map.attributionControl.addAttribution('BBS/OCHA · <a href="https://www.geoboundaries.org" target="_blank" rel="noopener noreferrer">geoBoundaries</a> (CC BY 3.0 IGO)');
     const canvas = L.canvas({ padding: 0.3 });
-    const state = { layer: null, metric: null, selected: null, legend: null, token: 0, thin: false, basemap: null, tiles: null };
-    const basemapControl = L.control({ position: 'topright' });
-    basemapControl.onAdd = () => {
-      const box = L.DomUtil.create('label', 'choropleth-basemap');
-      box.innerHTML = '<span></span><select></select>';
-      L.DomEvent.disableClickPropagation(box);
-      L.DomEvent.disableScrollPropagation(box);
-      box.querySelector('select').addEventListener('change', (event) => setBasemap(event.target.value));
-      state.basemapBox = box;
-      return box;
-    };
-    basemapControl.addTo(map);
-    function basemapLabels() {
-      const box = state.basemapBox, select = box.querySelector('select');
-      box.querySelector('span').textContent = bn() ? 'বেসম্যাপ' : 'Basemap';
-      select.innerHTML = BASEMAPS.map((b) => `<option value="${b.id}">${bn() ? b.bn : b.en}</option>`).join('');
-      select.value = state.basemap;
-    }
-    function setBasemap(id) {
-      const chosen = BASEMAPS.find((b) => b.id === id) || BASEMAPS[0];
-      if (state.tiles) map.removeLayer(state.tiles);
-      state.tiles = chosen.url ? L.tileLayer(chosen.url, chosen.options).addTo(map) : null;
-      state.basemap = chosen.id;
-      try { localStorage.setItem(BASEMAP_KEY, chosen.id); } catch (_) { /* storage blocked */ }
-      basemapLabels();
-      if (state.layer) state.layer.setStyle(style);
-    }
-    setBasemap(options.basemap || storedBasemap() || 'light');
-    document.addEventListener('site-language', basemapLabels);
+    const state = { layer: null, metric: null, selected: null, legend: null, token: 0, thin: false };
+    // Reference basemap (shared with the other maps); fills thin out over tiles.
+    const layers = window.MapLayers.addLayerControl(map, { storageKey: 'shasthopath-atlas-basemap', basemap: options.basemap,
+      onBasemap: () => { if (state.layer) state.layer.setStyle(style); } });
     const legendControl = L.control({ position: 'bottomright' });
     legendControl.onAdd = () => { state.legend = L.DomUtil.create('div', 'choropleth-legend'); return state.legend; };
     legendControl.addTo(map);
@@ -97,7 +58,7 @@
     }
     function style(feature) {
       const selected = state.selected === feature.properties.pcode;
-      return { fillColor: fill(feature.properties.pcode), fillOpacity: state.tiles ? 0.72 : 0.92, color: selected ? '#153a30' : '#ffffff',
+      return { fillColor: fill(feature.properties.pcode), fillOpacity: layers.hasTiles() ? 0.72 : 0.92, color: selected ? '#153a30' : '#ffffff',
                weight: selected ? 2.4 : state.thin ? 0.25 : 0.7, opacity: 1 };
     }
     function legend() {
@@ -164,9 +125,9 @@
       map.invalidateSize();
       if (state.layer) map.fitBounds(state.layer.getBounds(), { padding: [8, 8] });
     }
-    return { map, setLayer, setMetric, select, fit, refresh: restyle, setBasemap, basemap: () => state.basemap,
+    return { map, setLayer, setMetric, select, fit, refresh: restyle, setBasemap: layers.setBasemap, basemap: layers.basemap,
              layerCount: () => (state.layer ? state.layer.getLayers().length : 0) };
   }
 
-  window.AtlasChoropleth = { create, RAMPS, BASEMAPS: BASEMAPS.map((b) => b.id) };
+  window.AtlasChoropleth = { create, RAMPS };
 })();

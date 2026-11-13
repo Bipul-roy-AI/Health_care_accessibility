@@ -37,15 +37,15 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
 
   // Basemap switcher: grey OSM by default, then streets, terrain and none; fills thin out over tiles.
   await page.waitForSelector('#atlas-map .light-basemap-tiles img.leaflet-tile', { state: 'attached' });
-  assert.equal(await page.$eval('#atlas-map .choropleth-basemap select', (s) => s.options.length), 4);
+  assert.equal(await page.$eval('#atlas-map .map-layer-control select', (s) => s.options.length), 4);
   const opacity = () => page.$eval('#atlas-map path.leaflet-interactive', (p) => Number(p.getAttribute('fill-opacity')));
   assert.ok((await opacity()) < 0.8);
-  await page.selectOption('#atlas-map .choropleth-basemap select', 'terrain');
+  await page.selectOption('#atlas-map .map-layer-control select', 'terrain');
   await page.waitForSelector('#atlas-map img.leaflet-tile[src*="opentopomap"]', { state: 'attached' });
-  await page.selectOption('#atlas-map .choropleth-basemap select', 'none');
+  await page.selectOption('#atlas-map .map-layer-control select', 'none');
   await page.waitForFunction(() => !document.querySelector('#atlas-map img.leaflet-tile'));
   assert.ok((await opacity()) > 0.9);
-  await page.selectOption('#atlas-map .choropleth-basemap select', 'light');
+  await page.selectOption('#atlas-map .map-layer-control select', 'light');
 
   // Every level draws all of its areas; unions use a canvas.
   for (const [level, count] of [['division', levels.division], ['upazila', levels.upazila]]) {
@@ -77,7 +77,7 @@ const PAGES = ['index.html', 'overview.html', 'statistics.html', 'analysis.html'
   assert.equal(await page.getAttribute('html', 'lang'), 'bn');
   assert.equal(await page.textContent('h1'), 'স্বাস্থ্যসেবার দূরত্ব');
   assert.match(await page.textContent('#k-hospitals'), /[০-৯]/);
-  assert.equal((await page.textContent('#atlas-map .choropleth-basemap span')).trim(), 'বেসম্যাপ');
+  assert.equal((await page.textContent('#atlas-map .map-layer-control .map-layer-row span')).trim(), 'বেসম্যাপ');
   for (const name of PAGES) {
     const p = await context.newPage(); // same context: shares the stored language
     watch(p, name === 'index.html' || name === 'overview.html');

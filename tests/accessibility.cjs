@@ -10,6 +10,8 @@ const { chromium } = require('playwright');
     page.on('pageerror', (error) => errors.push(error.message));
     await page.route('**/*', (route) => {
       const url = new URL(route.request().url());
+      // Basemap tiles are the only allowed external requests; answer them with a blank PNG.
+      if (/(^|\.)(tile\.openstreetmap\.org|tile\.opentopomap\.org)$/.test(url.hostname)) return route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=', 'base64') });
       if (!['127.0.0.1','localhost'].includes(url.hostname)) { external.push(url.href); return route.abort(); }
       return route.continue();
     });
@@ -22,6 +24,16 @@ const { chromium } = require('playwright');
     await page.waitForFunction((value) => document.querySelector('#access-total').textContent === value, community.total);
     assert.equal(await page.locator('#access-mapped').textContent(), community.mapped);
     assert.match(await page.locator('#access-status').textContent(), /points shown/);
+    // Reference layers: grey basemap plus division and district outlines by default; unions load on demand.
+    await page.waitForSelector('#access-map .light-basemap-tiles img.leaflet-tile', { state: 'attached' });
+    await page.waitForFunction(() => document.querySelectorAll('#access-map .leaflet-boundaries-pane path').length === 8 + 64);
+    await page.check('#access-map input[data-boundary="union"]');
+    await page.waitForSelector('#access-map .leaflet-boundaries-pane canvas');
+    await page.uncheck('#access-map input[data-boundary="union"]');
+    await page.uncheck('#access-map input[data-boundary="district"]');
+    await page.waitForFunction(() => document.querySelectorAll('#access-map .leaflet-boundaries-pane path').length === 8);
+    await page.selectOption('#access-map .map-layer-control select', 'none');
+    await page.waitForFunction(() => !document.querySelector('#access-map img.leaflet-tile'));
     await page.selectOption('#access-tier', 'union');
     assert.equal(await page.locator('#access-total').textContent(), union.total);
     assert.equal(await page.locator('#access-mapped').textContent(), union.mapped);
