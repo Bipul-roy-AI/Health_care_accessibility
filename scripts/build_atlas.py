@@ -261,9 +261,6 @@ def assign(gx, gy, areas, transform):
     result = np.full(gx.shape[0], -1, dtype=int)
     cell_idx, poly_idx = tree.query(cells, predicate="intersects")
     result[cell_idx[::-1]] = poly_idx[::-1]  # first match wins
-    for i in np.flatnonzero(result == -1):
-        nearest = tree.query_nearest(cells[i])
-        result[i] = int(nearest[0])
     return result
 
 
@@ -298,6 +295,8 @@ def main() -> int:
     parser.add_argument("--adm3", type=Path, required=True)
     parser.add_argument("--adm4", type=Path, required=True)
     parser.add_argument("--census", type=Path, help="data/population/bbs-census-2022.json: also build data/access/")
+    parser.add_argument("--friction", type=Path, help="bd_friction_2019_1km.tif (Earth Engine export): travel time")
+    parser.add_argument("--floods", type=Path, nargs="*", help="bd_floods_years.tif and/or bd_floods_events.tif (Earth Engine exports)")
     args = parser.parse_args()
 
     from pyproj import Transformer
@@ -384,11 +383,15 @@ def main() -> int:
                 if f["usable"]:
                     counter["usable"] += 1
 
-    # Distance grid.
+    # Distance grid: 1 km cells whose centre lies in a union. The OSM country outline also
+    # covers territorial sea, so cells outside every union polygon (sea, estuary) are dropped.
     gx, gy = grid_cells(to_utm)
+    union_of = assign(gx, gy, unions, to_utm)
+    on_land = union_of >= 0
+    gx, gy, union_of = gx[on_land], gy[on_land], union_of[on_land]
     cells = np.column_stack([gx, gy])
     distances = {c: cKDTree(np.array(points[c])).query(cells, k=1)[0] / 1000.0 for c in DISTANCE_CLASSES}
-    assignment = {"union": assign(gx, gy, unions, to_utm)}
+    assignment = {"union": union_of}
     union_parent = np.array([upazilas.index(u["parent"]) for u in unions])
     upazila_parent = np.array([districts.index(u["parent"]) for u in upazilas])
     district_parent = np.array([divisions.index(d["parent"]) for d in districts])
@@ -402,7 +405,7 @@ def main() -> int:
         access = build_access.build({"census": args.census, "divisions": divisions, "districts": districts,
                                      "upazilas": upazilas, "unions": unions, "facilities": facilities,
                                      "to_utm": to_utm, "gx": gx, "gy": gy, "union_of_cell": assignment["union"],
-                                     "generated": GENERATED})
+                                     "generated": GENERATED, "friction": args.friction, "floods": args.floods})
         print("access:", json.dumps(access["matching"]["union_population_share"]))
     atlas_dir = ROOT / "data/atlas"
     atlas_dir.mkdir(exist_ok=True)

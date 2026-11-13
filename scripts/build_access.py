@@ -59,6 +59,17 @@ def tags(f):
     return out
 
 
+def people_curve(distance, weight, step=0.5, limit=40.0):
+    """Share of people within each distance (0.5 km steps to 40 km) and population-weighted median / P90."""
+    order = np.argsort(distance)
+    d, cum = distance[order], np.cumsum(weight[order]) / weight.sum()
+    marks = np.arange(step, limit + step / 2, step)
+    shares = np.interp(marks, d, cum, left=0.0, right=1.0)
+    quantile = lambda q: float(d[np.searchsorted(cum, q)])  # noqa: E731
+    return {"curve": [[round(float(m), 1), round(100 * float(v), 2)] for m, v in zip(marks, shares)],
+            "median_km": round(quantile(0.5), 2), "p90_km": round(quantile(0.9), 2)}
+
+
 def weighted_gini(values, weights):
     values, weights = np.asarray(values, float), np.asarray(weights, float)
     keep = np.isfinite(values) & (weights > 0)
@@ -234,6 +245,13 @@ def build(ctx) -> dict:
     area_of["division"] = di_dv[area_of["district"]]
     levels = {"division": divisions, "district": districts, "upazila": upazilas, "union": unions}
 
+    # Travel time and flood-disrupted access, when the Earth Engine exports are supplied.
+    if ctx.get("friction"):
+        import build_travel
+        build_travel.build({"friction": ctx["friction"], "floods": ctx.get("floods"), "xy": xy, "weight": weight,
+                                             "area_of": area_of, "levels": levels, "generated": ctx["generated"],
+                                             "class_points": {k: v for k, v in class_points.items()}})
+
     def access_stats(level):
         idx, n = area_of[level], len(levels[level])
         pop = np.bincount(idx, weights=weight, minlength=n)
@@ -407,6 +425,7 @@ def build(ctx) -> dict:
                 "access": {c: {"within": {str(t): round(100 * float(weight[dist[c] <= t].sum()) / total, 1) for t in THRESHOLDS},
                                "people_within": {str(t): round(float(weight[dist[c] <= t].sum())) for t in THRESHOLDS},
                                "mean_km": round(float((weight * dist[c]).sum()) / total, 2),
+                               **people_curve(dist[c], weight),
                                "points": len(class_points[c])} for c in ACCESS_CLASSES}}
     pop_source_share = Counter()
     for i in range(len(unions)):

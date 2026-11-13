@@ -73,7 +73,10 @@
         svg.append(element('rect', { x: width / 2, y: height - 22, width: 10, height: 10, fill: '#e8c8a5' })); text(svg, L('Unavailable / withheld', 'অপ্রাপ্য / বাদ রাখা'), width / 2 + 16, height - 13, { 'font-size': 10 });
       }
     } else if (kind === 'lines') {
-      const height = 340, left = 50, right = width - 20, top = 26, bottom = height - 56;
+      // Legend wraps onto extra rows (options.legendWidth per item); lines may be dashed (row.dash).
+      const legendWidth = options.legendWidth || 120, span = width - 70;
+      const perRow = Math.max(1, Math.min(rows.length, Math.floor(span / legendWidth))), legendRows = Math.ceil(rows.length / perRow);
+      const height = 340 + 15 * (legendRows - 1), left = 50, right = width - 20, top = 26, bottom = 284;
       const xmin = options.xmin ?? 0;
       const xmax = options.xmax ?? nice(Math.max(...rows.flatMap((r) => r.points.map((p) => p[0])), 0));
       const xLabel = options.xFormat || ((value) => fmt(value, xmax - xmin < 10 ? 1 : 0));
@@ -95,7 +98,7 @@
       rows.forEach((row) => {
         const colour = row.color || '#176b58';
         const path = row.points.map((p, i) => (i ? 'L' : 'M') + px(p[0]).toFixed(1) + ' ' + py(p[1]).toFixed(1)).join('');
-        svg.append(element('path', { d: path, fill: 'none', stroke: colour, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+        svg.append(element('path', { d: path, fill: 'none', stroke: colour, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', ...(row.dash ? { 'stroke-dasharray': row.dash } : {}) }));
         const last = row.points[row.points.length - 1];
         ends.push({ label: row.label, colour, y: py(last[1]) - 6 });
       });
@@ -108,9 +111,11 @@
       if (options.endLabels !== false) ends.forEach((end) => text(svg, end.label, right - 2, end.y, { 'text-anchor': 'end', 'font-size': 11, 'font-weight': 600, fill: end.colour, style: 'paint-order:stroke;stroke:#fff;stroke-width:3px' }));
       const legend = element('g', {});
       rows.forEach((row, index) => {
-        const x = left + index * Math.max(120, (right - left) / rows.length);
-        legend.append(element('rect', { x, y: height - 14, width: 10, height: 3, fill: row.color || '#176b58' }));
-        text(svg, row.label, x + 15, height - 9, { 'font-size': 10 });
+        const x = left + (index % perRow) * (span / perRow), y = 326 + Math.floor(index / perRow) * 15;
+        legend.append(row.dash
+          ? element('line', { x1: x, x2: x + 12, y1: y + 1.5, y2: y + 1.5, stroke: row.color || '#176b58', 'stroke-width': 2, 'stroke-dasharray': '3 2' })
+          : element('rect', { x, y, width: 12, height: 3, fill: row.color || '#176b58' }));
+        text(svg, row.label, x + 17, y + 5, { 'font-size': 10 });
       });
       svg.append(legend);
       const hover = element('g', { style: 'display:none', 'pointer-events': 'none' });
@@ -141,6 +146,35 @@
       function closestX(points, value) { let best = points[0]; for (const point of points) if (Math.abs(point[0] - value) < Math.abs(best[0] - value)) best = point; return best[0]; }
       wrap(options.axisLabel || L('Value', 'মান'), Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, width / 2, bottom + 34 + i * 13, { 'text-anchor': 'middle', 'font-size': 11 }));
       text(svg, options.yLabel || '', 0, 0, { transform: `translate(12 ${(top + bottom) / 2}) rotate(-90)`, 'text-anchor': 'middle', 'font-size': 11 });
+    } else if (kind === 'columns') {
+      // Vertical columns for a time series: rows {label, value, color?, display?, detail?}; options.legend [{label, color}],
+      // options.labelEvery (x labels), yLabel, axisLabel, digits, maximum.
+      const legend = options.legend || [], height = 300 + (legend.length ? 22 : 0), left = 54, right = width - 16, top = 18, bottom = 238;
+      const maximum = options.maximum ?? nice(Math.max(...rows.map((r) => r.value), 0));
+      svg = canvas(height);
+      for (let i = 0; i <= 4; i++) {
+        const y = bottom - (bottom - top) * i / 4, value = maximum * i / 4;
+        svg.append(element('line', { x1: left, x2: right, y1: y, y2: y, stroke: '#e1e9e3' }));
+        text(svg, fmt(value, options.digits ?? (maximum < 10 ? 1 : 0)), left - 6, y + 4, { 'text-anchor': 'end', 'font-size': 10 });
+      }
+      const step = (right - left) / rows.length, bar = Math.max(2, step - 2), every = options.labelEvery || Math.ceil(rows.length / Math.max(1, Math.floor((right - left) / 34)));
+      rows.forEach((row, i) => {
+        const x = left + i * step + (step - bar) / 2, h = maximum > 0 ? Math.max(0, Math.min(1, row.value / maximum)) * (bottom - top) : 0;
+        const value = row.display ?? fmt(row.value, options.digits ?? 0);
+        const group = element('g', { class: 'chart-observation', 'data-label': row.label, 'data-value': row.value });
+        group.append(element('title', {}, `${row.label}: ${value}${row.detail ? '; ' + row.detail : ''}`));
+        group.append(element('rect', { x: left + i * step, y: top, width: step, height: bottom - top, fill: 'transparent' }));
+        group.append(element('rect', { x, y: bottom - h, width: bar, height: h, rx: Math.min(2, bar / 2), fill: row.color || '#176b58' }));
+        svg.append(group);
+        if (i % every === 0 || i === rows.length - 1 && (rows.length - 1) % every > every / 2) text(svg, row.label, x + bar / 2, bottom + 15, { 'text-anchor': 'middle', 'font-size': 10 });
+      });
+      wrap(options.axisLabel || '', Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, (left + right) / 2, bottom + 34 + i * 13, { 'text-anchor': 'middle', 'font-size': 11 }));
+      text(svg, options.yLabel || '', 0, 0, { transform: `translate(12 ${(top + bottom) / 2}) rotate(-90)`, 'text-anchor': 'middle', 'font-size': 11 });
+      legend.forEach((item, i) => {
+        const x = left + i * Math.max(150, (right - left) / legend.length), y = bottom + 56;
+        svg.append(element('rect', { x, y, width: 12, height: 10, rx: 2, fill: item.color }));
+        text(svg, item.label, x + 17, y + 9, { 'font-size': 10 });
+      });
     } else if (kind === 'xy') {
       // General scatter: options.xLabel, yLabel, xmax, ymax, digits, refX/refY {value,label}; rows {label, x, y, color?, detail?}.
       const height = 340, left = 50, right = width - 20, top = 24, bottom = height - 56;
@@ -196,7 +230,7 @@
     const clean = kind === 'lines'
       ? rows.filter((r) => Array.isArray(r.points) && r.points.length > 1 && r.points.every((p) => Number.isFinite(p[0]) && Number.isFinite(p[1])))
       : kind === 'xy' ? rows.filter((r) => Number.isFinite(r.x) && Number.isFinite(r.y))
-      : rows.filter((r) => kind === 'bars' ? Number.isFinite(r.value) && r.value >= 0 : Number.isFinite(r.x) && r.x >= 0 && Number.isFinite(r.y) && r.y >= 0 && r.y <= 100);
+      : rows.filter((r) => kind === 'bars' || kind === 'columns' ? Number.isFinite(r.value) && r.value >= 0 : Number.isFinite(r.x) && r.x >= 0 && Number.isFinite(r.y) && r.y >= 0 && r.y <= 100);
     let state = states.get(target);
     if (!state) {
       state = {}; states.set(target, state);
@@ -221,5 +255,5 @@
     if (!headers || new Set(headers).size !== headers.length || rows.some((r) => r.length !== headers.length)) throw new Error('Invalid CSV columns');
     return rows.map((r) => Object.fromEntries(headers.map((h, i) => [h, r[i]])));
   }
-  window.HealthCharts = { bars: (target, rows, options) => render('bars', target, rows, options), scatter: (target, rows, options) => render('scatter', target, rows, options), lines: (target, rows, options) => render('lines', target, rows, options), xy: (target, rows, options) => render('xy', target, rows, options), csv };
+  window.HealthCharts = { bars: (target, rows, options) => render('bars', target, rows, options), scatter: (target, rows, options) => render('scatter', target, rows, options), lines: (target, rows, options) => render('lines', target, rows, options), xy: (target, rows, options) => render('xy', target, rows, options), columns: (target, rows, options) => render('columns', target, rows, options), csv };
 })();

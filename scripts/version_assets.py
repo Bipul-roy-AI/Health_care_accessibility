@@ -1,4 +1,4 @@
-"""Version local CSS/JS/SVG references in the generated site to refresh browser caches."""
+"""Version local CSS/JS/SVG/PNG references in the generated site to refresh browser caches."""
 import argparse
 import hashlib
 from pathlib import Path
@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--directory", type=Path, required=True)
 args = parser.parse_args()
 root = args.directory.resolve()
-pattern = re.compile(r'''((?:src|href)=["'])(\./[^"'?#]+\.(?:css|js|svg))(?:\?[^"']*)?(["'])''')
+pattern = re.compile(r'''((?:src|href)=["'])(\./[^"'?#]+\.(?:css|js|svg|png))(?:\?[^"']*)?(["'])''')
 
 
 def version(match):

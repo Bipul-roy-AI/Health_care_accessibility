@@ -1,5 +1,5 @@
 'use strict';
-// Browser checks for the Access study page (population access, BBS Census 2022 x DGHS).
+// Browser checks for the Access page (population access, BBS Census 2022 x DGHS).
 //   BASE_URL=http://127.0.0.1:8000 node tests/accessibility.cjs
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -66,6 +66,70 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     assert.equal(await page.locator('#t-corr tr').count(), 4);
     assert.equal(await page.locator('#t-tiers tr').count(), 9);
 
+    // People versus land: 3 classes x (people, land) curves; national table people / land.
+    assert.equal(await page.locator('#c-curve svg path[fill="none"][stroke-dasharray]').count(), 3);
+    assert.equal(await page.locator('#c-curve svg path[fill="none"]').count(), 6);
+    const landNat = JSON.parse(fs.readFileSync('data/atlas/distance.json', 'utf8')).national;
+    assert.equal(await page.locator('#t-national tr').count(), 3);
+    assert.equal((await page.locator('#t-national tr').first().locator('td').nth(2).textContent()), landNat.public_hospital.median_km.toFixed(1));
+
+    // Location quality moved from the Distance page.
+    const quality = JSON.parse(fs.readFileSync('data/atlas/location-quality.json', 'utf8'));
+    assert.match((await page.textContent('#q-summary')).replace(/,/g, ''), new RegExp(String(quality.flagged)));
+    assert.equal(await page.locator('#c-flagged .chart-observation').count(), 20);
+    assert.ok(await page.$('#c-status svg'));
+
+    // Land basis on the map: former Distance measures, ranking excludes areas with < 5 grid cells.
+    const landDistricts = JSON.parse(fs.readFileSync('data/atlas/areas-district.json', 'utf8')).areas;
+    await page.selectOption('#a-basis', 'land');
+    await page.waitForFunction(() => document.querySelector('#a-metric').value.startsWith('land_'));
+    assert.equal(await page.locator('#a-metric option').count(), 7);
+    const farthest = [...landDistricts].sort((a, b) => b.distance.public_hospital.median_km - a.distance.public_hospital.median_km)[0];
+    assert.equal(Number(await page.locator('#c-rank .chart-observation').first().getAttribute('data-value')), farthest.distance.public_hospital.median_km);
+    await page.fill('#a-search', farthest.name); await page.dispatchEvent('#a-search', 'change');
+    await page.waitForFunction(() => /Land \(area basis\)/.test(document.querySelector('#a-detail').textContent));
+    const landCsv = page.waitForEvent('download');
+    await page.click('#a-export');
+    assert.equal((await landCsv).suggestedFilename(), 'bangladesh-health-access-land-district.csv');
+    await page.selectOption('#a-basis', 'people');
+    await page.waitForFunction(() => document.querySelector('#a-metric').value === 'within5_public');
+
+    // Travel time: national table and curves from travel.json; travel basis on the map.
+    const travel = JSON.parse(fs.readFileSync('data/access/travel.json', 'utf8'));
+    assert.equal(await page.locator('#t-travel tr').count(), 5);
+    assert.equal(await page.locator('#t-travel tr').first().locator('td').nth(1).textContent(), travel.national.any_hospital.median_min.toFixed(1));
+    assert.equal(await page.locator('#c-travel svg path[fill="none"]').count(), 4);
+    await page.selectOption('#a-basis', 'travel');
+    await page.waitForFunction(() => document.querySelector('#a-metric').value === 'tmean_any');
+    const tp = travel.per_area.district, tmean = tp.travel.any_hospital.mean_min;
+    const slowest = Math.max(...tmean);
+    assert.equal(Number(await page.locator('#c-rank .chart-observation').first().getAttribute('data-value')), slowest);
+    const slowName = districts.find((d) => d.pcode === tp.pcodes[tmean.indexOf(slowest)]).name;
+    await page.fill('#a-search', slowName); await page.dispatchEvent('#a-search', 'change');
+    await page.waitForFunction(() => /Travel time \(people\)/.test(document.querySelector('#a-detail').textContent));
+    const travelCsv = page.waitForEvent('download');
+    await page.click('#a-export');
+    assert.equal((await travelCsv).suggestedFilename(), 'bangladesh-health-travel-floods-district.csv');
+
+    // Floods: yearly charts (26 years), named-event table, event selector on the map.
+    const floods = JSON.parse(fs.readFileSync('data/access/floods.json', 'utf8'));
+    assert.equal(floods.years.length, 26);
+    assert.equal(await page.locator('#c-flood-years .chart-observation').count(), 26);
+    assert.equal(await page.locator('#c-flood-lost .chart-observation').count(), 26);
+    assert.equal(await page.locator('#t-events tr').count(), floods.events.length);
+    assert.ok(floods.events.every((e) => e.flooded_km2 <= e.surface_water_km2));
+    const ev = floods.events[5];
+    await page.click(`#t-events tr:nth-child(6) .flood-map-btn`);
+    await page.waitForFunction((id) => document.querySelector('#a-flood').value === id && !document.querySelector('#access-map.loading'), ev.id);
+    assert.equal(await page.$eval('#a-basis', (e) => e.value), 'floods');
+    assert.equal(await page.$eval('#a-flood-wrap', (e) => e.hidden), false);
+    const fd = floods.per_area.district, lostTop = Math.max(...fd.pcodes.map((p, i) => fd[ev.id].lost_hospital[i] / districts.find((d) => d.pcode === p).population * 100));
+    assert.ok(Math.abs(Number(await page.locator('#c-rank .chart-observation').first().getAttribute('data-value')) - lostTop) < 1e-9);
+    await page.selectOption('#a-metric', 'f_years');
+    assert.equal(await page.$eval('#a-flood-wrap', (e) => e.hidden), true);
+    await page.selectOption('#a-basis', 'people');
+    await page.waitForFunction(() => document.querySelector('#a-metric').value === 'within5_public');
+
     // Cluster map: upazila level, categorical legend.
     await page.click('#t-moran tr:first-child button');
     await page.waitForFunction((n) => document.querySelectorAll('#access-map .leaflet-overlay-pane path.leaflet-interactive').length === n, upazilas.length, { timeout: 30000 });
@@ -88,7 +152,7 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     // Bangla.
     await page.click('#language');
     assert.equal(await page.getAttribute('html', 'lang'), 'bn');
-    assert.equal(await page.textContent('h1'), 'জনগণের স্বাস্থ্যসেবা প্রবেশগম্যতা');
+    assert.equal(await page.textContent('h1'), 'স্বাস্থ্যসেবায় প্রবেশগম্যতা');
     assert.match(await page.textContent('#k-public5'), /[০-৯]/);
     assert.match(await page.textContent('#access-map .map-layer-control'), /বেসম্যাপ/);
 
@@ -106,6 +170,6 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     await broken.goto(base + '/accessibility.html');
     await broken.waitForSelector('#atlas-status.atlas-error');
     assert.ok(await broken.$('#atlas-content[hidden]'));
-    console.log('PASS: Access study (BBS population x DGHS): KPIs, layers, ranking, detail, points, inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
+    console.log('PASS: Access page (BBS population x DGHS): KPIs, layers, ranking, detail, points, people vs land curves, location quality, land basis + CSV, travel time + CSV, floods (years, events, map selector), inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
   } finally { await browser.close(); }
 })();
