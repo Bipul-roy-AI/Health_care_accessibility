@@ -8,3 +8,5 @@ matplotlib==3.11.2
 osmium==4.3.2
 shapely==2.2.0
 topojson==2.2
+rasterio==1.5.2
+scikit-image==0.26.0

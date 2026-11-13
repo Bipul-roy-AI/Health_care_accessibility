@@ -298,6 +298,8 @@ def main() -> int:
     parser.add_argument("--adm3", type=Path, required=True)
     parser.add_argument("--adm4", type=Path, required=True)
     parser.add_argument("--census", type=Path, help="data/population/bbs-census-2022.json: also build data/access/")
+    parser.add_argument("--friction", type=Path, help="bd_friction_2019_1km.tif (Earth Engine export): travel time")
+    parser.add_argument("--floods", type=Path, help="bd_floods.tif (Earth Engine export): flood-disrupted access")
     args = parser.parse_args()
 
     from pyproj import Transformer
@@ -402,7 +404,7 @@ def main() -> int:
         access = build_access.build({"census": args.census, "divisions": divisions, "districts": districts,
                                      "upazilas": upazilas, "unions": unions, "facilities": facilities,
                                      "to_utm": to_utm, "gx": gx, "gy": gy, "union_of_cell": assignment["union"],
-                                     "generated": GENERATED})
+                                     "generated": GENERATED, "friction": args.friction, "floods": args.floods})
         print("access:", json.dumps(access["matching"]["union_population_share"]))
     atlas_dir = ROOT / "data/atlas"
     atlas_dir.mkdir(exist_ok=True)

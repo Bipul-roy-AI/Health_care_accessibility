@@ -245,6 +245,13 @@ def build(ctx) -> dict:
     area_of["division"] = di_dv[area_of["district"]]
     levels = {"division": divisions, "district": districts, "upazila": upazilas, "union": unions}
 
+    # Travel time and flood-disrupted access, when the Earth Engine exports are supplied.
+    if ctx.get("friction"):
+        import build_travel
+        build_travel.build({"friction": ctx["friction"], "floods": ctx.get("floods"), "xy": xy, "weight": weight,
+                                             "area_of": area_of, "levels": levels, "generated": ctx["generated"],
+                                             "class_points": {k: v for k, v in class_points.items()}})
+
     def access_stats(level):
         idx, n = area_of[level], len(levels[level])
         pop = np.bincount(idx, weights=weight, minlength=n)
