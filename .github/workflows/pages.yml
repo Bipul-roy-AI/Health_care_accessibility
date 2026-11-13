@@ -65,7 +65,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir _site
-          cp atlas.html atlas.css atlas.js choropleth.js map-layers.js i18n.js names-bn.js statistics-charts.js charts.js charts.css analysis.html analysis.js analysis.css accessibility.html accessibility.js accessibility.css statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg logo.svg _site/
+          cp atlas.html atlas.css atlas.js choropleth.js map-layers.js i18n.js names-bn.js statistics-charts.js charts.js charts.css analysis.html analysis.js analysis.css accessibility.html accessibility.js accessibility.css statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.png apple-touch-icon.png logo.png _site/
           cp -r vendor _site/vendor
           cp -r data _site/data
           touch _site/.nojekyll
