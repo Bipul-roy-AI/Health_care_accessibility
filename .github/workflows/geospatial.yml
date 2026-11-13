@@ -14,4 +14,5 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -r scripts/requirements-geospatial.txt
       - run: python -m unittest discover -s tests/geospatial -v
+      - run: python -m unittest discover -s tests -p 'test_travel.py' -v
       - run: python scripts/run_accessibility.py audit --output /tmp/dghs-input-audit.json
