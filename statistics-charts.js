@@ -1,6 +1,7 @@
 'use strict';
 (() => {
   const charts = new WeakMap(), palette = ['#176b58', '#4196ab', '#b98c36', '#9c80aa', '#71988a', '#d27b59'];
+  const css = (name, fallback) => (getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback);
   const L = (en, bn) => (document.documentElement.lang === 'bn' ? bn : en);
   const number = (n, digits = 0) => n.toLocaleString((document.documentElement.lang === 'bn' ? 'bn-BD' : 'en-GB'), { maximumFractionDigits: digits });
   const wrap = (text, length) => {
@@ -11,11 +12,11 @@
   const figurePlugin = {
     id: 'statisticsFigure',
     beforeDraw(chart) {
-      const { ctx, width, height } = chart; ctx.save(); ctx.globalCompositeOperation = 'destination-over'; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height); ctx.restore();
+      const { ctx, width, height } = chart; ctx.save(); ctx.globalCompositeOperation = 'destination-over'; ctx.fillStyle = css('--chart-bg', '#fff'); ctx.fillRect(0, 0, width, height); ctx.restore();
     },
     afterDatasetsDraw(chart) {
       const { ctx } = chart, opt = chart.options.plugins.statisticsFigure;
-      ctx.save(); ctx.fillStyle = '#214b3e'; ctx.font = '600 11px system-ui, sans-serif';
+      ctx.save(); ctx.fillStyle = css('--chart-title', '#214b3e'); ctx.font = '600 11px system-ui, sans-serif';
       if (chart.config.type === 'doughnut') {
         const arc = chart.getDatasetMeta(0).data[0];
         if (arc) { ctx.textAlign = 'center'; ctx.font = '700 23px system-ui, sans-serif'; ctx.fillText(number(opt.total), arc.x, arc.y); ctx.font = '11px system-ui, sans-serif'; ctx.fillText(opt.totalLabel, arc.x, arc.y + 21); }
@@ -54,8 +55,8 @@
   function options(title, source, extra = {}) {
     return { responsive: true, maintainAspectRatio: false, animation: false, devicePixelRatio: 2,
       layout: { padding: { top: 8, right: 44, bottom: 10, left: 5 } },
-      plugins: { title: { display: true, text: wrap(title, 42), align: 'start', color: '#214b3e', font: { size: 14, weight: '600' }, padding: { bottom: 8 } },
-        subtitle: { display: true, text: wrap(source, 62), align: 'start', color: '#61766e', font: { size: 10 }, padding: { bottom: 22 } },
+      plugins: { title: { display: true, text: wrap(title, 42), align: 'start', color: css('--chart-title', '#214b3e'), font: { size: 14, weight: '600' }, padding: { bottom: 8 } },
+        subtitle: { display: true, text: wrap(source, 62), align: 'start', color: css('--chart-muted', '#61766e'), font: { size: 10 }, padding: { bottom: 22 } },
         legend: { display: false }, statisticsFigure: { digits: 0 }, tooltip: { displayColors: true } }, ...extra };
   }
   function plot(target, rows, opt = {}) {
@@ -66,7 +67,7 @@
       charts.get(target)?.destroy(); target.textContent = L('No active listings in this selection.', 'এই বাছাইয়ে কোনো সক্রিয় তালিকা নেই।'); return;
     }
     const config = { type: opt.kind === 'doughnut' ? 'doughnut' : 'bar', plugins: [figurePlugin],
-      data: { labels: rows.map((r) => opt.kind === 'doughnut' ? r.label : wrap(r.label, opt.kind === 'columns' ? 12 : 23)), datasets: [{ label: opt.axisLabel, data: values, backgroundColor: rows.map((r, i) => r.muted ? '#bba984' : opt.kind === 'doughnut' ? palette[i % palette.length] : r.selected ? '#b8842c' : '#267a66'), borderRadius: opt.kind === 'doughnut' ? 0 : 3, borderWidth: opt.kind === 'doughnut' ? 2 : 0, borderColor: '#fff', maxBarThickness: 35 }] },
+      data: { labels: rows.map((r) => opt.kind === 'doughnut' ? r.label : wrap(r.label, opt.kind === 'columns' ? 12 : 23)), datasets: [{ label: opt.axisLabel, data: values, backgroundColor: rows.map((r, i) => r.muted ? '#bba984' : opt.kind === 'doughnut' ? palette[i % palette.length] : r.selected ? '#b8842c' : '#267a66'), borderRadius: opt.kind === 'doughnut' ? 0 : 3, borderWidth: opt.kind === 'doughnut' ? 2 : 0, borderColor: css('--chart-bg', '#fff'), maxBarThickness: 35 }] },
       options: options(title, source) };
     config.options.plugins.statisticsFigure = { digits, total, totalLabel: opt.totalLabel || 'active listings' };
     if (opt.kind === 'doughnut') {
@@ -75,9 +76,9 @@
       config.options.plugins.tooltip.callbacks = { label: (context) => `${context.label}: ${number(context.raw)} (${number(context.raw / total * 100, 1)}%)` };
     } else {
       const horizontal = opt.kind !== 'columns'; config.options.indexAxis = horizontal ? 'y' : 'x';
-      const ticks = { color: '#456456', font: { size: 11 }, maxRotation: 45, autoSkip: false };
+      const ticks = { color: css('--chart-text', '#456456'), font: { size: 11 }, maxRotation: 45, autoSkip: false };
       const category = { grid: { display: false }, ticks };
-      const numeric = { beginAtZero: true, ...(opt.maximum ? { max: opt.maximum } : {}), grid: { color: '#e5ece7' }, title: { display: true, text: wrap(opt.axisLabel || L('Active listings', 'সক্রিয় তালিকা'), 38), color: '#456456' }, ticks: { color: '#456456', callback: (v) => number(v, digits) } };
+      const numeric = { beginAtZero: true, ...(opt.maximum ? { max: opt.maximum } : {}), grid: { color: css('--chart-grid', '#e5ece7') }, title: { display: true, text: wrap(opt.axisLabel || L('Active listings', 'সক্রিয় তালিকা'), 38), color: css('--chart-text', '#456456') }, ticks: { color: css('--chart-text', '#456456'), callback: (v) => number(v, digits) } };
       config.options.scales = horizontal ? { x: numeric, y: category } : { x: category, y: numeric };
       config.options.plugins.tooltip.callbacks = { title: (items) => rows[items[0].dataIndex].label, label: (context) => `${opt.axisLabel}: ${number(context.raw, digits)}` };
     }
@@ -91,7 +92,7 @@
       { label: L('Sanctioned posts', 'অনুমোদিত পদ'), data: rows.map(([, v]) => v.sanctioned), backgroundColor: '#bba984', maxBarThickness: 42 }
     ] }, options: options(title, L('BBS Yearbook 2025, table 13.01; original source: DGHS.', 'BBS বর্ষগ্রন্থ ২০২৫, সারণি ১৩.০১; মূল উৎস: DGHS।')) };
     config.options.plugins.legend = { display: true, position: 'bottom', labels: { usePointStyle: true, font: { size: 11 } } };
-    config.options.scales = { x: { grid: { display: false }, ticks: { color: '#456456' } }, y: { beginAtZero: true, grid: { color: '#e5ece7' }, title: { display: true, text: L('Staff / posts · published 2025', 'জনবল / পদ · ২০২৫'), color: '#456456' } } };
+    config.options.scales = { x: { grid: { display: false }, ticks: { color: css('--chart-text', '#456456') } }, y: { beginAtZero: true, grid: { color: css('--chart-grid', '#e5ece7') }, title: { display: true, text: L('Staff / posts · published 2025', 'জনবল / পদ · ২০২৫'), color: css('--chart-text', '#456456') } } };
     mount(target, config, { title, height: 420 }, [[L('Staff category', 'জনবলের ধরন'), L('Existing staff', 'কর্মরত'), L('Sanctioned posts', 'অনুমোদিত পদ')], ...rows.map(([label, v]) => [label, v.existing, v.sanctioned])]);
   }
   window.StatisticsCharts = { plot, staffing };

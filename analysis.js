@@ -133,6 +133,7 @@
     renderMap();
   }
   document.addEventListener('site-language', () => { if (baseline) show(baseline); });
+  document.addEventListener('site-theme', () => { if (baseline) show(baseline); });
   fetch(path + 'manifest.json').then((response) => {
     if (!response.ok) throw new Error('Analysis unavailable');
     return response.json();

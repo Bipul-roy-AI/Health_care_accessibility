@@ -9,7 +9,8 @@
     amber: ['#fdf1e0', '#f6d9ab', '#edbb74', '#df9743', '#c56f22', '#9d4e12'],
     blue: ['#eaf2fb', '#c6dcf2', '#93bde5', '#5a98d3', '#2f74b5', '#174f88']
   };
-  const MISSING = '#e6e4dc';
+  const dark = () => document.documentElement.dataset.theme === 'dark';
+  const missing = () => (dark() ? '#3a4642' : '#e6e4dc');
   const bn = () => document.documentElement.lang === 'bn';
   const fmt = (value, digits = 0) => Number.isFinite(value)
     ? value.toLocaleString(bn() ? 'bn-BD' : 'en-GB', { maximumFractionDigits: digits }) : (bn() ? 'তথ্য নেই' : 'no data');
@@ -49,22 +50,23 @@
     const legendControl = L.control({ position: 'bottomright' });
     legendControl.onAdd = () => { state.legend = L.DomUtil.create('div', 'choropleth-legend'); return state.legend; };
     legendControl.addTo(map);
+    document.addEventListener('site-theme', () => restyle());
 
     function fill(pcode) {
       const metric = state.metric;
       if (metric && metric.categories) {
         const category = metric.categories.find((c) => c.key === metric.values.get(pcode));
-        return category ? category.color : MISSING;
+        return category ? category.color : missing();
       }
       const value = metric ? metric.values.get(pcode) : NaN;
-      if (!Number.isFinite(value)) return MISSING;
+      if (!Number.isFinite(value)) return missing();
       let bin = 0;
       while (bin < metric.edges.length && value > metric.edges[bin]) bin++;
       return metric.ramp[Math.min(bin, metric.ramp.length - 1)];
     }
     function style(feature) {
       const selected = state.selected === feature.properties.pcode;
-      return { fillColor: fill(feature.properties.pcode), fillOpacity: state.metric?.fillOpacity ?? (layers.hasTiles() ? 0.72 : 0.92), color: selected ? '#153a30' : '#ffffff',
+      return { fillColor: fill(feature.properties.pcode), fillOpacity: state.metric?.fillOpacity ?? (layers.hasTiles() ? 0.72 : 0.92), color: selected ? (dark() ? '#f2f8f5' : '#153a30') : (dark() ? '#0f1a17' : '#ffffff'),
                weight: selected ? 2.4 : state.thin ? 0.25 : 0.7, opacity: 1 };
     }
     function legend() {
@@ -82,7 +84,7 @@
         parts.push(`<span><i style="background:${colour}"></i>${fmt(low, m.digits)} – ${fmt(high, m.digits)}</span>`);
         low = high;
       });
-      parts.push(`<span><i style="background:${MISSING}"></i>${bn() ? 'তথ্য নেই / খুব ছোট এলাকা' : 'no data / too small for the grid'}</span>`);
+      parts.push(`<span><i style="background:${missing()}"></i>${bn() ? 'তথ্য নেই / খুব ছোট এলাকা' : 'no data / too small for the grid'}</span>`);
       state.legend.innerHTML = parts.join('');
     }
     function tooltip(feature) {
@@ -111,7 +113,7 @@
         style,
         onEachFeature: (feature, polygon) => {
           polygon.bindTooltip(() => tooltip(feature), { sticky: true, direction: 'top', opacity: 0.96 });
-          polygon.on('mouseover', () => polygon.setStyle({ weight: 2, color: '#153a30' }));
+          polygon.on('mouseover', () => polygon.setStyle({ weight: 2, color: dark() ? '#f2f8f5' : '#153a30' }));
           polygon.on('mouseout', () => polygon.setStyle(style(feature)));
           polygon.on('click', () => select(feature.properties.pcode));
         }
