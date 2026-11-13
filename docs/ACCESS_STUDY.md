@@ -49,6 +49,10 @@ Spot checks: district (Thakurgaon 1,533,895) and all five Thakurgaon upazilas ma
 - **Clustering:** Moran's I is 0.53 for people within 5 km of a government hospital and 0.69 for primary care per person. Low–low clusters for hospital access appear in the Chittagong Hill Tracts, the Sylhet–Netrokona haor belt and the north-west.
 - **Primary care:** there are 9,004 union residents per listed community clinic nationally. 207 of 483 upazilas with unions have more than 9,000 per clinic.
 
+## People versus land
+
+The page also keeps the area-based view of the former Distance page (*Basis → Land*; data in `data/atlas/`). The *People versus land* chart plots, for each class, the share of people and the share of land within 0.5–40 km. People sit nearer to facilities than land does: the median person is 6.0 km from a government hospital, the median square kilometre of land 8.5 km, because forests, rivers, chars and hills hold land but few people. Land figures answer a geographic question (how evenly is the network spread over the territory); people figures answer the access question.
+
 ## Limitations
 
 - **Not travel time:** distances are straight lines, not roads, rivers, ferries or seasonal flooding.

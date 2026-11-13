@@ -7,7 +7,7 @@ A free map and directory for finding healthcare institutions across Bangladesh.
 **[Statistics](https://bipul-roy-ai.github.io/Health_care_accessibility/statistics.html)** ·
 **[Availability](https://bipul-roy-ai.github.io/Health_care_accessibility/analysis.html)** ·
 **[Distance](https://bipul-roy-ai.github.io/Health_care_accessibility/atlas.html)** ·
-**[Access study](https://bipul-roy-ai.github.io/Health_care_accessibility/accessibility.html)** ·
+**[Access](https://bipul-roy-ai.github.io/Health_care_accessibility/accessibility.html)** ·
 **[Emergency & helplines](https://bipul-roy-ai.github.io/Health_care_accessibility/helplines.html)**
 
 ## What you can find
@@ -84,9 +84,9 @@ The statistical pages now use responsive SVG figures with labelled axes and SVG 
 
 ## Distance and location quality
 
-The [Distance page](atlas.html) measures straight-line distance from a 1 km national grid to the nearest DGHS hospital and primary-care facility, by division, district, upazila and union (5,160 unions), with disparity statistics. Figures are shares of land area, not population, and are not travel times.
+The former Distance page is now part of the [Access page](accessibility.html) (`atlas.html` redirects there). Its map has a **Basis** switch: *People* (default, BBS Census 2022) or *Land*, which shows the original area-based measures from the 1 km grid (median km and share of land within a distance, facilities per km²). A *People versus land* chart compares the two: for example, 40% of people but 21% of land lie within 5 km of a government hospital.
 
-The same build audits facility coordinates: a point is used only if it lies within 1 km of its recorded district and is not shared with facilities recorded in other areas. Flagged points (listed in `data/atlas/flagged-locations.csv`) are hidden on every map and excluded from distances, but stay in all counts. See [methods](docs/DISTANCE_ATLAS.md).
+The atlas build also audits facility coordinates: a point is used only if it lies within 1 km of its recorded district and is not shared with facilities recorded in other areas. Flagged points (listed in `data/atlas/flagged-locations.csv`) are hidden on every map and excluded from distances, but stay in all counts. The audit is summarised in the Access page's *Location data quality* section. See [distance methods](docs/DISTANCE_ATLAS.md) and [access methods](docs/ACCESS_STUDY.md).
 
 ## Languages
 

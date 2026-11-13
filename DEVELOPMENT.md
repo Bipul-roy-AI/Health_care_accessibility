@@ -119,7 +119,7 @@ python3 -m pytest -q tests/test_access.py
 NODE_PATH=... node tests/accessibility.cjs
 ```
 
-`scripts/population.py` holds the census-to-2015-boundary crosswalk (newer upazilas go to the unit they were carved from); review it when BBS or geoBoundaries change. `map-layers.js` provides the shared basemap/boundary control used by both choropleth pages.
+`scripts/population.py` holds the census-to-2015-boundary crosswalk (newer upazilas go to the unit they were carved from); review it when BBS or geoBoundaries change. `map-layers.js` provides the shared basemap/boundary control. The former Distance page (`atlas.html`) is a redirect to the Access page, whose *Land* basis and *Location data quality* section read `data/atlas/`.
 
 Optional geospatial backend:
 

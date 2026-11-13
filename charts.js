@@ -73,7 +73,10 @@
         svg.append(element('rect', { x: width / 2, y: height - 22, width: 10, height: 10, fill: '#e8c8a5' })); text(svg, L('Unavailable / withheld', 'অপ্রাপ্য / বাদ রাখা'), width / 2 + 16, height - 13, { 'font-size': 10 });
       }
     } else if (kind === 'lines') {
-      const height = 340, left = 50, right = width - 20, top = 26, bottom = height - 56;
+      // Legend wraps onto extra rows (options.legendWidth per item); lines may be dashed (row.dash).
+      const legendWidth = options.legendWidth || 120, span = width - 70;
+      const perRow = Math.max(1, Math.min(rows.length, Math.floor(span / legendWidth))), legendRows = Math.ceil(rows.length / perRow);
+      const height = 340 + 15 * (legendRows - 1), left = 50, right = width - 20, top = 26, bottom = 284;
       const xmin = options.xmin ?? 0;
       const xmax = options.xmax ?? nice(Math.max(...rows.flatMap((r) => r.points.map((p) => p[0])), 0));
       const xLabel = options.xFormat || ((value) => fmt(value, xmax - xmin < 10 ? 1 : 0));
@@ -95,7 +98,7 @@
       rows.forEach((row) => {
         const colour = row.color || '#176b58';
         const path = row.points.map((p, i) => (i ? 'L' : 'M') + px(p[0]).toFixed(1) + ' ' + py(p[1]).toFixed(1)).join('');
-        svg.append(element('path', { d: path, fill: 'none', stroke: colour, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+        svg.append(element('path', { d: path, fill: 'none', stroke: colour, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', ...(row.dash ? { 'stroke-dasharray': row.dash } : {}) }));
         const last = row.points[row.points.length - 1];
         ends.push({ label: row.label, colour, y: py(last[1]) - 6 });
       });
@@ -108,9 +111,11 @@
       if (options.endLabels !== false) ends.forEach((end) => text(svg, end.label, right - 2, end.y, { 'text-anchor': 'end', 'font-size': 11, 'font-weight': 600, fill: end.colour, style: 'paint-order:stroke;stroke:#fff;stroke-width:3px' }));
       const legend = element('g', {});
       rows.forEach((row, index) => {
-        const x = left + index * Math.max(120, (right - left) / rows.length);
-        legend.append(element('rect', { x, y: height - 14, width: 10, height: 3, fill: row.color || '#176b58' }));
-        text(svg, row.label, x + 15, height - 9, { 'font-size': 10 });
+        const x = left + (index % perRow) * (span / perRow), y = 326 + Math.floor(index / perRow) * 15;
+        legend.append(row.dash
+          ? element('line', { x1: x, x2: x + 12, y1: y + 1.5, y2: y + 1.5, stroke: row.color || '#176b58', 'stroke-width': 2, 'stroke-dasharray': '3 2' })
+          : element('rect', { x, y, width: 12, height: 3, fill: row.color || '#176b58' }));
+        text(svg, row.label, x + 17, y + 5, { 'font-size': 10 });
       });
       svg.append(legend);
       const hover = element('g', { style: 'display:none', 'pointer-events': 'none' });

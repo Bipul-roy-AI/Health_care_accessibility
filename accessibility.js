@@ -95,11 +95,45 @@
       levels: ['upazila'], en: 'Clusters: ' + LISA_NAMES[key][0], bn: 'গুচ্ছ: ' + LISA_NAMES[key][1],
       note: ['Local Moran (LISA), 999 permutations, p < 0.05.', 'স্থানীয় মোরান (LISA), ৯৯৯ বিন্যাস, p < ০.০৫।'] }))
   ];
-  const state = { level: 'district', measure: 'within5_public', data: null, map: null, points: null, pointsLayer: null, lisaKey: 'within5_any_hospital' };
+  // Land (area) basis: the former Distance page measures, from data/atlas/ (shares of 1 km cells, not people).
+  const LOW_CELLS = 5;
+  const land = (klass, key, sub) => (a) => { const d = a.distance?.[klass]; if (!d || !d.cells) return NaN; return sub ? d.within_km?.[sub] ?? NaN : d[key]; };
+  const landPoints = (a, k) => (a.points && a.points[k]) || 0;
+  MEASURES.push(
+    { id: 'land_public_median', basis: 'land', grid: true, klass: 'public_hospital', levels: ALL, digits: 1, ramp: 'amber', worse: 'high', value: land('public_hospital', 'median_km'),
+      en: 'Median km to a government hospital (land)', bn: 'সরকারি হাসপাতালের মধ্যমা দূরত্ব (ভূমি, কিমি)',
+      note: ["Half of the area's land is closer than this to a government hospital.", 'এলাকার অর্ধেক ভূমি সরকারি হাসপাতাল থেকে এর চেয়ে কম দূরত্বে।'] },
+    { id: 'land_any_median', basis: 'land', grid: true, klass: 'any_hospital', levels: ALL, digits: 1, ramp: 'amber', worse: 'high', value: land('any_hospital', 'median_km'),
+      en: 'Median km to any hospital (land)', bn: 'যেকোনো হাসপাতালের মধ্যমা দূরত্ব (ভূমি, কিমি)', note: ['Government and non-government hospitals together.', 'সরকারি ও বেসরকারি হাসপাতাল একসাথে।'] },
+    { id: 'land_primary_median', basis: 'land', grid: true, klass: 'primary_care', levels: ALL, digits: 1, ramp: 'amber', worse: 'high', value: land('primary_care', 'median_km'),
+      en: 'Median km to primary care (land)', bn: 'প্রাথমিক স্বাস্থ্যসেবার মধ্যমা দূরত্ব (ভূমি, কিমি)', note: ['Community clinics, union centres, UH&FWC, MCWC and urban primary-care centres.', 'কমিউনিটি ক্লিনিক, ইউনিয়ন কেন্দ্র, UH&FWC, MCWC ও নগর প্রাথমিক স্বাস্থ্যকেন্দ্র।'] },
+    { id: 'land_public_w10', basis: 'land', grid: true, klass: 'public_hospital', levels: ALL, digits: 1, ramp: 'green', worse: 'low', value: land('public_hospital', null, '10'),
+      en: 'Land within 10 km of a government hospital (%)', bn: 'সরকারি হাসপাতাল থেকে ১০ কিমির মধ্যে ভূমি (%)', note: ["Share of the area's land within 10 km in a straight line.", 'সরলরেখায় ১০ কিমির মধ্যে থাকা ভূমির অংশ।'] },
+    { id: 'land_primary_w5', basis: 'land', grid: true, klass: 'primary_care', levels: ALL, digits: 1, ramp: 'green', worse: 'low', value: land('primary_care', null, '5'),
+      en: 'Land within 5 km of primary care (%)', bn: 'প্রাথমিক স্বাস্থ্যসেবা থেকে ৫ কিমির মধ্যে ভূমি (%)', note: ["Share of the area's land within 5 km in a straight line.", 'সরলরেখায় ৫ কিমির মধ্যে থাকা ভূমির অংশ।'] },
+    { id: 'land_hospital_density', basis: 'land', klass: 'any_hospital', levels: ALL, digits: 1, ramp: 'green', worse: 'low',
+      value: (a) => (a.area_km2 > 0 ? (landPoints(a, 'public_hospital') + landPoints(a, 'private_ngo_hospital')) / a.area_km2 * 1000 : NaN),
+      en: 'Hospital locations per 1,000 km²', bn: 'প্রতি ১,০০০ বর্গকিমিতে হাসপাতাল', note: ['Usable hospital locations inside the area, per land area.', 'এলাকার ভেতরে ব্যবহারযোগ্য হাসপাতালের অবস্থান, ভূমির আয়তন অনুযায়ী।'] },
+    { id: 'land_primary_density', basis: 'land', klass: 'primary_care', levels: ALL, digits: 1, ramp: 'green', worse: 'low',
+      value: (a) => (a.area_km2 > 0 ? landPoints(a, 'primary_care') / a.area_km2 * 100 : NaN),
+      en: 'Primary-care locations per 100 km²', bn: 'প্রতি ১০০ বর্গকিমিতে প্রাথমিক স্বাস্থ্যসেবা', note: ['Usable primary-care locations inside the area, per land area.', 'এলাকার ভেতরে ব্যবহারযোগ্য প্রাথমিক স্বাস্থ্যসেবার অবস্থান, ভূমির আয়তন অনুযায়ী।'] }
+  );
+  const basisOf = (m) => m.basis || 'people';
+
+  const state = { level: 'district', measure: 'within5_public', basis: 'people', data: null, map: null, points: null, pointsLayer: null, lisaKey: 'within5_any_hospital' };
   const areasOf = (level) => state.data.areas[level] || [];
   const byPcode = (level) => state.data.index[level] || new Map();
+  const landOf = (level) => state.data.land[level] || [];
+  const listFor = (level) => (state.basis === 'land' ? landOf(level) : areasOf(level));
+  const indexFor = (level) => (state.basis === 'land' ? state.data.landIndex[level] : state.data.index[level]) || new Map();
+  async function ensureLand(level) {
+    if (state.data.land[level]) return;
+    const file = await get(`./data/atlas/areas-${level}.json`);
+    state.data.land[level] = file.areas;
+    state.data.landIndex[level] = new Map(file.areas.map((a) => [a.pcode, a]));
+  }
   const measure = () => MEASURES.find((m) => m.id === state.measure) || MEASURES[0];
-  const areaLabel = (a, level) => (level === 'union' ? `${a.name} · ${a.upazila}` : level === 'upazila' ? `${a.name} · ${place(a.parent_name)}` : place(a.name));
+  const areaLabel = (a, level) => (level === 'union' ? `${a.name} · ${a.upazila || a.parent_name || ''}` : level === 'upazila' ? `${a.name} · ${place(a.parent_name)}` : place(a.name));
   const SOURCE = () => T('Source: BBS Census 2022 (PEC-adjusted by division); DGHS facility registry; geoBoundaries. Straight-line distance.',
     'উৎস: বিবিএস জনশুমারি ২০২২ (বিভাগভিত্তিক PEC সমন্বয়); DGHS প্রতিষ্ঠান রেজিস্ট্রি; geoBoundaries। সরলরৈখিক দূরত্ব।');
 
@@ -129,17 +163,18 @@
     const level = state.level;
     $('#a-level').replaceChildren(...ALL.map((k) => option(k, lvl(k))));
     $('#a-level').value = level;
-    const list = MEASURES.filter((m) => m.levels.includes(level));
+    $('#a-basis').value = state.basis;
+    const list = MEASURES.filter((m) => m.levels.includes(level) && basisOf(m) === state.basis);
     if (!list.some((m) => m.id === state.measure)) state.measure = list[0].id;
     $('#a-metric').replaceChildren(...list.map((m) => option(m.id, T(m.en, m.bn))));
     $('#a-metric').value = state.measure;
-    $('#a-names').replaceChildren(...areasOf(level).map((a) => option(areaLabel(a, level), '')));
+    $('#a-names').replaceChildren(...listFor(level).map((a) => option(areaLabel(a, level), '')));
     $('#a-export').textContent = T(`Download ${LEVELS[level].en.toLowerCase()} table (CSV) ↓`, `${LEVELS[level].bn} সারণি ডাউনলোড (CSV) ↓`);
   }
 
   function paint() {
-    const m = measure(), level = state.level, list = areasOf(level);
-    $('#a-metric-note').textContent = T(...m.note) + (level === 'union'
+    const m = measure(), level = state.level, list = listFor(level), isLand = basisOf(m) === 'land';
+    $('#a-metric-note').textContent = T(...m.note) + (isLand ? ' ' + T('Land basis: shares of 1 km grid cells, not of people.', 'ভূমি ভিত্তি: ১ কিমি গ্রিড ঘরের অংশ, মানুষের নয়।') : '') + (level === 'union' && !isLand
       ? ' ' + T('Union populations: matched by name to the census where possible, otherwise estimated from the upazila total by area (city wards).', 'ইউনিয়নের জনসংখ্যা: সম্ভব হলে নামে জনশুমারির সাথে মেলানো, নইলে উপজেলার মোট থেকে আয়তন অনুযায়ী অনুমান (সিটি ওয়ার্ড)।') : '');
     if (m.lisa) {
       state.map.setMetric({ legendTitle: T(m.en, m.bn), categories: LISA.map((c) => ({ key: c.key, color: c.color, label: T(c.en, c.bn) })),
@@ -154,20 +189,30 @@
       state.map.setMetric({ legendTitle: T(m.en, m.bn), ramp: m.ramp, digits: m.digits,
         values: new Map(list.map((a) => [a.pcode, Number(m.value(a, level))])),
         extra: (pcode) => { const a = byPcode(level).get(pcode); return a && level === 'union' && a.source === 'estimated' ? `<br><em>${T('population estimated', 'জনসংখ্যা অনুমিত')}</em>` : ''; } });
-      const usable = list.filter((a) => Number.isFinite(Number(m.value(a, level))) && (level !== 'union' || a.source !== 'estimated') && (a.population || 0) > 0);
+      const usable = list.filter((a) => Number.isFinite(Number(m.value(a, level))) && (isLand
+        ? !(m.grid && (a.distance?.public_hospital?.cells || 0) < LOW_CELLS)
+        : (level !== 'union' || a.source !== 'estimated') && (a.population || 0) > 0));
       if (m.worse) usable.sort((a, b) => (m.worse === 'high' ? m.value(b, level) - m.value(a, level) : m.value(a, level) - m.value(b, level)));
       else usable.sort((a, b) => m.value(b, level) - m.value(a, level));
       $('#c-rank-title').textContent = m.worse
         ? T(`Least served: 20 ${LEVELS[level].en.toLowerCase()} areas · ${m.en}`, `সবচেয়ে কম সেবাপ্রাপ্ত ২০টি ${LEVELS[level].bn} · ${m.bn}`)
         : T(`Highest 20 ${LEVELS[level].en.toLowerCase()} areas · ${m.en}`, `সর্বোচ্চ ২০টি ${LEVELS[level].bn} · ${m.bn}`);
       window.HealthCharts.bars($('#c-rank'), usable.slice(0, 20).map((a) => ({ label: areaLabel(a, level), value: Number(m.value(a, level)), display: N(Number(m.value(a, level)), m.digits),
-        detail: T('population ', 'জনসংখ্যা ') + N(a.population) })), { title: T(m.en, m.bn), axisLabel: T(m.en, m.bn), digits: m.digits, source: SOURCE() });
+        detail: isLand ? N(a.area_km2) + T(' km²', ' বর্গকিমি') : T('population ', 'জনসংখ্যা ') + N(a.population) })),
+        { title: T(m.en, m.bn), axisLabel: T(m.en, m.bn), digits: m.digits, source: SOURCE() });
     }
     drawPoints();
   }
 
   function detail(pcode) {
     const level = state.level, a = pcode ? byPcode(level).get(pcode) : null, box = $('#a-detail');
+    const ground = pcode ? (state.data.landIndex[level] || new Map()).get(pcode) : null;
+    if (!a && ground) {
+      const h = document.createElement('h3'); h.textContent = areaLabel(ground, level);
+      const code = document.createElement('p'); code.className = 'atlas-code'; code.textContent = `${level === 'union' ? T('ID', 'আইডি') : 'BBS pcode'}: ${ground.pcode}`;
+      box.replaceChildren(h, code, ...landBlock(ground));
+      return;
+    }
     if (!a) {
       const h = document.createElement('h3'); h.textContent = T('Select an area', 'একটি এলাকা বাছুন');
       const p = document.createElement('p'); p.textContent = T('Click the map or search by name.', 'মানচিত্রে ক্লিক করুন বা নাম খুঁজুন।');
@@ -206,12 +251,31 @@
       }
       nodes.push(table);
     }
+    nodes.push(...landBlock(ground));
     box.replaceChildren(...nodes);
+  }
+
+  function landBlock(g) {
+    if (!g) return [];
+    const head = document.createElement('h4'); head.textContent = T('Land (area basis)', 'ভূমি (আয়তন ভিত্তি)');
+    const items = [[T('Area', 'আয়তন'), N(g.area_km2) + T(' km²', ' বর্গকিমি')], [T('Grid cells (1 km)', 'গ্রিড ঘর (১ কিমি)'), N(g.distance?.public_hospital?.cells || 0)]];
+    for (const k of ['public_hospital', 'any_hospital', 'primary_care']) {
+      const d = g.distance?.[k];
+      if (d && d.cells) items.push([`${cls(k)} · ${T('median km of land', 'ভূমির মধ্যমা কিমি')}`, N(d.median_km, 1)]);
+    }
+    if ((g.distance?.public_hospital?.cells || 0) < LOW_CELLS) items.push([T('Note', 'টীকা'), T('Fewer than 5 grid cells: land figures are rough.', '৫টির কম গ্রিড ঘর: ভূমির হিসাব মোটামুটি।')]);
+    const dl = document.createElement('dl');
+    items.forEach(([t, v]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = t; dd.textContent = v; dl.append(dt, dd); });
+    return [head, dl];
   }
 
   async function showLevel(level) {
     state.level = level;
-    if (level === 'union' && !state.data.areas.union) {
+    if (state.basis === 'land' && !state.data.land[level]) {
+      $('#access-map').classList.add('loading');
+      await ensureLand(level);
+    }
+    if (state.basis === 'people' && level === 'union' && !state.data.areas.union) {
       $('#access-map').classList.add('loading');
       const file = await get('./data/access/areas-union.json');
       const cols = file.columns;
@@ -344,8 +408,8 @@
        `জনশুমারির এলাকা ২০২২ সালের; মানচিত্রের সীমানা ২০১৫ সালের। ${N(m.census_upazilas.exact)}টি উপজেলা/থানা হুবহু, ${N(m.census_upazilas.spelling)}টি বানান মিলিয়ে, এবং ${N((m.census_upazilas.parent || 0) + (m.census_upazilas.rename || 0) + (m.census_upazilas.approximate || 0))}টি নতুন বা নাম-বদলানো এককের জনসংখ্যা যে ২০১৫ এককের অংশ ছিল সেখানে যোগ করা হয়েছে (${N(m.census_upazilas.approximate || 0)}টি মহানগর থানা আনুমানিক)। জেলা ও উপজেলার মোট নির্ভুল।`],
       [`Unions: ${N(m.union_population_share.census)}% of people are in unions matched to the census by name, ${N(m.union_population_share['census+'])}% in matched unions that also absorb small unmatched units, ${N(m.union_population_share.paurashava)}% in paurashavas, and ${N(m.union_population_share.estimated)}% (mostly city-corporation wards) estimated from the upazila total by area.`,
        `ইউনিয়ন: ${N(m.union_population_share.census)}% মানুষ নামে মেলানো ইউনিয়নে, ${N(m.union_population_share['census+'])}% মেলানো ইউনিয়নে যেখানে ছোট অমিলিত অংশ যোগ হয়েছে, ${N(m.union_population_share.paurashava)}% পৌরসভায়, এবং ${N(m.union_population_share.estimated)}% (মূলত সিটি কর্পোরেশনের ওয়ার্ড) উপজেলার মোট থেকে আয়তন অনুযায়ী অনুমিত।`],
-      ['Distances: the population of each union is spread evenly over the 1 km grid cells in that union, and each cell is measured to the nearest usable DGHS coordinate in a straight line. Points outside their recorded district or sharing a coordinate across areas are excluded (see the Distance page). Because excluded or missing coordinates remove some real facilities, the shares within a distance are lower bounds. Real travel by road, river or ferry is longer and slower.',
-       'দূরত্ব: প্রতিটি ইউনিয়নের জনসংখ্যা ইউনিয়নের ১ কিমি গ্রিড ঘরগুলোতে সমানভাবে ছড়ানো, এবং প্রতিটি ঘর থেকে নিকটতম ব্যবহারযোগ্য DGHS স্থানাঙ্কের সরলরৈখিক দূরত্ব মাপা হয়েছে। নিজের জেলার বাইরে থাকা বা একাধিক এলাকায় একই স্থানাঙ্কের বিন্দু বাদ (দূরত্ব পৃষ্ঠা দেখুন)। বাদ পড়া বা অনুপস্থিত স্থানাঙ্কের কারণে কিছু প্রকৃত প্রতিষ্ঠান বাদ যায়, তাই নির্দিষ্ট দূরত্বের মধ্যে মানুষের অংশ ন্যূনতম হিসাব। সড়ক, নদী বা ফেরিতে প্রকৃত যাত্রা দীর্ঘতর ও ধীর।'],
+      ['Distances: the population of each union is spread evenly over the 1 km grid cells in that union, and each cell is measured to the nearest usable DGHS coordinate in a straight line. Points outside their recorded district or sharing a coordinate across areas are excluded (see Location data quality below). Because excluded or missing coordinates remove some real facilities, the shares within a distance are lower bounds. Real travel by road, river or ferry is longer and slower.',
+       'দূরত্ব: প্রতিটি ইউনিয়নের জনসংখ্যা ইউনিয়নের ১ কিমি গ্রিড ঘরগুলোতে সমানভাবে ছড়ানো, এবং প্রতিটি ঘর থেকে নিকটতম ব্যবহারযোগ্য DGHS স্থানাঙ্কের সরলরৈখিক দূরত্ব মাপা হয়েছে। নিজের জেলার বাইরে থাকা বা একাধিক এলাকায় একই স্থানাঙ্কের বিন্দু বাদ (নিচে অবস্থানের মান দেখুন)। বাদ পড়া বা অনুপস্থিত স্থানাঙ্কের কারণে কিছু প্রকৃত প্রতিষ্ঠান বাদ যায়, তাই নির্দিষ্ট দূরত্বের মধ্যে মানুষের অংশ ন্যূনতম হিসাব। সড়ক, নদী বা ফেরিতে প্রকৃত যাত্রা দীর্ঘতর ও ধীর।'],
       [`Facility counts per person use every active DGHS listing recorded in the area (coordinates not needed); ${N(m.dghs_unmatched_listings)} listings have an upazila label that matches no upazila in its district. Union counts use mapped points only.`,
        `জনপ্রতি প্রতিষ্ঠানের হিসাবে এলাকায় নথিভুক্ত প্রতিটি সক্রিয় DGHS তালিকা ব্যবহৃত (স্থানাঙ্ক লাগে না); ${N(m.dghs_unmatched_listings)}টি তালিকার উপজেলার নাম তার জেলার কোনো উপজেলার সাথে মেলে না। ইউনিয়নের সংখ্যা শুধু মানচিত্রের বিন্দু থেকে।`],
       ['Not measured: opening hours, staff, medicines, cost, quality, travel time, seasonal flooding, and private or NGO facilities missing from the DGHS registry. Results describe areas, not individuals (ecological fallacy).',
@@ -401,15 +465,63 @@
     $('#s-x').replaceChildren(...Object.entries(SOCIO).map(([k, v]) => option(k, T(...v)))); $('#s-x').value = x;
     $('#s-y').replaceChildren(...Object.entries(ACCESS_Y).map(([k, v]) => option(k, T(v.en, v.bn)))); $('#s-y').value = y;
   }
-  function staticSections() { kpis(); inequality(); clusters(); selects(); social(); primary(); methods(); }
+  function staticSections() { kpis(); curves(); inequality(); clusters(); selects(); social(); primary(); quality(); methods(); }
+
+  // ---------- People versus land ----------
+  function curves() {
+    const people = state.data.summary.national.access, ground = state.data.distance.national;
+    const order = [['public_hospital', '#077a53'], ['any_hospital', '#2563eb'], ['primary_care', '#8b5cf6']];
+    // Legend: people row first, land row second (three per row), so each colour lines up with its pair.
+    const lines = [...order.map(([k, color]) => ({ label: `${cls(k)} · ${T('people', 'মানুষ')}`, color, points: people[k].curve })),
+      ...order.map(([k, color]) => ({ label: `${cls(k)} · ${T('land', 'ভূমি')}`, color, dash: '6 4', points: ground[k].curve }))];
+    window.HealthCharts.lines($('#c-curve'), lines, { title: T('Share within a straight-line distance of the nearest facility: people (solid) and land (dashed)', 'নিকটতম প্রতিষ্ঠান থেকে নির্দিষ্ট দূরত্বের মধ্যে অংশ: মানুষ (কঠিন) ও ভূমি (ড্যাশ)'),
+      axisLabel: T('Straight-line distance (km)', 'সরলরৈখিক দূরত্ব (কিমি)'), yLabel: T('% of people or land', 'মানুষ বা ভূমির %'), xmax: 40, ymax: 100,
+      xUnit: T('km', 'কিমি'), digits: 1, endLabels: false, legendWidth: 380, source: SOURCE() });
+    const both = (k, t) => `${pct(people[k].within[t])} / ${pct(ground[k].within_km[t])}`;
+    rows('#t-national', order.map(([k]) => [cls(k), N(people[k].points), N(people[k].median_km, 1), N(ground[k].median_km, 1), both(k, '2'), both(k, '5'), both(k, '10'), both(k, '20')]));
+  }
+
+  // ---------- Location quality ----------
+  function quality() {
+    const q = state.data.quality, r = q.flag_reasons;
+    $('#q-summary').textContent = T(
+      `Of ${N(q.published)} published DGHS coordinates, ${N(q.flagged)} (${pct(q.flagged / q.published * 100)}) are flagged and left out of every map and distance: ${N(r['outside recorded district'] || 0)} lie more than 1 km outside the district recorded for the facility, and ${N(r['coordinate shared with facilities in other areas'] || 0)} share one coordinate with facilities recorded in other districts or upazilas (some have both problems). Flagged facilities still count in all listing totals and per-person rates.`,
+      `${N(q.published)}টি প্রকাশিত DGHS স্থানাঙ্কের মধ্যে ${N(q.flagged)}টি (${pct(q.flagged / q.published * 100)}) চিহ্নিত এবং সব মানচিত্র ও দূরত্ব থেকে বাদ: ${N(r['outside recorded district'] || 0)}টি প্রতিষ্ঠানের নথিভুক্ত জেলার ১ কিমির বেশি বাইরে, এবং ${N(r['coordinate shared with facilities in other areas'] || 0)}টি অন্য জেলা বা উপজেলার প্রতিষ্ঠানের সাথে একই স্থানাঙ্ক ভাগ করে (কিছুতে দুটো সমস্যাই আছে)। চিহ্নিত প্রতিষ্ঠান তালিকার মোট ও জনপ্রতি হারে গণনায় থাকে।`);
+    const flagged = landOf('district').filter((d) => d.registry?.published >= 20)
+      .map((d) => ({ d, share: d.registry.flagged / d.registry.published * 100 })).sort((a, b) => b.share - a.share).slice(0, 20);
+    window.HealthCharts.bars($('#c-flagged'), flagged.map(({ d, share }) => ({ label: place(d.name), value: share, display: pct(share),
+      detail: T(`${d.registry.flagged} of ${d.registry.published}`, `${N(d.registry.published)}টির মধ্যে ${N(d.registry.flagged)}টি`) })),
+      { title: T('Flagged share of published locations', 'প্রকাশিত অবস্থানের চিহ্নিত অংশ'), axisLabel: T('% flagged', '% চিহ্নিত'), maximum: 100, digits: 1,
+        source: T('Districts with at least 20 published locations, by recorded district.', 'অন্তত ২০টি প্রকাশিত অবস্থানসহ জেলা, নথিভুক্ত জেলা অনুযায়ী।') });
+    const status = q.coordinate_status;
+    window.HealthCharts.bars($('#c-status'), [
+      [T('Usable', 'ব্যবহারযোগ্য'), q.usable], [T('Flagged (misplaced or shared)', 'চিহ্নিত (ভুল স্থানে বা ভাগ করা)'), q.flagged],
+      [T('No coordinates', 'স্থানাঙ্ক নেই'), status.missing || 0], [T('Outside Bangladesh', 'বাংলাদেশের বাইরে'), status.outside || 0], [T('Invalid', 'অবৈধ'), status.invalid || 0]
+    ].map(([label, value]) => ({ label, value })), { title: T('Active records by location status', 'অবস্থানের অবস্থা অনুযায়ী সক্রিয় রেকর্ড'), axisLabel: T('Records', 'রেকর্ড'),
+      source: T('DGHS registry snapshot; location audit.', 'DGHS রেজিস্ট্রি স্ন্যাপশট; অবস্থান যাচাই।') });
+  }
+
+  function exportLand(level) {
+    ensureLand(level).then(() => {
+      const classes = ['public_hospital', 'any_hospital', 'private_ngo_hospital', 'primary_care'];
+      const keys = [...new Set(landOf(level).flatMap((a) => classes.flatMap((k) => Object.keys(a.distance?.[k]?.within_km || {}))))].sort((a, b) => a - b);
+      const header = ['pcode', 'name', 'parent', 'area_km2', ...classes.map((k) => 'mapped_' + k), 'approved_beds_mapped',
+        ...classes.flatMap((k) => ['cells', 'median_km', ...keys.map((t) => `pct_land_within_${t}km`)].map((f) => `${k}_${f}`))];
+      csv(`bangladesh-health-access-land-${level}.csv`, header, landOf(level).map((a) => [a.pcode, a.name, a.parent_name || '', a.area_km2,
+        ...classes.map((k) => landPoints(a, k)), a.beds || 0,
+        ...classes.flatMap((k) => { const d = a.distance?.[k] || {}; return [d.cells ?? '', d.median_km ?? '', ...keys.map((t) => d.within_km?.[t] ?? '')]; })]));
+    });
+  }
 
   async function init() {
     try {
       const levels = ['division', 'district', 'upazila'];
-      const [summary, sources, ...files] = await Promise.all([get('./data/access/summary.json'), get('./data/statistics/sources.json'),
+      const [summary, sources, distance, quality, landDistrict, ...files] = await Promise.all([get('./data/access/summary.json'), get('./data/statistics/sources.json'),
+        get('./data/atlas/distance.json'), get('./data/atlas/location-quality.json'), get('./data/atlas/areas-district.json'),
         ...levels.map((k) => get(`./data/access/areas-${k}.json`))]);
-      if (!summary.national?.access?.blood_bank || !summary.moran) throw new Error(T('the data files are an older version; please reload the page (Ctrl+F5)', 'তথ্যের ফাইল পুরোনো সংস্করণের; পৃষ্ঠাটি আবার লোড করুন (Ctrl+F5)'));
-      state.data = { summary, sourcesUrl: sources.url, areas: {}, index: {} };
+      if (!summary.national?.access?.blood_bank?.curve || !summary.moran || !distance.national?.primary_care?.curve) throw new Error(T('the data files are an older version; please reload the page (Ctrl+F5)', 'তথ্যের ফাইল পুরোনো সংস্করণের; পৃষ্ঠাটি আবার লোড করুন (Ctrl+F5)'));
+      state.data = { summary, sourcesUrl: sources.url, distance, quality, areas: {}, index: {},
+                     land: { district: landDistrict.areas }, landIndex: { district: new Map(landDistrict.areas.map((a) => [a.pcode, a])) } };
       levels.forEach((k, i) => { state.data.areas[k] = files[i].areas; state.data.index[k] = new Map(files[i].areas.map((a) => [a.pcode, a])); });
     } catch (error) {
       $('#atlas-status').textContent = T('The access data could not be loaded: ', 'প্রবেশগম্যতার তথ্য লোড হয়নি: ') + error.message;
@@ -423,15 +535,16 @@
       onSelect: (pcode) => detail(pcode), boundaries: true, defaultBoundaries: ['division'], storageKey: 'shasthopath-access-basemap'
     });
     $('#a-level').addEventListener('change', (e) => showLevel(e.target.value));
+    $('#a-basis').addEventListener('change', (e) => { state.basis = e.target.value; showLevel(state.level); });
     $('#a-metric').addEventListener('change', (e) => { state.measure = e.target.value; if (measure().lisa) { state.lisaKey = measure().lisa; lisaList(); } paint(); });
     $('#a-points').addEventListener('change', drawPoints);
     state.map.map.on('zoomend', () => { if ($('#a-points').checked) drawPoints(); });
     $('#a-search').addEventListener('change', (e) => {
-      const q = e.target.value.trim().toLowerCase(), name = q.split(' · ')[0], list = areasOf(state.level);
+      const q = e.target.value.trim().toLowerCase(), name = q.split(' · ')[0], list = listFor(state.level);
       const hit = list.find((a) => areaLabel(a, state.level).toLowerCase() === q) || list.find((a) => a.name.toLowerCase() === name) || list.find((a) => a.name.toLowerCase().includes(name));
       if (hit) state.map.select(hit.pcode, true);
     });
-    $('#a-export').addEventListener('click', () => exportLevel(state.level));
+    $('#a-export').addEventListener('click', () => (state.basis === 'land' ? exportLand(state.level) : exportLevel(state.level)));
     ALL.forEach((k) => $('#d-' + k).addEventListener('click', () => exportLevel(k)));
     $('#g-level').addEventListener('change', inequality);
     $('#s-x').addEventListener('change', social); $('#s-y').addEventListener('change', social);

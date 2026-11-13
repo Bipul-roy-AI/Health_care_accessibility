@@ -1,5 +1,7 @@
 # Distance and location quality
 
+> **Now part of the Access page.** The Distance page was merged into `accessibility.html`: choose *Basis → Land* on its map for these measures; the national curves are in *People versus land* and the coordinate audit in *Location data quality*. `atlas.html` redirects. The data files in `data/atlas/` and this method are unchanged.
+
 `atlas.html` (the **Distance** page) shows straight-line distance to the nearest DGHS hospital and primary-care facility for every division, district, upazila/thana and union in Bangladesh. `scripts/build_atlas.py` also produces the facility-location audit used by every map on the site.
 
 ## Location quality audit
