@@ -27,15 +27,7 @@ A free map and directory for finding healthcare institutions across Bangladesh.
 
 ## Website screenshots
 
-![Institution search and road routing](docs/images/directory.png)
-
-![National institution distribution by division](docs/images/overview.png)
-
-![Emergency and national helplines](docs/images/helplines.png)
-
-![Healthcare statistics using DGHS and BBS data](docs/images/statistics.png)
-
-### Access study: travel time and floods
+Screenshots from the Access study: travel time and floods.
 
 **Travel time by upazila.** Average minutes by vehicle to the nearest hospital; the slowest upazilas include the Chittagong Hill Tracts and the haor basin.
 
@@ -65,9 +57,9 @@ A free map and directory for finding healthcare institutions across Bangladesh.
 
 ![Access page in dark mode](docs/images/access-dark-mode.png)
 
-Statistics use the adjusted **2022 census population** as a baseline. Facility availability is not the same as travel-time access or quality of care. See [sources, definitions and reproducibility](docs/STATISTICS.md).
-
 ## Information and sources
+
+Statistics use the adjusted **2022 census population** as a baseline. Facility availability is not the same as travel-time access or quality of care. See [sources, definitions and reproducibility](docs/STATISTICS.md).
 
 The initial DGHS directory contains **39,442 institutions** and **62 public report
 fields** per record. **28,464** records currently pass the Bangladesh national-boundary check.
