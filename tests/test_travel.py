@@ -48,6 +48,17 @@ class Travel(unittest.TestCase):
         self.assertFalse(seasonal_water(years, t, 2022, t, (2, 2))[0, 0])   # the event's own year does not count
         self.assertFalse(seasonal_water(years, t, 2024, t, (2, 2))[0, 1])
 
+    def test_overlay_reprojection_keeps_dry_pixels_dry(self):
+        from rasterio.transform import from_origin
+        from build_flood_overlays import to_mercator, trim
+        classes = np.zeros((200, 200), np.uint8)
+        classes[50:60, 50:60] = 1                   # one small flooded patch near Dhaka
+        merc, t = to_mercator(classes, from_origin(240000, 2640000, 100, 100), 200)
+        self.assertLess((merc == 1).mean(), 0.01)   # a 0 = "no data" bug would flag nearly every pixel
+        self.assertGreater((merc == 1).sum(), 0)
+        cropped, _ = trim(merc, t)
+        self.assertLessEqual(cropped.shape[0], 8)
+
     def test_snap_cells_moves_edge_points_to_valid_cells(self):
         from build_travel import snap_cells
         valid = np.ones((5, 5), bool)

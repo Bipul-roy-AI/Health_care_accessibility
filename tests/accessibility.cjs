@@ -133,8 +133,19 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     await page.fill('#f-search', topFlood.name); await page.dispatchEvent('#f-search', 'change');
     await page.waitForFunction((name) => document.querySelector('#f-detail h3')?.textContent === name, topFlood.name);
     assert.match(await page.textContent('#f-detail'), /Lose hospital/);
+    // Satellite flood layer: the selected flood's PNG, placed at the manifest bounds, with a legend.
+    const overlays = JSON.parse(fs.readFileSync('data/floods/overlays.json', 'utf8'));
+    assert.equal(Object.keys(overlays.layers).length, floods.events.length + floods.years.length + 1);
+    await page.waitForFunction((file) => { const img = document.querySelector('#flood-map img.flood-raster'); return img && img.src.includes(file) && img.complete && img.naturalWidth > 0; }, overlays.layers[ev.id].file);
+    assert.match(await page.textContent('#flood-map .flood-legend'), /Flooded beyond normal monsoon water/);
     await page.selectOption('#f-metric', 'f_years');
+    assert.equal(await page.$eval('#f-flood-wrap', (e) => e.hidden), false);   // still needed by the flood layer
+    await page.selectOption('#f-overlay', 'frequency');
+    await page.waitForFunction(() => document.querySelector('#flood-map img.flood-raster')?.src.includes('frequency.png'));
+    assert.match(await page.textContent('#flood-map .flood-legend'), /20–26 years/);
     assert.equal(await page.$eval('#f-flood-wrap', (e) => e.hidden), true);
+    await page.selectOption('#f-overlay', 'none');
+    await page.waitForFunction(() => !document.querySelector('#flood-map img.flood-raster') && document.querySelector('#flood-map .flood-legend').hidden);
     await page.selectOption('#f-level', 'upazila');
     await page.waitForFunction((n) => document.querySelectorAll('#flood-map .leaflet-overlay-pane path.leaflet-interactive').length === n && !document.querySelector('#flood-map.loading'), upazilas.length, { timeout: 30000 });
     // The main map's Floods basis still works, with its own selector.
@@ -185,6 +196,6 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     await broken.goto(base + '/accessibility.html');
     await broken.waitForSelector('#atlas-status.atlas-error');
     assert.ok(await broken.$('#atlas-content[hidden]'));
-    console.log('PASS: Access page (BBS population x DGHS): KPIs, layers, ranking, detail, points, people vs land curves, location quality, land basis + CSV, travel time + CSV, floods (years, events, own flood map + detail + ranking, main-map basis), inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
+    console.log('PASS: Access page (BBS population x DGHS): KPIs, layers, ranking, detail, points, people vs land curves, location quality, land basis + CSV, travel time + CSV, floods (years, events, own flood map + detail + ranking + satellite flood layers, main-map basis), inequality, clusters, social, primary care, union level, CSV, Bangla, mobile, error state');
   } finally { await browser.close(); }
 })();

@@ -650,7 +650,37 @@
       yLabel: T('% of people', 'মানুষের %'), axisLabel: T(`Years flooded (of ${fq.years_mapped})`, `প্লাবিত বছর (${N(fq.years_mapped)}টির মধ্যে)`), labelEvery: 2, digits: 0, source: FLOOD_SOURCE() });
   }
   // ---------- Flood map (its own map in the Floods section) ----------
-  const fstate = { level: 'district', measure: 'f_lost_hosp', flood: 'f2020_07', map: null };
+  const fstate = { level: 'district', measure: 'f_lost_hosp', flood: 'f2020_07', map: null, overlay: 'flood', raster: null, legend: null };
+  // Satellite flood layers (data/floods/overlays.json, scripts/build_flood_overlays.py): Web Mercator PNGs over the area map.
+  function drawRaster() {
+    const ov = state.data.overlays, map = fstate.map?.map;
+    if (!map) return;
+    if (fstate.raster) { map.removeLayer(fstate.raster); fstate.raster = null; }
+    const id = fstate.overlay === 'frequency' ? 'frequency' : fstate.flood, entry = fstate.overlay !== 'none' && ov ? ov.layers[id] : null;
+    if (entry) {
+      if (!map.getPane('flood-raster')) map.createPane('flood-raster').style.zIndex = 420;
+      fstate.raster = L.imageOverlay(`./data/floods/${entry.file}?v=${encodeURIComponent(ov.generatedAt)}`, entry.bounds,
+        { pane: 'flood-raster', opacity: 0.9, interactive: false, className: 'flood-raster', alt: T('Satellite flood map', 'উপগ্রহের বন্যার মানচিত্র') }).addTo(map);
+    }
+    if (!fstate.legend) {
+      fstate.legend = L.control({ position: 'bottomleft' });
+      fstate.legend.onAdd = () => { const d = L.DomUtil.create('div', 'flood-legend'); L.DomEvent.disableClickPropagation(d); return d; };
+      fstate.legend.addTo(map);
+    }
+    const box = fstate.legend.getContainer();
+    box.hidden = !entry;
+    if (!entry) return;
+    const title = entry.kind === 'frequency' ? T(`Years flooded, 2000–2025 (of ${entry.years_mapped})`, `প্লাবিত বছর, ২০০০–২০২৫ (${N(entry.years_mapped)}টির মধ্যে)`)
+      : `${T('Satellite flood map', 'উপগ্রহের বন্যার মানচিত্র')} · ${floodLabel(floodRecord(id))}`;
+    const strong = document.createElement('strong'); strong.textContent = title;
+    const items = ov.legend[entry.kind].map((l) => { const span = document.createElement('span'), i = document.createElement('i'); i.style.background = l.color; span.append(i, T(l.en, l.bn)); return span; });
+    const note = document.createElement('small');
+    note.textContent = T(`Every flooded pixel (${entry.res_m} m); the tables count 1 km cells at least half flooded, so they show less area. Permanent rivers are left out.`,
+      `প্রতিটি প্লাবিত পিক্সেল (${N(entry.res_m)} মি); সারণিতে শুধু অন্তত অর্ধেক প্লাবিত ১ কিমি ঘর গোনা হয়, তাই কম এলাকা দেখায়। স্থায়ী নদী বাদ।`);
+    if (entry.kind === 'event') note.textContent += ' ' + T('Scattered single specks across the country are most likely wet rice fields or radar noise rather than flooding.',
+      'সারা দেশে ছড়ানো একক বিন্দুগুলো সম্ভবত পানিতে ভেজা ধানক্ষেত বা রাডারের নয়েজ, বন্যা নয়।');
+    box.replaceChildren(strong, ...items, note);
+  }
   const floodMeasure = () => MEASURES.find((m) => m.id === fstate.measure);
   function floodSelects() {
     const level = fstate.level, f = state.data.floods;
@@ -660,7 +690,7 @@
     const group = (label, list) => { const g = document.createElement('optgroup'); g.label = label; g.append(...list.map((e) => option(e.id, floodLabel(e)))); return g; };
     $('#f-flood').replaceChildren(group(T('Named floods (Sentinel-1)', 'নামকৃত বন্যা (সেন্টিনেল-১)'), f.events), group(T('Whole years, 2000–2025', 'পুরো বছর, ২০০০–২০২৫'), [...f.years].reverse()));
     $('#f-flood').value = fstate.flood;
-    $('#f-flood-wrap').hidden = !floodMeasure().event;
+    $('#f-flood-wrap').hidden = !(floodMeasure().event || fstate.overlay === 'flood');
     $('#f-names').replaceChildren(...areasOf(level).map((a) => option(areaLabel(a, level), '')));
   }
   function floodPaint() {
@@ -668,7 +698,9 @@
     const val = (a) => Number(m.value(a, level, fstate.flood));
     $('#f-metric-note').textContent = (fr ? floodLabel(fr) + '. ' : '') + T(...m.note) + (fr && fr.id.startsWith('y') && level === 'union' && m.id !== 'f_flooded'
       ? ' ' + T('Access losses for whole years are published down to upazila.', 'পুরো বছরের প্রবেশগম্যতা হারানোর হিসাব উপজেলা পর্যন্ত প্রকাশিত।') : '');
-    fstate.map.setMetric({ legendTitle: T(m.en, m.bn), ramp: m.ramp, digits: m.digits, values: new Map(list.map((a) => [a.pcode, val(a)])) });
+    const rasterOn = fstate.overlay !== 'none' && state.data.overlays;
+    fstate.map.setMetric({ legendTitle: T(m.en, m.bn), ramp: m.ramp, digits: m.digits, values: new Map(list.map((a) => [a.pcode, val(a)])), fillOpacity: rasterOn ? 0.35 : undefined });
+    drawRaster();
     const usable = list.filter((a) => Number.isFinite(val(a)) && (a.population || 0) > 0 && (level !== 'union' || a.source !== 'estimated')).sort((a, b) => val(b) - val(a));
     $('#f-rank-title').textContent = T(`${m.rank[0]}: 20 ${LEVELS[level].en.toLowerCase()} areas · ${m.en}`, `${m.rank[1]}: ২০টি ${LEVELS[level].bn} · ${m.bn}`);
     window.HealthCharts.bars($('#c-flood-rank'), usable.slice(0, 20).map((a) => ({ label: areaLabel(a, level), value: val(a), display: N(val(a), m.digits),
@@ -714,8 +746,10 @@
       onSelect: (pcode) => floodDetail(pcode), boundaries: true, defaultBoundaries: ['division'], storageKey: 'shasthopath-flood-basemap'
     });
     $('#f-level').addEventListener('change', (e) => floodLevel(e.target.value));
-    $('#f-metric').addEventListener('change', (e) => { fstate.measure = e.target.value; $('#f-flood-wrap').hidden = !floodMeasure().event; floodPaint(); });
+    $('#f-metric').addEventListener('change', (e) => { fstate.measure = e.target.value; $('#f-flood-wrap').hidden = !(floodMeasure().event || fstate.overlay === 'flood'); floodPaint(); });
     $('#f-flood').addEventListener('change', (e) => { fstate.flood = e.target.value; floodPaint(); floodDetail(null); });
+    $('#f-overlay').addEventListener('change', (e) => { fstate.overlay = e.target.value; $('#f-flood-wrap').hidden = !(floodMeasure().event || fstate.overlay === 'flood'); floodPaint(); });
+    if (!state.data.overlays) $('#f-overlay').closest('label').hidden = true;
     $('#f-search').addEventListener('change', (e) => {
       const q = e.target.value.trim().toLowerCase(), name = q.split(' · ')[0], list = areasOf(fstate.level);
       const hit = list.find((a) => areaLabel(a, fstate.level).toLowerCase() === q) || list.find((a) => a.name.toLowerCase() === name) || list.find((a) => a.name.toLowerCase().includes(name));
@@ -804,8 +838,9 @@
         get('./data/atlas/distance.json'), get('./data/atlas/location-quality.json'), get('./data/atlas/areas-district.json'),
         ...levels.map((k) => get(`./data/access/areas-${k}.json`))]);
       if (!summary.national?.access?.blood_bank?.curve || !summary.moran || !distance.national?.primary_care?.curve) throw new Error(T('the data files are an older version; please reload the page (Ctrl+F5)', 'তথ্যের ফাইল পুরোনো সংস্করণের; পৃষ্ঠাটি আবার লোড করুন (Ctrl+F5)'));
-      const [travel, floods] = await Promise.all([get('./data/access/travel.json').catch(() => null), get('./data/access/floods.json').catch(() => null)]);
-      state.data = { summary, sourcesUrl: sources.url, distance, quality, areas: {}, index: {}, travel, floods, travelLv: {}, floodLv: {},
+      const [travel, floods, overlays] = await Promise.all([get('./data/access/travel.json').catch(() => null), get('./data/access/floods.json').catch(() => null),
+        get('./data/floods/overlays.json').catch(() => null)]);
+      state.data = { summary, sourcesUrl: sources.url, distance, quality, areas: {}, index: {}, travel, floods, overlays, travelLv: {}, floodLv: {},
                      land: { district: landDistrict.areas }, landIndex: { district: new Map(landDistrict.areas.map((a) => [a.pcode, a])) } };
       levels.forEach((k, i) => { state.data.areas[k] = files[i].areas; state.data.index[k] = new Map(files[i].areas.map((a) => [a.pcode, a])); });
     } catch (error) {

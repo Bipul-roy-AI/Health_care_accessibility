@@ -21,3 +21,10 @@
 #t-events a { overflow-wrap: anywhere; }
 #c-flood-freq { margin-top: 18px; }
 @media (max-width: 800px) { #floods .analysis-table table, #travel .analysis-table table { min-width: 680px; } #t-events th[scope="row"] { min-width: 170px; } }
+.flood-raster { image-rendering: pixelated; }
+.flood-legend { background: rgba(255,255,255,.95); border: 1px solid #d9e3db; border-radius: 6px; padding: 8px 10px; font-size: 11px; line-height: 1.5; max-width: 240px; color: #21473f; }
+.flood-legend strong { display: block; margin-bottom: 3px; }
+.flood-legend span { display: flex; align-items: center; gap: 6px; }
+.flood-legend i { width: 12px; height: 10px; border-radius: 2px; flex: none; }
+.flood-legend small { display: block; margin-top: 4px; color: #5e756c; }
+@media (max-width: 600px) { .flood-legend { max-width: 170px; font-size: 10px; } }
