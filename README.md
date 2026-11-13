@@ -6,6 +6,8 @@ A free map and directory for finding healthcare institutions across Bangladesh.
 **[National overview map](https://bipul-roy-ai.github.io/Health_care_accessibility/overview.html)** ·
 **[Healthcare statistics](https://bipul-roy-ai.github.io/Health_care_accessibility/statistics.html)** ·
 **[Analysis maps & tables](https://bipul-roy-ai.github.io/Health_care_accessibility/analysis.html)** ·
+**[Hospital research](https://bipul-roy-ai.github.io/Health_care_accessibility/research.html)** ·
+**[Distance atlas](https://bipul-roy-ai.github.io/Health_care_accessibility/atlas.html)** ·
 **[Emergency & helplines](https://bipul-roy-ai.github.io/Health_care_accessibility/helplines.html)**
 
 ## What you can find
@@ -79,3 +81,9 @@ calculate or approve proposed healthcare locations.
 The separate [Analysis page](analysis.html) presents the completed DGHS/BBS availability baseline: 10 administrative-area maps, six-tier national figures, area CSV downloads and coordinate-quality findings. It uses saved results without fetching the current registry or external map tiles. Travel-time and population-access results remain pending their required inputs. See [baseline methods](docs/AVAILABILITY_BASELINE.md).
 
 The statistical pages now use responsive SVG figures with labelled axes and SVG downloads. The Analysis page adds care-tier counts, coordinate-completeness comparisons, division/district/ADM3 rankings and a count-versus-completeness scatter plot. Its five advanced-analysis modules expose the actual input-readiness report; no travel, coverage, referral or site-selection result is simulated. The selected motorised scenario reports 30, 60 and 120 minute thresholds. Union/ADM4 remains unavailable because the supplied archive is ADM3.
+
+## Hospital research and Distance atlas
+
+[Hospital research](research.html) explores the 8,363 active hospital-type DGHS listings: a district map, linked filters, eight charts and a place probe that lists the five nearest hospitals with 1/5/10 km rings. See [its methods](docs/HOSPITAL_RESEARCH.md).
+
+[Distance atlas](atlas.html) measures straight-line distance from a national 2 km grid to the nearest of the 6,027 mapped hospitals, and summarises it for 544 upazilas/thanas, 64 districts and 8 divisions, alongside hospital points, approved beds and establishment decades. Figures are shares of land area, not population, and are not travel times. See [its methods](docs/DISTANCE_ATLAS.md).

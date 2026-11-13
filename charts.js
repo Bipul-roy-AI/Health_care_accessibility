@@ -71,6 +71,75 @@
         svg.append(element('rect', { x: left, y: height - 22, width: 10, height: 10, fill: '#176b58' })); text(svg, 'Eligible coordinates', left + 16, height - 13, { 'font-size': 10 });
         svg.append(element('rect', { x: width / 2, y: height - 22, width: 10, height: 10, fill: '#e8c8a5' })); text(svg, 'Unavailable / withheld', width / 2 + 16, height - 13, { 'font-size': 10 });
       }
+    } else if (kind === 'lines') {
+      const height = 340, left = 50, right = width - 20, top = 26, bottom = height - 56;
+      const xmin = options.xmin ?? 0;
+      const xmax = options.xmax ?? nice(Math.max(...rows.flatMap((r) => r.points.map((p) => p[0])), 0));
+      const xLabel = options.xFormat || ((value) => fmt(value, xmax - xmin < 10 ? 1 : 0));
+      const ymax = options.ymax ?? nice(Math.max(...rows.flatMap((r) => r.points.map((p) => p[1])), 0));
+      svg = canvas(height);
+      const xTicks = options.xTicks || 4;
+      for (let i = 0; i <= xTicks; i++) {
+        const x = left + (right - left) * i / xTicks;
+        svg.append(element('line', { x1: x, x2: x, y1: top, y2: bottom, stroke: '#e1e9e3' }));
+        text(svg, xLabel(xmin + (xmax - xmin) * i / xTicks), x, bottom + 17, { 'text-anchor': i === xTicks ? 'end' : i === 0 ? 'start' : 'middle', 'font-size': 10 });
+      }
+      for (let i = 0; i <= 4; i++) {
+        const y = bottom - (bottom - top) * i / 4;
+        svg.append(element('line', { x1: left, x2: right, y1: y, y2: y, stroke: '#e1e9e3' }));
+        text(svg, fmt(ymax * i / 4, ymax < 10 ? 1 : 0), left - 6, y + 4, { 'text-anchor': 'end', 'font-size': 10 });
+      }
+      const px = (x) => left + (x - xmin) / (xmax - xmin) * (right - left), py = (y) => bottom - y / ymax * (bottom - top);
+      const ends = [];
+      rows.forEach((row) => {
+        const colour = row.color || '#176b58';
+        const path = row.points.map((p, i) => (i ? 'L' : 'M') + px(p[0]).toFixed(1) + ' ' + py(p[1]).toFixed(1)).join('');
+        svg.append(element('path', { d: path, fill: 'none', stroke: colour, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+        const last = row.points[row.points.length - 1];
+        ends.push({ label: row.label, colour, y: py(last[1]) - 6 });
+      });
+      // Direct end labels: spread vertically so they never overlap (>=13px apart).
+      ends.forEach((end) => { end.y = Math.max(top + 10, end.y); });
+      ends.sort((a, b) => a.y - b.y);
+      for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 13);
+      const overflow = ends.length ? ends[ends.length - 1].y - (bottom - 4) : 0;
+      if (overflow > 0) ends.forEach((end) => { end.y -= overflow; });
+      ends.forEach((end) => text(svg, end.label, right - 2, end.y, { 'text-anchor': 'end', 'font-size': 11, 'font-weight': 600, fill: end.colour, style: 'paint-order:stroke;stroke:#fff;stroke-width:3px' }));
+      const legend = element('g', {});
+      rows.forEach((row, index) => {
+        const x = left + index * Math.max(120, (right - left) / rows.length);
+        legend.append(element('rect', { x, y: height - 14, width: 10, height: 3, fill: row.color || '#176b58' }));
+        text(svg, row.label, x + 15, height - 9, { 'font-size': 10 });
+      });
+      svg.append(legend);
+      const hover = element('g', { style: 'display:none', 'pointer-events': 'none' });
+      const hoverLine = element('line', { y1: top, y2: bottom, stroke: '#8aa79b', 'stroke-dasharray': '3 3' });
+      const hoverText = element('text', { 'font-size': 11, fill: '#21473f', style: 'paint-order:stroke;stroke:#fff;stroke-width:3px' });
+      const hoverDots = rows.map((row) => element('circle', { r: 3.5, fill: row.color || '#176b58', stroke: '#fff', 'stroke-width': 1.5 }));
+      hover.append(hoverLine, ...hoverDots, hoverText);
+      svg.append(hover);
+      root.addEventListener('pointermove', (event) => {
+        const box = root.getBoundingClientRect();
+        const svgX = (event.clientX - box.left) * (width / box.width);
+        const xValue = Math.max(xmin, Math.min(xmax, xmin + (svgX - left) / (right - left) * (xmax - xmin)));
+        hover.style.display = '';
+        const sx = px(xValue);
+        hoverLine.setAttribute('x1', sx); hoverLine.setAttribute('x2', sx);
+        const readings = rows.map((row, index) => {
+          let best = row.points[0];
+          for (const point of row.points) if (Math.abs(point[0] - xValue) < Math.abs(best[0] - xValue)) best = point;
+          hoverDots[index].setAttribute('cx', px(best[0])); hoverDots[index].setAttribute('cy', py(best[1]));
+          return `${row.label} ${fmt(best[1], options.digits ?? 1)}`;
+        });
+        hoverText.textContent = `${xLabel(rows[0] ? closestX(rows[0].points, xValue) : xValue)} ${options.xUnit || ''} · ${readings.join(' · ')}`;
+        hoverText.setAttribute('x', Math.min(sx + 8, width - 8)); hoverText.setAttribute('y', top + 12);
+        hoverText.setAttribute('text-anchor', sx > width * 0.55 ? 'end' : 'start');
+        if (sx > width * 0.55) hoverText.setAttribute('x', sx - 8);
+      });
+      root.addEventListener('pointerleave', () => { hover.style.display = 'none'; });
+      function closestX(points, value) { let best = points[0]; for (const point of points) if (Math.abs(point[0] - value) < Math.abs(best[0] - value)) best = point; return best[0]; }
+      wrap(options.axisLabel || 'Value', Math.max(25, Math.floor((width - 30) / 7))).forEach((line, i) => text(svg, line, width / 2, bottom + 34 + i * 13, { 'text-anchor': 'middle', 'font-size': 11 }));
+      text(svg, options.yLabel || '', 0, 0, { transform: `translate(12 ${(top + bottom) / 2}) rotate(-90)`, 'text-anchor': 'middle', 'font-size': 11 });
     } else {
       const height = 330, left = 47, right = width - 22, top = 23, bottom = height - 52;
       const xmax = nice(Math.max(...rows.map((r) => r.x), 0)); svg = canvas(height);
@@ -92,7 +161,9 @@
   function render(kind, target, rows, options = {}) {
     if (typeof target === 'string') target = document.querySelector(target);
     if (!target) return;
-    const clean = rows.filter((r) => kind === 'bars' ? Number.isFinite(r.value) && r.value >= 0 : Number.isFinite(r.x) && r.x >= 0 && Number.isFinite(r.y) && r.y >= 0 && r.y <= 100);
+    const clean = kind === 'lines'
+      ? rows.filter((r) => Array.isArray(r.points) && r.points.length > 1 && r.points.every((p) => Number.isFinite(p[0]) && Number.isFinite(p[1])))
+      : rows.filter((r) => kind === 'bars' ? Number.isFinite(r.value) && r.value >= 0 : Number.isFinite(r.x) && r.x >= 0 && Number.isFinite(r.y) && r.y >= 0 && r.y <= 100);
     let state = states.get(target);
     if (!state) {
       state = {}; states.set(target, state);
@@ -117,5 +188,5 @@
     if (!headers || new Set(headers).size !== headers.length || rows.some((r) => r.length !== headers.length)) throw new Error('Invalid CSV columns');
     return rows.map((r) => Object.fromEntries(headers.map((h, i) => [h, r[i]])));
   }
-  window.HealthCharts = { bars: (target, rows, options) => render('bars', target, rows, options), scatter: (target, rows, options) => render('scatter', target, rows, options), csv };
+  window.HealthCharts = { bars: (target, rows, options) => render('bars', target, rows, options), scatter: (target, rows, options) => render('scatter', target, rows, options), lines: (target, rows, options) => render('lines', target, rows, options), csv };
 })();

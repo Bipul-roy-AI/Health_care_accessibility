@@ -36,11 +36,12 @@ jobs:
         run: |
           python3 scripts/validate_dghs.py
           python3 scripts/build_statistics.py
+          python3 scripts/build_research.py
       - name: Commit extracted institutional data
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/dghs data/statistics/summary.json
+          git add data/dghs data/statistics/summary.json data/research/hospitals.json
           if ! git diff --cached --quiet; then
             git commit -m 'Update DGHS detailed institution profiles'
             git pull --rebase origin main
@@ -50,7 +51,7 @@ jobs:
       - name: Prepare the updated site
         run: |
           mkdir _site
-          cp statistics-charts.js charts.js charts.css analysis.html analysis.js analysis.css accessibility.html accessibility.js accessibility-model.js accessibility.css statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
+          cp research.html research.css research.js research-model.js atlas.html atlas.css atlas.js choropleth.js statistics-charts.js charts.js charts.css analysis.html analysis.js analysis.css accessibility.html accessibility.js accessibility-model.js accessibility.css statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
           cp -r vendor data _site/
           touch _site/.nojekyll
           python3 scripts/version_assets.py --directory _site
