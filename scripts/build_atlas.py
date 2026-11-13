@@ -66,7 +66,6 @@ ADM_ALIASES = {
     "chapai nawabganj": "chapainawabganj", "khagrachhari": "khagrachari",
     "nawabganj": "chapainawabganj", "brahamanbaria": "brahmanbaria",
 }
-PRIVATE_NGO_TYPES = {"Private Hospital / Clinic", "NGO Hospital/Clinic"}
 PRIMARY_TYPES = {
     "Community Clinic", "Union Health Center", "Union Health Sub Center",
     "Union Health & Family Welfare Center (UH&FWC)",
@@ -88,7 +87,8 @@ def norm(value) -> str:
 def classify(record: dict) -> str:
     kind = record.get("facility_type_name") or ""
     if kind in HOSPITAL_TYPES:
-        if kind not in PRIVATE_NGO_TYPES and (record.get("facility_ownership_name") or "") in GOV_OWNERSHIP:
+        # Same rule as the Statistics page: government ownership decides, whatever the type label.
+        if (record.get("facility_ownership_name") or "") in GOV_OWNERSHIP:
             return "public_hospital"
         return "private_ngo_hospital"
     if kind in PRIMARY_TYPES:
@@ -297,6 +297,7 @@ def main() -> int:
     parser.add_argument("--adm2", type=Path, required=True)
     parser.add_argument("--adm3", type=Path, required=True)
     parser.add_argument("--adm4", type=Path, required=True)
+    parser.add_argument("--census", type=Path, help="data/population/bbs-census-2022.json: also build data/access/")
     args = parser.parse_args()
 
     from pyproj import Transformer
@@ -396,6 +397,13 @@ def main() -> int:
     assignment["division"] = district_parent[assignment["district"]]
 
     areas_by_level = {"division": divisions, "district": districts, "upazila": upazilas, "union": unions}
+    if args.census:
+        import build_access
+        access = build_access.build({"census": args.census, "divisions": divisions, "districts": districts,
+                                     "upazilas": upazilas, "unions": unions, "facilities": facilities,
+                                     "to_utm": to_utm, "gx": gx, "gy": gy, "union_of_cell": assignment["union"],
+                                     "generated": GENERATED})
+        print("access:", json.dumps(access["matching"]["union_population_share"]))
     atlas_dir = ROOT / "data/atlas"
     atlas_dir.mkdir(exist_ok=True)
 

@@ -42,7 +42,8 @@
     const canvas = L.canvas({ padding: 0.3 });
     const state = { layer: null, metric: null, selected: null, legend: null, token: 0, thin: false };
     // Reference basemap (shared with the other maps); fills thin out over tiles.
-    const layers = window.MapLayers.addLayerControl(map, { storageKey: 'shasthopath-atlas-basemap', basemap: options.basemap,
+    const layers = window.MapLayers.addLayerControl(map, { storageKey: options.storageKey || 'shasthopath-atlas-basemap', basemap: options.basemap,
+      boundaries: Boolean(options.boundaries), defaultBoundaries: options.defaultBoundaries, boundariesAbove: true, boundaryAttribution: false,
       onBasemap: () => { if (state.layer) state.layer.setStyle(style); } });
     const legendControl = L.control({ position: 'bottomright' });
     legendControl.onAdd = () => { state.legend = L.DomUtil.create('div', 'choropleth-legend'); return state.legend; };
@@ -50,6 +51,10 @@
 
     function fill(pcode) {
       const metric = state.metric;
+      if (metric && metric.categories) {
+        const category = metric.categories.find((c) => c.key === metric.values.get(pcode));
+        return category ? category.color : MISSING;
+      }
       const value = metric ? metric.values.get(pcode) : NaN;
       if (!Number.isFinite(value)) return MISSING;
       let bin = 0;
@@ -65,6 +70,11 @@
       const m = state.metric;
       if (!m || !state.legend) return;
       const parts = [`<strong>${m.legendTitle}</strong>`];
+      if (m.categories) {
+        m.categories.forEach((c) => parts.push(`<span><i style="background:${c.color}"></i>${c.label}</span>`));
+        state.legend.innerHTML = parts.join('');
+        return;
+      }
       let low = m.min;
       m.ramp.slice(0, m.edges.length + 1).forEach((colour, i) => {
         const high = i < m.edges.length ? m.edges[i] : m.max;
@@ -77,7 +87,9 @@
     function tooltip(feature) {
       const m = state.metric, p = feature.properties;
       const label = options.label ? options.label(p) : p.name;
-      return `<strong>${label}</strong>` + (m ? `<br>${m.legendTitle}: <strong>${fmt(m.values.get(p.pcode), m.digits)}</strong>` : '')
+      const shown = m && m.categories ? ((m.categories.find((c) => c.key === m.values.get(p.pcode)) || {}).label || fmt(NaN))
+        : m ? fmt(m.values.get(p.pcode), m.digits) : '';
+      return `<strong>${label}</strong>` + (m ? `<br>${m.legendTitle}: <strong>${shown}</strong>` : '')
         + (m && m.extra ? m.extra(p.pcode) : '');
     }
     function restyle() {
@@ -116,6 +128,7 @@
       if (options.onSelect) options.onSelect(pcode);
     }
     function setMetric(metric) {
+      if (metric.categories) { state.metric = { ...metric }; restyle(); return; }
       const numeric = [...metric.values.values()].filter(Number.isFinite);
       state.metric = { digits: 0, ...metric, edges: quantileBins(numeric, 6), ramp: RAMPS[metric.ramp || 'green'],
                        min: numeric.length ? Math.min(...numeric) : 0, max: numeric.length ? Math.max(...numeric) : 0 };

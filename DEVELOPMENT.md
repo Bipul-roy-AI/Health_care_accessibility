@@ -104,15 +104,22 @@ a nearby district centre. The browser independently checks all plotted DGHS poin
 and withholds routes to rejected points. Canvas dots retain actual point locations;
 no averaged cluster centres are displayed.
 
-## Accessibility study addition
+## Access study (population access)
 
-The static page is `accessibility.html`; `accessibility-model.js` applies exact DGHS active/type/coordinate rules without extra data sources. `accessibility.js` renders points and division counts using the committed registry. It makes no external tile/routing request. The original website's external layers remain separate.
+`accessibility.html` / `accessibility.js` / `accessibility.css` show population-based access. Data come from `data/access/`, built together with the Distance atlas:
 
 ```bash
-node tests/accessibility-model.cjs
-NODE_PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules node tests/accessibility.cjs
-python3 scripts/run_accessibility.py audit --output outputs/dghs_input_audit.json
+# once, when the census source changes (UNICEF Bangladesh dashboard of BBS Census 2022 tables):
+git clone --depth 1 https://github.com/unicefbd/bangladesh-population-housing-census-2022 /tmp/census
+python3 -I scripts/extract_census.py /tmp/census/index.html      # -> data/population/bbs-census-2022.json
+# atlas + access outputs (about 45 s):
+python3 -W ignore scripts/build_atlas.py --adm2 BGD_ADM2.geojson --adm3 BGD_ADM3.geojson --adm4 BGD_ADM4.geojson \
+  --census data/population/bbs-census-2022.json
+python3 -m pytest -q tests/test_access.py
+NODE_PATH=... node tests/accessibility.cjs
 ```
+
+`scripts/population.py` holds the census-to-2015-boundary crosswalk (newer upazilas go to the unit they were carved from); review it when BBS or geoBoundaries change. `map-layers.js` provides the shared basemap/boundary control used by both choropleth pages.
 
 Optional geospatial backend:
 
