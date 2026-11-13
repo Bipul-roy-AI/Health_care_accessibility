@@ -1,0 +1,26 @@
+/* Distance atlas: layout for the choropleth, its detail panel and legend.
+   Everything else reuses research.css and charts.css. */
+.atlas-map-row { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; margin: 16px 0 24px; }
+#atlas-map { height: 620px; border: 1px solid #d9e3db; border-radius: 8px; background: #f7f8f4; }
+.atlas-detail { border: 1px solid #d9e3db; border-radius: 8px; background: #fff; padding: 16px; font-size: 13px; align-self: start; }
+.atlas-detail h3 { margin: 0 0 10px; font-size: 16px; }
+.atlas-detail dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0 0 10px; }
+.atlas-detail dt { color: #5e756c; }
+.atlas-detail dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: #21473f; }
+.choropleth-legend { background: rgba(255, 255, 255, 0.95); padding: 8px 10px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15); font: 11px/1.5 system-ui, sans-serif; color: #21473f; max-width: 220px; }
+.choropleth-legend strong { display: block; margin-bottom: 4px; }
+.choropleth-legend span { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.choropleth-legend i { width: 14px; height: 10px; border-radius: 2px; flex: none; border: 1px solid rgba(0, 0, 0, 0.08); }
+#atlas-main .analysis-table { overflow-x: auto; margin: 16px 0; }
+#atlas-main .analysis-table table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+#atlas-main .analysis-table th, #atlas-main .analysis-table td { padding: 7px 9px; border-bottom: 1px solid #e3ebe5; text-align: right; }
+#atlas-main .analysis-table th[scope="row"], #atlas-main .analysis-table thead th:first-child { text-align: left; }
+#atlas-main .analysis-table caption { text-align: left; font-size: 12px; color: #5e756c; padding-bottom: 6px; }
+#atlas-main .figure-card { margin-bottom: 16px; }
+#atlas-main .analysis-downloads { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0; font-size: 13px; }
+#atlas-main input[type="search"] { width: 100%; }
+@media (max-width: 900px) {
+  .atlas-map-row { grid-template-columns: 1fr; }
+  #atlas-map { height: 460px; }
+  #atlas-main .figure-grid { grid-template-columns: 1fr; }
+}

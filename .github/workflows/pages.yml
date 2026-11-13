@@ -37,6 +37,10 @@ jobs:
           node --check accessibility-model.js
           node --check analysis.js
           node --check charts.js
+          node --check research.js
+          node --check research-model.js
+          node tests/research-model.cjs
+          python3 scripts/build_research.py --check
           node tests/accessibility-model.cjs
           python3 scripts/build_statistics.py --check
           python3 scripts/validate_dghs.py
@@ -54,6 +58,7 @@ jobs:
           NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/statistics.cjs
           NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/accessibility.cjs
           NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/analysis.cjs
+          NODE_PATH="$RUNNER_TEMP/shastho-tests/node_modules" node tests/atlas.cjs
   deploy:
     needs: test
     runs-on: ubuntu-24.04
@@ -65,7 +70,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir _site
-          cp statistics-charts.js charts.js charts.css analysis.html analysis.js analysis.css accessibility.html accessibility.js accessibility-model.js accessibility.css statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
+          cp research.html research.css research.js research-model.js atlas.html atlas.css atlas.js choropleth.js statistics-charts.js charts.js charts.css analysis.html analysis.js analysis.css accessibility.html accessibility.js accessibility-model.js accessibility.css statistics.html statistics.js statistics.css index.html overview.html helplines.html app.js overview.js helplines.js country-boundary.js map-tools.js facility-details.js registry-directory.js styles.css favicon.svg _site/
           cp -r vendor _site/vendor
           cp -r data _site/data
           touch _site/.nojekyll
