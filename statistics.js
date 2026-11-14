@@ -144,6 +144,8 @@
     document.querySelectorAll('.stats-controls select, .stats-controls button').forEach((e) => { e.disabled = false; });
     document.addEventListener('site-language', () => { labels(); official(); render(); });
     document.addEventListener('site-theme', () => render());
+    // Canvas charts draw with whatever font is ready; redraw once Montserrat has loaded.
+    if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => render());
     official(); render();
   }).catch(() => { $('#statistics-status').textContent = T('Statistics could not be loaded. Reload the page or use the source downloads below.', 'পরিসংখ্যান লোড হয়নি। পৃষ্ঠাটি রিফ্রেশ করুন বা নিচের উৎস ডাউনলোড করুন।'); $('#statistics-status').classList.add('error'); });
 })();

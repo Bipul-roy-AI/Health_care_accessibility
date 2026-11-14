@@ -34,7 +34,7 @@
 .atlas-detail dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0 0 10px; }
 .atlas-detail dt { color: #5e756c; }
 .atlas-detail dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: #21473f; }
-.choropleth-legend { background: rgba(255, 255, 255, 0.95); padding: 8px 10px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15); font: 11px/1.5 system-ui, sans-serif; color: #21473f; max-width: 220px; }
+.choropleth-legend { background: rgba(255, 255, 255, 0.95); padding: 8px 10px; border-radius: 6px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15); font: 11px/1.5 Montserrat,system-ui, sans-serif; color: #21473f; max-width: 220px; }
 .choropleth-legend strong { display: block; margin-bottom: 4px; }
 .choropleth-legend span { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
 .choropleth-legend i { width: 14px; height: 10px; border-radius: 2px; flex: none; border: 1px solid rgba(0, 0, 0, 0.08); }
