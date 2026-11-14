@@ -32,3 +32,12 @@
 .inund-pick { width: min(100%, 520px); }
 .inund-pick select { width: 100%; }
 #flood-inundation, #flood-measures { margin-top: 28px; font-size: 1.15rem; }
+.connect-control { background: rgba(255,255,255,.95); border: 1px solid #d9e3db; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: #21473f; max-width: 230px; }
+.connect-control strong { display: block; margin-bottom: 4px; }
+.connect-control label { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; font-size: 12px; font-weight: 400; line-height: 1.5; margin: 3px 0; cursor: pointer; }
+.connect-control input { margin: 0; }
+.connect-control label small { flex-basis: 100%; margin-left: 20px; color: #7a8c85; font-size: 10.5px; line-height: 1.2; }
+.connect-control input:disabled + * { opacity: .6; }
+.connect-legend span i { flex: none; }
+.connect-flooded { color: #b45309; font-weight: 600; margin-top: 4px; }
+@media (max-width: 600px) { .connect-control { font-size: 11px; max-width: 180px; } }
