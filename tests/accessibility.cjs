@@ -144,10 +144,21 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     assert.equal(await page.$eval('#i-layer', (e) => e.value), ev.id);
     await page.waitForFunction((file) => { const img = document.querySelector('#inund-map img.flood-raster'); return img && img.src.includes(file) && img.complete && img.naturalWidth > 0; }, overlays.layers[ev.id].file);
     assert.equal(await page.locator('#inund-map .leaflet-overlay-pane path.leaflet-interactive').count(), 0);   // no area fills
-    assert.match(await page.textContent('#inund-map .flood-legend'), /Flooded beyond normal monsoon water/);
+    assert.match(await page.textContent('#inund-map .flood-legend:not(.connect-legend)'), /Flooded beyond normal monsoon water/);
+    // Facilities on the flood maps: sites on flooded pixels are counted in the legend.
+    const facilities = JSON.parse(fs.readFileSync('data/floods/facilities.json', 'utf8'));
+    const points = JSON.parse(fs.readFileSync('data/access/points.json', 'utf8')).rows;
+    const wetHospitals = (id) => facilities.flooded[id].filter((i) => points[i][2] & (2 | 8)).length;
+    await page.waitForFunction((n) => document.querySelector('#inund-map .connect-legend')?.textContent.includes(`${n} hospitals and UHCs`), wetHospitals(ev.id).toLocaleString('en-GB'));
+    assert.ok(await page.$('#inund-map .leaflet-inund-facilities-pane canvas'));
+    assert.equal(await page.locator('#inund-map .connect-control input[data-layer]').count(), overlays.roads ? 3 : 2);
+    await page.check('#inund-map .connect-control input[data-layer="primary"]');
+    await page.waitForFunction(() => /primary-care facilities/.test(document.querySelector('#inund-map .connect-legend').textContent));
+    await page.uncheck('#inund-map .connect-control input[data-layer="primary"]');
+    assert.match(await page.textContent('#flood-map .connect-legend'), /hospitals and UHCs/);
     await page.selectOption('#i-layer', 'frequency');
     await page.waitForFunction(() => document.querySelector('#inund-map img.flood-raster')?.src.includes('frequency.png'));
-    assert.match(await page.textContent('#inund-map .flood-legend'), /20–26 years/);
+    assert.match(await page.textContent('#inund-map .flood-legend:not(.connect-legend)'), /20–26 years/);
     await page.selectOption('#i-layer', 'y2004');
     await page.waitForFunction(() => document.querySelector('#inund-map img.flood-raster')?.src.includes('y2004.png'));
     assert.match(await page.textContent('#i-note'), /MODIS/);

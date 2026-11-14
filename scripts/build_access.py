@@ -466,9 +466,13 @@ def build(ctx) -> dict:
     for f in usable:
         mask = sum(MASK_BITS[t] for t in tags(f) if t in MASK_BITS)
         if mask:
-            mask_rows.append([round(float(f["lon"]), 4), round(float(f["lat"]), 4), mask])
-    mask_rows.sort()
-    dump("points.json", {"generatedAt": ctx["generated"], "bits": MASK_BITS, "rows": mask_rows})
+            mask_rows.append([round(float(f["lon"]), 4), round(float(f["lat"]), 4), mask,
+                              f.get("name") or "", f.get("type") or "", f.get("upazila") or "", f.get("district") or "", str(f.get("code") or "")])
+    mask_rows.sort(key=lambda r: (r[0], r[1], r[2], r[7]))
+    dump("points.json", {"generatedAt": ctx["generated"], "bits": MASK_BITS, "rows": [r[:3] for r in mask_rows]})
+    # Names for the same rows, in the same order (loaded only when someone opens a facility on a map).
+    dump("points-names.json", {"generatedAt": ctx["generated"], "columns": ["name", "type", "upazila", "district", "code"],
+                               "rows": [r[3:] for r in mask_rows]})
     with open(OUT / "census-upazila-crosswalk.csv", "w", newline="", encoding="utf-8") as stream:
         writer = csv.writer(stream)
         writer.writerow(["district", "census_upazila_or_thana", "census_population_2022", "pcode_2015", "upazila_2015", "match"])

@@ -59,6 +59,24 @@ class Travel(unittest.TestCase):
         cropped, _ = trim(merc, t)
         self.assertLessEqual(cropped.shape[0], 8)
 
+    def test_flooded_road_stretches(self):
+        import geopandas as gpd
+        from rasterio.transform import from_origin
+        from shapely.geometry import LineString
+        from build_flood_overlays import flooded_stretches
+        t = from_origin(0, 1000, 100, 100)                  # 10 x 10 pixels of 100 m
+        wet = np.zeros((10, 10), bool)
+        wet[:, 3:6] = True                                    # a 300 m wide flooded band
+        roads = gpd.GeoDataFrame({"c": [1, 3], "n": ["N1", ""]},
+                                 geometry=[LineString([(50, 550), (950, 550)]),      # crosses the band
+                                           LineString([(850, 50), (850, 950)])],     # stays dry
+                                 crs=32646)
+        parts, km = flooded_stretches(roads, wet, t, 100)
+        self.assertEqual(len(parts), 1)
+        self.assertEqual(parts[0][0], 1)
+        self.assertAlmostEqual(parts[0][1].length, 300, delta=100)  # band width, to one sample step
+        self.assertEqual(set(km), {"1"})
+
     def test_snap_cells_moves_edge_points_to_valid_cells(self):
         from build_travel import snap_cells
         valid = np.ones((5, 5), bool)

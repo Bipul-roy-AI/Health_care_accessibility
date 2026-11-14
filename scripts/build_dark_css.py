@@ -195,7 +195,7 @@ html[data-theme="dark"] .leaflet-control-attribution a{color:#8fd3b5}
 html[data-theme="dark"] .leaflet-tooltip{background:#1c2b26;color:var(--ink);border-color:#2c3f39}
 html[data-theme="dark"] .leaflet-tooltip-top:before{border-top-color:#1c2b26}
 html[data-theme="dark"] .leaflet-popup-content-wrapper,html[data-theme="dark"] .leaflet-popup-tip{background:#1c2b26;color:var(--ink)}
-html[data-theme="dark"] .leaflet-control.map-layer-control,html[data-theme="dark"] .choropleth-legend,html[data-theme="dark"] .flood-legend{background:rgba(22,35,31,.95);color:var(--ink);border-color:#2c3f39}
+html[data-theme="dark"] .leaflet-control.map-layer-control,html[data-theme="dark"] .choropleth-legend,html[data-theme="dark"] .flood-legend,html[data-theme="dark"] .connect-control{background:rgba(22,35,31,.95);color:var(--ink);border-color:#2c3f39}
 html[data-theme="dark"] .map-layer-control .map-layer-row,html[data-theme="dark"] .map-layer-control legend,html[data-theme="dark"] .map-layer-control fieldset label{color:var(--ink)}
 html[data-theme="dark"] .map-layer-control select{background:#0f1a17;color:var(--ink);border-color:#3a4e47}
 html[data-theme="dark"] .leaflet-boundaries-pane path.boundary-division{stroke:#e8f1ed}

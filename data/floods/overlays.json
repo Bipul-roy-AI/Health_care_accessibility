@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-13T22:07:35+00:00",
+ "generatedAt": "2026-11-14T09:56:20+00:00",
  "crs": "EPSG:3857 images; bounds in latitude/longitude",
  "legend": {
   "event": [
@@ -55,6 +55,10 @@
   ]
  },
  "notes": "Permanent water (JRC Global Surface Water, 10+ months a year) and areas outside Bangladesh are transparent. Events at 200 m, years and frequency at 250 m; modal class when downsampling.",
+ "roads": null,
+ "facilities": {
+  "rule": "a facility counts as flooded when its own pixel is flooded (events: beyond normal monsoon water); for the frequency layer, in 5 or more of the 26 years"
+ },
  "layers": {
   "f2019_07": {
    "file": "overlays/f2019_07.png",

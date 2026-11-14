@@ -648,7 +648,119 @@
   const fstate = { level: 'district', measure: 'f_lost_hosp', flood: 'f2020_07', map: null };
 
   // ---------- Inundation map: satellite flood layers only (data/floods/overlays.json, scripts/build_flood_overlays.py) ----------
-  const istate = { layer: 'f2020_07', map: null, raster: null, legend: null };
+  const istate = { layer: 'f2020_07', map: null, raster: null, legend: null, conn: null };
+
+  // ---------- Connectivity on the flood maps: DGHS facilities and OSM main roads ----------
+  // data/floods/facilities.json marks the facilities (rows of data/access/points.json) whose own pixel is flooded in each
+  // layer; data/floods/roads.geojson holds OSM main roads and data/floods/roads/<layer>.geojson the stretches under water.
+  const CONNECT = { hospital: '#c2185b', primary: '#795548', flooded: '#ff8f00', road: '#37474f', roadDark: '#d5dee2', roadFlooded: '#e53935' };
+  const HOSPITAL_BITS = 2 | 8, PRIMARY_BIT = 4;
+  const connData = { facilities: null, names: null, roads: null, flooded: new Map() };
+  async function connFacilities() {
+    if (!connData.facilities) {
+      const [pts, fac] = await Promise.all([state.points || get('./data/access/points.json'), get('./data/floods/facilities.json')]);
+      state.points = pts; connData.facilities = fac;
+    }
+    return connData.facilities;
+  }
+  async function connRoads() { if (connData.roads === null) connData.roads = await get('./data/floods/roads.geojson').catch(() => false); return connData.roads; }
+  async function connFloodedRoads(id) {
+    if (!connData.flooded.has(id)) connData.flooded.set(id, await get(`./data/floods/roads/${id}.geojson`).catch(() => null));
+    return connData.flooded.get(id);
+  }
+  const roadsAvailable = () => Boolean(state.data.overlays?.roads);
+  function connectivity(map, key, layerId) {
+    const ctl = { show: { hospital: true, primary: false, roads: roadsAvailable() }, group: L.layerGroup().addTo(map), token: 0 };
+    map.createPane(`${key}-roads`).style.zIndex = 440;
+    map.createPane(`${key}-facilities`).style.zIndex = 470;
+    const panel = L.control({ position: 'topright' });
+    panel.onAdd = () => { const d = L.DomUtil.create('div', 'connect-control'); L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d); return d; };
+    panel.addTo(map);
+    const legend = L.control({ position: 'bottomleft' });
+    legend.onAdd = () => { const d = L.DomUtil.create('div', 'flood-legend connect-legend'); L.DomEvent.disableClickPropagation(d); return d; };
+    legend.addTo(map);
+    ctl.labels = () => {
+      const box = panel.getContainer(), title = document.createElement('strong');
+      title.textContent = T('Show on the map', 'মানচিত্রে দেখান');
+      const row = (k, en, bn, disabled, note) => {
+        const label = document.createElement('label'), input = document.createElement('input');
+        input.type = 'checkbox'; input.checked = ctl.show[k] && !disabled; input.disabled = disabled; input.dataset.layer = k;
+        input.addEventListener('change', () => { ctl.show[k] = input.checked; ctl.redraw(); });
+        label.append(input, ' ', T(en, bn));
+        if (note) { const small = document.createElement('small'); small.textContent = note; label.append(small); }
+        return label;
+      };
+      box.replaceChildren(title, row('hospital', 'Hospitals and UHCs (DGHS)', 'হাসপাতাল ও উপজেলা স্বাস্থ্য কমপ্লেক্স (DGHS)'),
+        row('primary', 'Primary care (DGHS)', 'প্রাথমিক স্বাস্থ্যসেবা (DGHS)'),
+        ...(roadsAvailable() ? [row('roads', 'Main roads (OpenStreetMap)', 'প্রধান সড়ক (ওপেনস্ট্রিটম্যাপ)', false)] : []));
+    };
+    async function popup(i, flooded, id) {
+      if (!connData.names) connData.names = await get('./data/access/points-names.json');
+      const [name, type, upazila, district] = connData.names.rows[i], fac = connData.facilities, years = fac.years_flooded?.[i];
+      const box = document.createElement('div'), h = document.createElement('strong'), p1 = document.createElement('div'), p2 = document.createElement('div');
+      h.textContent = name; p1.textContent = [type, upazila, district].filter(Boolean).join(' · ');
+      const what = id === 'frequency' ? T('flooded in 5 or more years', '৫ বা বেশি বছর প্লাবিত') : T('under water in this flood', 'এই বন্যায় পানির নিচে');
+      p2.textContent = (flooded ? `⚠ ${T('Site', 'স্থান')} ${what}` : T('Site not flooded on this map', 'এই মানচিত্রে স্থানটি প্লাবিত নয়'))
+        + (Number.isFinite(years) ? ` · ${T(`flooded in ${years} of 26 yearly maps`, `২৬টি বার্ষিক মানচিত্রের ${N(years)}টিতে প্লাবিত`)}` : '');
+      p2.className = flooded ? 'connect-flooded' : '';
+      box.append(h, p1, p2);
+      return box;
+    }
+    ctl.redraw = async () => {
+      const token = ++ctl.token, id = layerId(), dark = document.documentElement.dataset.theme === 'dark';
+      const fac = await connFacilities(), roads = ctl.show.roads && roadsAvailable() ? await connRoads() : null, wet = ctl.show.roads && roadsAvailable() ? await connFloodedRoads(id) : null;
+      if (token !== ctl.token) return;
+      ctl.group.clearLayers();
+      const width = { 1: 2.2, 2: 1.5, 3: 0.9 }, roadRenderer = L.canvas({ pane: `${key}-roads`, padding: 0.3 });
+      if (roads) L.geoJSON(roads, { pane: `${key}-roads`, renderer: roadRenderer, interactive: false,
+        style: (f) => ({ color: dark ? CONNECT.roadDark : CONNECT.road, weight: width[f.properties.c] || 1, opacity: 0.8 }) }).addTo(ctl.group);
+      if (wet) L.geoJSON(wet, { pane: `${key}-roads`, renderer: roadRenderer, interactive: false,
+        style: (f) => ({ color: CONNECT.roadFlooded, weight: (width[f.properties.c] || 1) + 2, opacity: 0.95 }) }).addTo(ctl.group);
+      const floodedSet = new Set(fac.flooded[id] || []), renderer = L.canvas({ pane: `${key}-facilities`, padding: 0.3 }), z = map.getZoom();
+      const r = z <= 7 ? 2 : z <= 9 ? 3 : 4.5, later = [], wetCount = { hospital: 0, primary: 0 };
+      state.points.rows.forEach(([lon, lat, mask], i) => {
+        const hospital = (mask & HOSPITAL_BITS) !== 0, primary = !hospital && (mask & PRIMARY_BIT) !== 0;
+        const flooded = floodedSet.has(i);
+        if (flooded && hospital) wetCount.hospital++;
+        if (flooded && primary) wetCount.primary++;
+        if (!((hospital && ctl.show.hospital) || (primary && ctl.show.primary))) return;
+        const marker = L.circleMarker([lat, lon], flooded
+          ? { renderer, pane: `${key}-facilities`, radius: r + 1.5, weight: 1.2, color: '#111', fillColor: CONNECT.flooded, fillOpacity: 1 }
+          : { renderer, pane: `${key}-facilities`, radius: hospital ? r : r * 0.75, weight: 0.6, color: dark ? '#0f1a17' : '#fff', fillColor: hospital ? CONNECT.hospital : CONNECT.primary, fillOpacity: 0.95 });
+        marker.on('click', async () => marker.bindPopup(await popup(i, flooded, id), { maxWidth: 260 }).openPopup());
+        if (flooded) later.push(marker); else marker.addTo(ctl.group);
+      });
+      later.forEach((m) => m.addTo(ctl.group));
+      // Legend with this layer's counts.
+      const km = state.data.overlays?.layers[id]?.roads_flooded_km, box = legend.getContainer(), items = [];
+      const item = (color, text, ring) => { const span = document.createElement('span'), i = document.createElement('i'); i.style.background = color; if (ring) i.style.outline = '1px solid #111'; i.style.borderRadius = '50%'; i.style.width = i.style.height = '10px'; span.append(i, text); return span; };
+      const line = (color, text, h) => { const span = document.createElement('span'), i = document.createElement('i'); i.style.background = color; i.style.height = h + 'px'; i.style.width = '16px'; span.append(i, text); return span; };
+      const what = id === 'frequency' ? T('flooded in 5+ of 26 years', '২৬ বছরের ৫+টিতে প্লাবিত') : T('under water', 'পানির নিচে');
+      const strong = document.createElement('strong'); strong.textContent = T('Health facilities and roads', 'স্বাস্থ্য প্রতিষ্ঠান ও সড়ক');
+      items.push(strong);
+      if (ctl.show.hospital) items.push(item(CONNECT.hospital, T('Hospital or UHC', 'হাসপাতাল বা উপজেলা স্বাস্থ্য কমপ্লেক্স')));
+      if (ctl.show.primary) items.push(item(CONNECT.primary, T('Primary care', 'প্রাথমিক স্বাস্থ্যসেবা')));
+      if (ctl.show.hospital || ctl.show.primary) {
+        const parts = [];
+        if (ctl.show.hospital) parts.push(T(`${N(wetCount.hospital)} hospitals and UHCs`, `${N(wetCount.hospital)}টি হাসপাতাল ও উপজেলা স্বাস্থ্য কমপ্লেক্স`));
+        if (ctl.show.primary) parts.push(T(`${N(wetCount.primary)} primary-care facilities`, `${N(wetCount.primary)}টি প্রাথমিক সেবা প্রতিষ্ঠান`));
+        items.push(item(CONNECT.flooded, `${T('Facility site', 'প্রতিষ্ঠানের স্থান')} ${what}: ${parts.join(', ')}`, true));
+      }
+      if (roads) {
+        items.push(line(dark ? CONNECT.roadDark : CONNECT.road, T('Main road', 'প্রধান সড়ক'), 2));
+        const total = km ? Object.values(km).reduce((a, b) => a + b, 0) : 0;
+        items.push(line(CONNECT.roadFlooded, `${T('Road', 'সড়ক')} ${what}${km ? `: ${N(total)} ${T('km', 'কিমি')}` : ''}`, 4));
+      }
+      const note = document.createElement('small');
+      note.textContent = T('Click a facility for its name. A site counts as flooded when its own pixel is.', 'নাম দেখতে প্রতিষ্ঠানে ক্লিক করুন। প্রতিষ্ঠানের নিজের পিক্সেল প্লাবিত হলে স্থানটি প্লাবিত ধরা হয়েছে।');
+      items.push(note);
+      box.replaceChildren(...items);
+    };
+    map.on('zoomend', () => ctl.redraw());
+    document.addEventListener('site-theme', () => ctl.redraw());
+    ctl.labels();
+    return ctl;
+  }
   function inundSelect() {
     const ov = state.data.overlays, f = state.data.floods;
     const group = (label, list) => { const g = document.createElement('optgroup'); g.label = label; g.append(...list); return g; };
@@ -677,6 +789,7 @@
     if (entry.kind === 'year') note += ' ' + T(fr.year <= 2018 ? 'MODIS years show only the large floods mapped in the Global Flood Database.' : 'Radar years combine every month from April to October and include normal monsoon water.',
       fr.year <= 2018 ? 'MODIS বছরগুলোতে শুধু গ্লোবাল ফ্লাড ডেটাবেসের বড় বন্যাগুলো আছে।' : 'রাডার বছরগুলোতে এপ্রিল থেকে অক্টোবরের প্রতিটি মাস একসাথে, স্বাভাবিক বর্ষার পানিসহ।');
     $('#i-note').textContent = note;
+    istate.conn?.redraw();
   }
   function initInundMap() {
     const ov = state.data.overlays;
@@ -689,6 +802,7 @@
     istate.legend.onAdd = () => { const d = L.DomUtil.create('div', 'flood-legend'); L.DomEvent.disableClickPropagation(d); return d; };
     istate.legend.addTo(map);
     istate.map = map;
+    istate.conn = connectivity(map, 'inund', () => istate.layer);
     inundSelect(); drawInundation();
     $('#i-layer').addEventListener('change', (e) => { istate.layer = e.target.value; drawInundation(); });
   }
@@ -710,6 +824,8 @@
     $('#f-metric-note').textContent = (fr ? floodLabel(fr) + '. ' : '') + T(...m.note) + (fr && fr.id.startsWith('y') && level === 'union' && m.id !== 'f_flooded'
       ? ' ' + T('Access losses for whole years are published down to upazila.', 'পুরো বছরের প্রবেশগম্যতা হারানোর হিসাব উপজেলা পর্যন্ত প্রকাশিত।') : '');
     fstate.map.setMetric({ legendTitle: T(m.en, m.bn), ramp: m.ramp, digits: m.digits, values: new Map(list.map((a) => [a.pcode, val(a)])) });
+    if (!fstate.conn) fstate.conn = connectivity(fstate.map.map, 'impact', () => (floodMeasure().event ? fstate.flood : 'frequency'));
+    fstate.conn.redraw();
     const usable = list.filter((a) => Number.isFinite(val(a)) && (a.population || 0) > 0 && (level !== 'union' || a.source !== 'estimated')).sort((a, b) => val(b) - val(a));
     $('#f-rank-title').textContent = T(`${m.rank[0]}: 20 ${LEVELS[level].en.toLowerCase()} areas · ${m.en}`, `${m.rank[1]}: ২০টি ${LEVELS[level].bn} · ${m.bn}`);
     window.HealthCharts.bars($('#c-flood-rank'), usable.slice(0, 20).map((a) => ({ label: areaLabel(a, level), value: val(a), display: N(val(a), m.digits),
@@ -880,7 +996,7 @@
     await showLevel(state.level);
     initInundMap();
     await initFloodMap();
-    document.addEventListener('site-language', () => { fillSelects(); paint(); staticSections(); detail(null); if (fstate.map) { floodSelects(); floodPaint(); floodDetail(null); } if (istate.map) { inundSelect(); drawInundation(); } });
+    document.addEventListener('site-language', () => { fillSelects(); paint(); staticSections(); detail(null); if (fstate.map) { floodSelects(); floodPaint(); floodDetail(null); } if (istate.map) { inundSelect(); drawInundation(); } istate.conn?.labels(); fstate.conn?.labels(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

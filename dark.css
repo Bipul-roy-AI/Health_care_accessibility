@@ -83,6 +83,9 @@ html[data-theme="dark"] .access-within tr:first-child th{color:#c6e5de}
 html[data-theme="dark"] .atlas-footer{color:#a1b4ad}
 html[data-theme="dark"] .flood-legend{background:rgba(22,35,31,.95);border:1px solid #475049;color:#c6e5de}
 html[data-theme="dark"] .flood-legend small{color:#a1b4ad}
+html[data-theme="dark"] .connect-control{background:rgba(22,35,31,.95);border:1px solid #475049;color:#c6e5de}
+html[data-theme="dark"] .connect-control label small{color:#8f9e98}
+html[data-theme="dark"] .connect-flooded{color:#f8aa6f}
 html[data-theme="dark"] .analysis-context{background:#23352e}
 html[data-theme="dark"] .analysis-kpis article{background:#16231f}
 html[data-theme="dark"] .analysis-card{background:#16231f}
@@ -147,7 +150,7 @@ html[data-theme="dark"] .leaflet-control-attribution a{color:#8fd3b5}
 html[data-theme="dark"] .leaflet-tooltip{background:#1c2b26;color:var(--ink);border-color:#2c3f39}
 html[data-theme="dark"] .leaflet-tooltip-top:before{border-top-color:#1c2b26}
 html[data-theme="dark"] .leaflet-popup-content-wrapper,html[data-theme="dark"] .leaflet-popup-tip{background:#1c2b26;color:var(--ink)}
-html[data-theme="dark"] .leaflet-control.map-layer-control,html[data-theme="dark"] .choropleth-legend,html[data-theme="dark"] .flood-legend{background:rgba(22,35,31,.95);color:var(--ink);border-color:#2c3f39}
+html[data-theme="dark"] .leaflet-control.map-layer-control,html[data-theme="dark"] .choropleth-legend,html[data-theme="dark"] .flood-legend,html[data-theme="dark"] .connect-control{background:rgba(22,35,31,.95);color:var(--ink);border-color:#2c3f39}
 html[data-theme="dark"] .map-layer-control .map-layer-row,html[data-theme="dark"] .map-layer-control legend,html[data-theme="dark"] .map-layer-control fieldset label{color:var(--ink)}
 html[data-theme="dark"] .map-layer-control select{background:#0f1a17;color:var(--ink);border-color:#3a4e47}
 html[data-theme="dark"] .leaflet-boundaries-pane path.boundary-division{stroke:#e8f1ed}
