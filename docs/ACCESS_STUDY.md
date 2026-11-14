@@ -101,6 +101,16 @@ Flooding differs by place and year, so the study uses floods observed from satel
 
     python3 scripts/build_flood_overlays.py --years bd_floods_years.tif --events bd_floods_events.tif
 
+**Facilities, roads and railways on the flood maps.** Both flood maps can show DGHS hospitals and UHCs, primary care, OSM main roads and railways, so the loss of connectivity is visible.
+- **Facilities:** a facility counts as flooded when its own pixel is: flooded beyond normal monsoon water for a named flood, flooded at any time for a year, or flooded in 5 or more of the 26 years on the frequency map. Data: `data/floods/facilities.json`; names for the popup: `data/access/points-names.json`.
+- **Roads and railways** come from the Geofabrik Bangladesh extract of OpenStreetMap (ODbL). The main roads (motorway, trunk, primary, secondary and their links) total 22,824 km, and the railways (rail and narrow gauge) 4,293 km. Tertiary roads are left out to keep the layer light.
+- **Flooded stretches:** each line is sampled every 100 m for a named flood and every 250 m for a year. A run of flooded samples becomes a stretch under water, and OSM bridges are never counted as under water.
+- **Examples:** in June–August 2020, 1,511 km of main road and 361 km of railway were under water; in August 2024, 336 km and 92 km.
+- **Limits:** embankments and raised roads are not modelled, so a raised road crossing a flooded area still counts as under water, and the radar specks noted above can mark short stretches.
+
+    python3 scripts/build_flood_overlays.py --years bd_floods_years.tif --events bd_floods_events.tif \
+        --roads gis_osm_roads_free_1.shp --railways gis_osm_railways_free_1.shp
+
 Across the 26 yearly maps, 34.7% of people live in a 1 km cell flooded at least once, 12.8% in five or more years and 6.7% in ten or more.
 
 **Limits.**
