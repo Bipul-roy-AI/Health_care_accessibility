@@ -157,7 +157,7 @@ html[data-theme="dark"] .leaflet-boundaries-pane path.boundary-division{stroke:#
 html[data-theme="dark"] .leaflet-boundaries-pane path.boundary-district{stroke:#b7cbc3}
 html[data-theme="dark"] .leaflet-boundaries-pane path.boundary-upazila{stroke:#8ea69d}
 /* Flood layers and their legend swatches: flip lightness so more water reads brighter on the dark map. */
-html[data-theme="dark"] .flood-raster,html[data-theme="dark"] .flood-legend i{filter:invert(1) hue-rotate(180deg)}
+html[data-theme="dark"] .flood-raster,html[data-theme="dark"] .flood-legend:not(.connect-legend) i{filter:invert(1) hue-rotate(180deg)}
 html[data-theme="dark"] select,html[data-theme="dark"] input,html[data-theme="dark"] textarea{background:#0f1a17;color:var(--ink);border-color:#3a4e47}
 .theme-toggle{display:inline-flex;align-items:center;gap:6px}
 .theme-toggle .theme-icon{font-size:15px;line-height:1}

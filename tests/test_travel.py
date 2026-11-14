@@ -76,6 +76,9 @@ class Travel(unittest.TestCase):
         self.assertEqual(parts[0][0], 1)
         self.assertAlmostEqual(parts[0][1].length, 300, delta=100)  # band width, to one sample step
         self.assertEqual(set(km), {"1"})
+        roads["b"] = [True, False]                            # the crossing is a bridge: it stays open
+        parts, km = flooded_stretches(roads, wet, t, 100)
+        self.assertEqual(parts, [])
 
     def test_snap_cells_moves_edge_points_to_valid_cells(self):
         from build_travel import snap_cells
