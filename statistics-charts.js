@@ -16,10 +16,10 @@
     },
     afterDatasetsDraw(chart) {
       const { ctx } = chart, opt = chart.options.plugins.statisticsFigure;
-      ctx.save(); ctx.fillStyle = css('--chart-title', '#214b3e'); ctx.font = '600 11px system-ui, sans-serif';
+      ctx.save(); ctx.fillStyle = css('--chart-title', '#214b3e'); ctx.font = '600 11px Montserrat,system-ui, sans-serif';
       if (chart.config.type === 'doughnut') {
         const arc = chart.getDatasetMeta(0).data[0];
-        if (arc) { ctx.textAlign = 'center'; ctx.font = '700 23px system-ui, sans-serif'; ctx.fillText(number(opt.total), arc.x, arc.y); ctx.font = '11px system-ui, sans-serif'; ctx.fillText(opt.totalLabel, arc.x, arc.y + 21); }
+        if (arc) { ctx.textAlign = 'center'; ctx.font = '700 23px Montserrat,system-ui, sans-serif'; ctx.fillText(number(opt.total), arc.x, arc.y); ctx.font = '11px Montserrat,system-ui, sans-serif'; ctx.fillText(opt.totalLabel, arc.x, arc.y + 21); }
       } else chart.data.datasets.forEach((dataset, index) => {
         if (chart.options.indexAxis !== 'y' && chart.width < 420 && dataset.data.length > 5) return;
         chart.getDatasetMeta(index).data.forEach((bar, i) => {
@@ -47,6 +47,7 @@
       chart.options.plugins.title.text = wrap(options.title, Math.max(22, Math.floor((size.width - 30) / 7)));
       chart.options.plugins.subtitle.text = wrap(source, Math.max(28, Math.floor((size.width - 30) / 5)));
     };
+    Chart.defaults.font.family = 'Montserrat, system-ui, sans-serif';
     const chart = new Chart(canvas, config); charts.set(target, chart);
     button.addEventListener('click', () => {
       const link = document.createElement('a'); link.href = chart.toBase64Image('image/png', 1); link.download = options.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 100) + '.png'; link.click();

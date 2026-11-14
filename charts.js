@@ -26,7 +26,7 @@
   }
   const nice = (value) => { if (!(value > 0)) return 1; const power = 10 ** Math.floor(Math.log10(value)), scaled = value / power; return [1, 2, 5, 10].find((v) => v >= scaled) * power; };
   function base(width, height, title) {
-    const svg = element('svg', { xmlns: ns, viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': title, class: 'data-chart', style: 'font-family:system-ui,sans-serif;background:var(--chart-bg, white);color:var(--chart-title, #21473f)' });
+    const svg = element('svg', { xmlns: ns, viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': title, class: 'data-chart', style: 'font-family:Montserrat,system-ui,sans-serif;background:var(--chart-bg, white);color:var(--chart-title, #21473f)' });
     svg.append(element('title', {}, title));
     return svg;
   }
