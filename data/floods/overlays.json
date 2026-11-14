@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-14T09:56:20+00:00",
+ "generatedAt": "2026-11-14T10:08:55+00:00",
  "crs": "EPSG:3857 images; bounds in latitude/longitude",
  "legend": {
   "event": [
@@ -55,7 +55,28 @@
   ]
  },
  "notes": "Permanent water (JRC Global Surface Water, 10+ months a year) and areas outside Bangladesh are transparent. Events at 200 m, years and frequency at 250 m; modal class when downsampling.",
- "roads": null,
+ "roads": {
+  "source": "OpenStreetMap contributors (ODbL), Geofabrik Bangladesh extract (roads and railways)",
+  "classes": {
+   "1": "national highway (motorway or trunk)",
+   "2": "primary road",
+   "3": "secondary road",
+   "4": "railway"
+  },
+  "bridges": "OSM bridges are never counted as under water",
+  "total_km": {
+   "1": 5875.4,
+   "2": 5896.7,
+   "3": 11052.4,
+   "4": 4292.9
+  },
+  "sample_m": {
+   "event": 100,
+   "year": 250,
+   "frequency": 250
+  },
+  "frequency_rule": "for the frequency layer, a stretch counts when its pixels flooded in 5 or more of the 26 years"
+ },
  "facilities": {
   "rule": "a facility counts as flooded when its own pixel is flooded (events: beyond normal monsoon water); for the frequency layer, in 5 or more of the 26 years"
  },
@@ -74,7 +95,13 @@
    ],
    "res_m": 200,
    "bytes": 362748,
-   "kind": "event"
+   "kind": "event",
+   "roads_flooded_km": {
+    "1": 131.5,
+    "2": 207.1,
+    "3": 471.8,
+    "4": 195.3
+   }
   },
   "f2020_07": {
    "file": "overlays/f2020_07.png",
@@ -90,7 +117,13 @@
    ],
    "res_m": 200,
    "bytes": 468071,
-   "kind": "event"
+   "kind": "event",
+   "roads_flooded_km": {
+    "1": 256.9,
+    "2": 382.4,
+    "3": 871.4,
+    "4": 361.3
+   }
   },
   "f2022_05": {
    "file": "overlays/f2022_05.png",
@@ -106,7 +139,13 @@
    ],
    "res_m": 200,
    "bytes": 117729,
-   "kind": "event"
+   "kind": "event",
+   "roads_flooded_km": {
+    "1": 19.5,
+    "2": 49.7,
+    "3": 56.0,
+    "4": 7.8
+   }
   },
   "f2022_06": {
    "file": "overlays/f2022_06.png",
@@ -122,7 +161,13 @@
    ],
    "res_m": 200,
    "bytes": 230983,
-   "kind": "event"
+   "kind": "event",
+   "roads_flooded_km": {
+    "1": 50.9,
+    "2": 120.7,
+    "3": 198.9,
+    "4": 75.7
+   }
   },
   "f2024_06": {
    "file": "overlays/f2024_06.png",
@@ -138,7 +183,13 @@
    ],
    "res_m": 200,
    "bytes": 218290,
-   "kind": "event"
+   "kind": "event",
+   "roads_flooded_km": {
+    "1": 37.5,
+    "2": 83.0,
+    "3": 139.8,
+    "4": 43.9
+   }
   },
   "f2024_08": {
    "file": "overlays/f2024_08.png",
@@ -154,7 +205,13 @@
    ],
    "res_m": 200,
    "bytes": 292043,
-   "kind": "event"
+   "kind": "event",
+   "roads_flooded_km": {
+    "1": 51.8,
+    "2": 84.5,
+    "3": 200.1,
+    "4": 91.5
+   }
   },
   "f2024_10": {
    "file": "overlays/f2024_10.png",
@@ -170,7 +227,13 @@
    ],
    "res_m": 200,
    "bytes": 155624,
-   "kind": "event"
+   "kind": "event",
+   "roads_flooded_km": {
+    "1": 15.8,
+    "2": 26.5,
+    "3": 64.0,
+    "4": 19.9
+   }
   },
   "f2025_06": {
    "file": "overlays/f2025_06.png",
@@ -186,7 +249,13 @@
    ],
    "res_m": 200,
    "bytes": 164996,
-   "kind": "event"
+   "kind": "event",
+   "roads_flooded_km": {
+    "1": 16.6,
+    "2": 39.3,
+    "3": 66.8,
+    "4": 25.4
+   }
   },
   "y2000": {
    "file": "overlays/y2000.png",
@@ -202,7 +271,13 @@
    ],
    "res_m": 250,
    "bytes": 69935,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 130.7,
+    "2": 101.1,
+    "3": 168.7,
+    "4": 61.5
+   }
   },
   "y2001": {
    "file": "overlays/y2001.png",
@@ -218,7 +293,13 @@
    ],
    "res_m": 250,
    "bytes": 5846,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 0.2,
+    "2": 2.0,
+    "3": 0.3,
+    "4": 1.0
+   }
   },
   "y2002": {
    "file": "overlays/y2002.png",
@@ -234,7 +315,13 @@
    ],
    "res_m": 250,
    "bytes": 71787,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 161.9,
+    "2": 164.4,
+    "3": 360.9,
+    "4": 89.4
+   }
   },
   "y2003": {
    "file": "overlays/y2003.png",
@@ -250,7 +337,13 @@
    ],
    "res_m": 250,
    "bytes": 112978,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 351.4,
+    "2": 327.1,
+    "3": 710.3,
+    "4": 233.1
+   }
   },
   "y2004": {
    "file": "overlays/y2004.png",
@@ -266,7 +359,13 @@
    ],
    "res_m": 250,
    "bytes": 138456,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 635.3,
+    "2": 698.3,
+    "3": 1240.8,
+    "4": 494.0
+   }
   },
   "y2005": {
    "file": "overlays/y2005.png",
@@ -282,7 +381,13 @@
    ],
    "res_m": 250,
    "bytes": 89514,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 195.2,
+    "2": 263.7,
+    "3": 585.5,
+    "4": 125.4
+   }
   },
   "y2006": {
    "file": "overlays/y2006.png",
@@ -298,7 +403,13 @@
    ],
    "res_m": 250,
    "bytes": 72515,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 131.2,
+    "2": 193.3,
+    "3": 385.5,
+    "4": 64.3
+   }
   },
   "y2007": {
    "file": "overlays/y2007.png",
@@ -314,7 +425,13 @@
    ],
    "res_m": 250,
    "bytes": 134874,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 692.0,
+    "2": 744.0,
+    "3": 1406.3,
+    "4": 566.9
+   }
   },
   "y2008": {
    "file": "overlays/y2008.png",
@@ -330,7 +447,13 @@
    ],
    "res_m": 250,
    "bytes": 77842,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 160.6,
+    "2": 204.4,
+    "3": 443.8,
+    "4": 109.7
+   }
   },
   "y2009": {
    "file": "overlays/y2009.png",
@@ -346,7 +469,13 @@
    ],
    "res_m": 250,
    "bytes": 32044,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 21.3,
+    "2": 12.5,
+    "3": 19.1,
+    "4": 22.4
+   }
   },
   "y2010": {
    "file": "overlays/y2010.png",
@@ -362,7 +491,13 @@
    ],
    "res_m": 250,
    "bytes": 81735,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 130.1,
+    "2": 142.1,
+    "3": 338.8,
+    "4": 97.6
+   }
   },
   "y2011": {
    "file": "overlays/y2011.png",
@@ -378,7 +513,13 @@
    ],
    "res_m": 250,
    "bytes": 47402,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 70.3,
+    "2": 26.5,
+    "3": 59.3,
+    "4": 43.4
+   }
   },
   "y2012": {
    "file": "overlays/y2012.png",
@@ -394,7 +535,13 @@
    ],
    "res_m": 250,
    "bytes": 3890,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 4.3,
+    "2": 4.5,
+    "3": 4.9,
+    "4": 1.2
+   }
   },
   "y2013": {
    "file": "overlays/y2013.png",
@@ -410,7 +557,13 @@
    ],
    "res_m": 250,
    "bytes": 23166,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 33.8,
+    "2": 2.4,
+    "3": 13.3,
+    "4": 14.7
+   }
   },
   "y2014": {
    "file": "overlays/y2014.png",
@@ -426,7 +579,13 @@
    ],
    "res_m": 250,
    "bytes": 53024,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 88.0,
+    "2": 121.0,
+    "3": 334.8,
+    "4": 53.8
+   }
   },
   "y2015": {
    "file": "overlays/y2015.png",
@@ -442,7 +601,13 @@
    ],
    "res_m": 250,
    "bytes": 50291,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 38.9,
+    "2": 66.0,
+    "3": 126.4,
+    "4": 54.4
+   }
   },
   "y2016": {
    "file": "overlays/y2016.png",
@@ -458,7 +623,13 @@
    ],
    "res_m": 250,
    "bytes": 88078,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 113.8,
+    "2": 150.2,
+    "3": 370.0,
+    "4": 82.8
+   }
   },
   "y2017": {
    "file": "overlays/y2017.png",
@@ -474,7 +645,13 @@
    ],
    "res_m": 250,
    "bytes": 79344,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 93.3,
+    "2": 134.3,
+    "3": 323.5,
+    "4": 70.2
+   }
   },
   "y2018": {
    "file": "overlays/y2018.png",
@@ -490,7 +667,13 @@
    ],
    "res_m": 250,
    "bytes": 77710,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 250.3,
+    "2": 306.5,
+    "3": 701.7,
+    "4": 348.5
+   }
   },
   "y2019": {
    "file": "overlays/y2019.png",
@@ -506,7 +689,13 @@
    ],
    "res_m": 250,
    "bytes": 103683,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 26.2,
+    "2": 48.4,
+    "3": 175.1,
+    "4": 23.1
+   }
   },
   "y2020": {
    "file": "overlays/y2020.png",
@@ -522,7 +711,13 @@
    ],
    "res_m": 250,
    "bytes": 135654,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 50.9,
+    "2": 74.7,
+    "3": 234.7,
+    "4": 48.7
+   }
   },
   "y2021": {
    "file": "overlays/y2021.png",
@@ -538,7 +733,13 @@
    ],
    "res_m": 250,
    "bytes": 84474,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 12.0,
+    "2": 22.0,
+    "3": 136.4,
+    "4": 17.6
+   }
   },
   "y2022": {
    "file": "overlays/y2022.png",
@@ -554,7 +755,13 @@
    ],
    "res_m": 250,
    "bytes": 82960,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 21.5,
+    "2": 60.9,
+    "3": 174.3,
+    "4": 20.6
+   }
   },
   "y2023": {
    "file": "overlays/y2023.png",
@@ -570,7 +777,13 @@
    ],
    "res_m": 250,
    "bytes": 78117,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 9.9,
+    "2": 24.6,
+    "3": 133.1,
+    "4": 11.7
+   }
   },
   "y2024": {
    "file": "overlays/y2024.png",
@@ -586,7 +799,13 @@
    ],
    "res_m": 250,
    "bytes": 116075,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 28.6,
+    "2": 60.5,
+    "3": 192.7,
+    "4": 30.3
+   }
   },
   "y2025": {
    "file": "overlays/y2025.png",
@@ -602,7 +821,13 @@
    ],
    "res_m": 250,
    "bytes": 90559,
-   "kind": "year"
+   "kind": "year",
+   "roads_flooded_km": {
+    "1": 10.7,
+    "2": 33.1,
+    "3": 147.9,
+    "4": 15.0
+   }
   },
   "frequency": {
    "file": "overlays/frequency.png",
@@ -619,7 +844,13 @@
    "res_m": 250,
    "bytes": 419910,
    "kind": "frequency",
-   "years_mapped": 26
+   "years_mapped": 26,
+   "roads_flooded_km": {
+    "1": 205.5,
+    "2": 260.4,
+    "3": 569.1,
+    "4": 143.8
+   }
   }
  }
 }

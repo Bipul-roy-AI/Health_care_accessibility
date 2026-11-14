@@ -151,7 +151,14 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     const wetHospitals = (id) => facilities.flooded[id].filter((i) => points[i][2] & (2 | 8)).length;
     await page.waitForFunction((n) => document.querySelector('#inund-map .connect-legend')?.textContent.includes(`${n} hospitals and UHCs`), wetHospitals(ev.id).toLocaleString('en-GB'));
     assert.ok(await page.$('#inund-map .leaflet-inund-facilities-pane canvas'));
-    assert.equal(await page.locator('#inund-map .connect-control input[data-layer]').count(), overlays.roads ? 3 : 2);
+    assert.equal(await page.locator('#inund-map .connect-control input[data-layer]').count(), 4);   // hospitals, primary care, roads, railways
+    const km = overlays.layers[ev.id].roads_flooded_km, roadKm = Math.round((km['1'] || 0) + (km['2'] || 0) + (km['3'] || 0));
+    await page.waitForFunction((t) => document.querySelector('#inund-map .connect-legend').textContent.includes(t), `Main road under water: ${roadKm.toLocaleString('en-GB')} km`);
+    assert.match(await page.textContent('#inund-map .connect-legend'), new RegExp(`Railway under water: ${Math.round(km['4'] || 0)} km`));
+    assert.match(await page.textContent('#inund-map .leaflet-control-attribution'), /OpenStreetMap contributors \(ODbL\)/);
+    await page.uncheck('#inund-map .connect-control input[data-layer="rail"]');
+    await page.waitForFunction(() => !/Railway/.test(document.querySelector('#inund-map .connect-legend').textContent));
+    await page.check('#inund-map .connect-control input[data-layer="rail"]');
     await page.check('#inund-map .connect-control input[data-layer="primary"]');
     await page.waitForFunction(() => /primary-care facilities/.test(document.querySelector('#inund-map .connect-legend').textContent));
     await page.uncheck('#inund-map .connect-control input[data-layer="primary"]');

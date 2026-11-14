@@ -45,8 +45,9 @@ FREQ_BINS = [(1, 1), (2, 3), (4, 6), (7, 12), (13, 19), (20, 26)]
 FREQ_COLOURS = ["#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c", "#08306b"]
 ROAD_CLASSES = {"motorway": 1, "motorway_link": 1, "trunk": 1, "trunk_link": 1, "primary": 2, "primary_link": 2,
                 "secondary": 3, "secondary_link": 3}
-ROAD_NAMES = {1: "national highway (motorway or trunk)", 2: "primary road", 3: "secondary road"}
-SIMPLIFY_M = 25
+RAIL_CLASSES = {"rail": 4, "narrow_gauge": 4}
+ROAD_NAMES = {1: "national highway (motorway or trunk)", 2: "primary road", 3: "secondary road", 4: "railway"}
+SIMPLIFY_M = 40
 
 
 def to_mercator(classes, transform, res):
@@ -126,15 +127,23 @@ def flooded_at(mask, transform, x, y):
     return out
 
 
-def load_roads(path):
-    """OSM main roads from the Geofabrik roads shapefile, in EPSG:32646, with class code and label."""
+def load_roads(path, rail_path=None):
+    """OSM main roads (and railways) from the Geofabrik shapefiles, in EPSG:32646, with class code
+    (1-3 roads, 4 railway) and a bridge flag: bridges are never counted as under water."""
     import geopandas as gpd
-    roads = gpd.read_file(path, columns=["fclass", "name", "ref"])
-    roads = roads[roads["fclass"].isin(ROAD_CLASSES)].to_crs(32646)
-    roads = roads[roads.geometry.notna() & ~roads.geometry.is_empty].explode(index_parts=False)
-    roads["c"] = roads["fclass"].map(ROAD_CLASSES).astype(int)
-    roads["n"] = [(r if isinstance(r, str) and r else "") or (n if isinstance(n, str) else "") for r, n in zip(roads["ref"], roads["name"])]
-    return roads[["c", "n", "geometry"]].reset_index(drop=True)
+    import pandas as pd
+    parts = []
+    for p, classes in ((path, ROAD_CLASSES), (rail_path, RAIL_CLASSES)):
+        if not p:
+            continue
+        df = gpd.read_file(p, columns=["fclass", "bridge"])
+        df = df[df["fclass"].isin(classes)].to_crs(32646)
+        df["c"] = df["fclass"].map(classes).astype(int)
+        df["b"] = df["bridge"].astype(str).str.upper().eq("T")
+        parts.append(df[["c", "b", "geometry"]])
+    lines = gpd.GeoDataFrame(pd.concat(parts, ignore_index=True), crs=32646)
+    lines = lines[lines.geometry.notna() & ~lines.geometry.is_empty].explode(index_parts=False)
+    return lines.reset_index(drop=True)
 
 
 def flooded_stretches(roads, mask, transform, step):
@@ -151,6 +160,8 @@ def flooded_stretches(roads, mask, transform, step):
     dist = frac * lengths[owner]
     pts = shapely.line_interpolate_point(lines[owner], dist)
     wet = flooded_at(mask, transform, shapely.get_x(pts), shapely.get_y(pts))
+    if "b" in roads:
+        wet &= ~roads["b"].to_numpy()[owner]          # bridges stay open
     out, km = [], {}
     i = 0
     while i < owner.size:
@@ -183,7 +194,7 @@ def to_lonlat_features(items, simplify=0):
             continue
         lon, lat = tr.transform(coords[:, 0], coords[:, 1])
         feats.append({"type": "Feature", "properties": props,
-                      "geometry": {"type": "LineString", "coordinates": [[round(a, 5), round(b, 5)] for a, b in zip(lon, lat)]}})
+                      "geometry": {"type": "LineString", "coordinates": [[round(a, 4), round(b, 4)] for a, b in zip(lon, lat)]}})
     return {"type": "FeatureCollection", "features": feats}
 
 
@@ -192,7 +203,7 @@ def write_json(path, payload):
     path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
-def build(years_path: Path, events_path: Path, roads_path: Path | None = None) -> dict:
+def build(years_path: Path, events_path: Path, roads_path: Path | None = None, rail_path: Path | None = None) -> dict:
     (OUT / "overlays").mkdir(parents=True, exist_ok=True)
     years, y_t = read(years_path)
     events, e_t = read(events_path)
@@ -200,7 +211,7 @@ def build(years_path: Path, events_path: Path, roads_path: Path | None = None) -
     layers = {}
     pts, px, py = load_points()
     fac = {"generatedAt": None, "points": "data/access/points.json", "flooded": {}, "counts": {}}
-    roads = load_roads(roads_path) if roads_path else None
+    roads = load_roads(roads_path, rail_path) if roads_path else None
 
     def connect(name, flooded, transform, step):
         hit = flooded_at(flooded, transform, px, py)
@@ -208,7 +219,7 @@ def build(years_path: Path, events_path: Path, roads_path: Path | None = None) -
         fac["counts"][name] = {k: int(sum(1 for i in np.flatnonzero(hit) if pts["rows"][i][2] & bit)) for k, bit in pts["bits"].items()}
         if roads is not None:
             parts, km = flooded_stretches(roads, flooded, transform, step)
-            write_json(OUT / "roads" / f"{name}.geojson", to_lonlat_features([({"c": c}, g) for c, g in parts]))
+            write_json(OUT / "roads" / f"{name}.geojson", to_lonlat_features([({"c": c}, g) for c, g in parts], simplify=SIMPLIFY_M / 2))
             layers[name]["roads_flooded_km"] = km
 
     perm = events.get("perm_water", 0)
@@ -241,10 +252,10 @@ def build(years_path: Path, events_path: Path, roads_path: Path | None = None) -
     fac["counts"]["frequency"] = {k: int(sum(1 for i in np.flatnonzero(often) if pts["rows"][i][2] & bit)) for k, bit in pts["bits"].items()}
     if roads is not None:
         parts, km = flooded_stretches(roads, count >= 5, y_t, 250)
-        write_json(OUT / "roads" / "frequency.geojson", to_lonlat_features([({"c": c}, g) for c, g in parts]))
+        write_json(OUT / "roads" / "frequency.geojson", to_lonlat_features([({"c": c}, g) for c, g in parts], simplify=SIMPLIFY_M / 2))
         layers["frequency"]["roads_flooded_km"] = km
         total = {str(cl): round(float(roads.geometry[roads["c"] == cl].length.sum()) / 1000, 1) for cl in sorted(set(roads["c"]))}
-        write_json(OUT / "roads.geojson", to_lonlat_features([({"c": int(cl), "n": n}, g) for cl, n, g in zip(roads["c"], roads["n"], roads.geometry)], simplify=SIMPLIFY_M))
+        write_json(OUT / "roads.geojson", to_lonlat_features([({"c": int(cl)}, g) for cl, g in zip(roads["c"], roads.geometry)], simplify=SIMPLIFY_M))
     fac["generatedAt"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     write_json(OUT / "facilities.json", fac)
 
@@ -259,7 +270,8 @@ def build(years_path: Path, events_path: Path, roads_path: Path | None = None) -
                           for c, (lo, hi) in zip(FREQ_COLOURS, FREQ_BINS)]},
         "notes": "Permanent water (JRC Global Surface Water, 10+ months a year) and areas outside Bangladesh are transparent. "
                  "Events at 200 m, years and frequency at 250 m; modal class when downsampling.",
-        "roads": ({"source": "OpenStreetMap contributors (ODbL), Geofabrik Bangladesh extract", "classes": {str(k): v for k, v in ROAD_NAMES.items()},
+        "roads": ({"source": "OpenStreetMap contributors (ODbL), Geofabrik Bangladesh extract (roads and railways)", "classes": {str(k): v for k, v in ROAD_NAMES.items()},
+                   "bridges": "OSM bridges are never counted as under water",
                    "total_km": total, "sample_m": {"event": 100, "year": 250, "frequency": 250},
                    "frequency_rule": "for the frequency layer, a stretch counts when its pixels flooded in 5 or more of the 26 years"}
                   if roads is not None else None),
@@ -274,7 +286,8 @@ if __name__ == "__main__":
     ap.add_argument("--years", type=Path, required=True)
     ap.add_argument("--events", type=Path, required=True)
     ap.add_argument("--roads", type=Path, help="Geofabrik gis_osm_roads_free_1.shp (optional)")
+    ap.add_argument("--railways", type=Path, help="Geofabrik gis_osm_railways_free_1.shp (optional, with --roads)")
     a = ap.parse_args()
-    m = build(a.years, a.events, a.roads)
+    m = build(a.years, a.events, a.roads, a.railways)
     total = sum(v["bytes"] for v in m["layers"].values())
     print(f"{len(m['layers'])} overlays, {total / 1e6:.1f} MB")

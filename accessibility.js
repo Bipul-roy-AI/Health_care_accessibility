@@ -653,7 +653,7 @@
   // ---------- Connectivity on the flood maps: DGHS facilities and OSM main roads ----------
   // data/floods/facilities.json marks the facilities (rows of data/access/points.json) whose own pixel is flooded in each
   // layer; data/floods/roads.geojson holds OSM main roads and data/floods/roads/<layer>.geojson the stretches under water.
-  const CONNECT = { hospital: '#c2185b', primary: '#795548', flooded: '#ff8f00', road: '#37474f', roadDark: '#d5dee2', roadFlooded: '#e53935' };
+  const CONNECT = { hospital: '#c2185b', primary: '#795548', flooded: '#ff8f00', road: '#37474f', roadDark: '#d5dee2', roadFlooded: '#e53935', rail: '#5d4037', railDark: '#e3d3c8' };
   const HOSPITAL_BITS = 2 | 8, PRIMARY_BIT = 4;
   const connData = { facilities: null, names: null, roads: null, flooded: new Map() };
   async function connFacilities() {
@@ -669,8 +669,9 @@
     return connData.flooded.get(id);
   }
   const roadsAvailable = () => Boolean(state.data.overlays?.roads);
+  const railAvailable = () => Boolean(state.data.overlays?.roads?.total_km?.['4']);
   function connectivity(map, key, layerId) {
-    const ctl = { show: { hospital: true, primary: false, roads: roadsAvailable() }, group: L.layerGroup().addTo(map), token: 0 };
+    const ctl = { show: { hospital: true, primary: false, roads: roadsAvailable(), rail: railAvailable() }, group: L.layerGroup().addTo(map), token: 0 };
     map.createPane(`${key}-roads`).style.zIndex = 440;
     map.createPane(`${key}-facilities`).style.zIndex = 470;
     const panel = L.control({ position: 'topright' });
@@ -692,7 +693,8 @@
       };
       box.replaceChildren(title, row('hospital', 'Hospitals and UHCs (DGHS)', 'হাসপাতাল ও উপজেলা স্বাস্থ্য কমপ্লেক্স (DGHS)'),
         row('primary', 'Primary care (DGHS)', 'প্রাথমিক স্বাস্থ্যসেবা (DGHS)'),
-        ...(roadsAvailable() ? [row('roads', 'Main roads (OpenStreetMap)', 'প্রধান সড়ক (ওপেনস্ট্রিটম্যাপ)', false)] : []));
+        ...(roadsAvailable() ? [row('roads', 'Main roads (OpenStreetMap)', 'প্রধান সড়ক (ওপেনস্ট্রিটম্যাপ)', false)] : []),
+        ...(railAvailable() ? [row('rail', 'Railways (OpenStreetMap)', 'রেলপথ (ওপেনস্ট্রিটম্যাপ)', false)] : []));
     };
     async function popup(i, flooded, id) {
       if (!connData.names) connData.names = await get('./data/access/points-names.json');
@@ -708,14 +710,18 @@
     }
     ctl.redraw = async () => {
       const token = ++ctl.token, id = layerId(), dark = document.documentElement.dataset.theme === 'dark';
-      const fac = await connFacilities(), roads = ctl.show.roads && roadsAvailable() ? await connRoads() : null, wet = ctl.show.roads && roadsAvailable() ? await connFloodedRoads(id) : null;
+      const lines = (ctl.show.roads || ctl.show.rail) && roadsAvailable();
+      const fac = await connFacilities(), roads = lines ? await connRoads() : null, wet = lines ? await connFloodedRoads(id) : null;
+      const keep = (f) => (f.properties.c === 4 ? ctl.show.rail : ctl.show.roads);
       if (token !== ctl.token) return;
       ctl.group.clearLayers();
-      const width = { 1: 2.2, 2: 1.5, 3: 0.9 }, roadRenderer = L.canvas({ pane: `${key}-roads`, padding: 0.3 });
-      if (roads) L.geoJSON(roads, { pane: `${key}-roads`, renderer: roadRenderer, interactive: false,
-        style: (f) => ({ color: dark ? CONNECT.roadDark : CONNECT.road, weight: width[f.properties.c] || 1, opacity: 0.8 }) }).addTo(ctl.group);
-      if (wet) L.geoJSON(wet, { pane: `${key}-roads`, renderer: roadRenderer, interactive: false,
-        style: (f) => ({ color: CONNECT.roadFlooded, weight: (width[f.properties.c] || 1) + 2, opacity: 0.95 }) }).addTo(ctl.group);
+      const width = { 1: 2.2, 2: 1.5, 3: 0.9, 4: 1.6 }, roadRenderer = L.canvas({ pane: `${key}-roads`, padding: 0.3 });
+      const base = (f) => (f.properties.c === 4
+        ? { color: dark ? CONNECT.railDark : CONNECT.rail, weight: width[4], opacity: 0.9, dashArray: '5 3' }
+        : { color: dark ? CONNECT.roadDark : CONNECT.road, weight: width[f.properties.c] || 1, opacity: 0.8 });
+      if (roads) L.geoJSON(roads, { pane: `${key}-roads`, renderer: roadRenderer, interactive: false, filter: keep, style: base }).addTo(ctl.group);
+      if (wet) L.geoJSON(wet, { pane: `${key}-roads`, renderer: roadRenderer, interactive: false, filter: keep,
+        style: (f) => ({ color: CONNECT.roadFlooded, weight: (width[f.properties.c] || 1) + 2, opacity: 0.95, dashArray: f.properties.c === 4 ? '5 3' : null }) }).addTo(ctl.group);
       const floodedSet = new Set(fac.flooded[id] || []), renderer = L.canvas({ pane: `${key}-facilities`, padding: 0.3 }), z = map.getZoom();
       const r = z <= 7 ? 2 : z <= 9 ? 3 : 4.5, later = [], wetCount = { hospital: 0, primary: 0 };
       state.points.rows.forEach(([lon, lat, mask], i) => {
@@ -746,16 +752,23 @@
         if (ctl.show.primary) parts.push(T(`${N(wetCount.primary)} primary-care facilities`, `${N(wetCount.primary)}টি প্রাথমিক সেবা প্রতিষ্ঠান`));
         items.push(item(CONNECT.flooded, `${T('Facility site', 'প্রতিষ্ঠানের স্থান')} ${what}: ${parts.join(', ')}`, true));
       }
-      if (roads) {
+      if (roads && ctl.show.roads) {
         items.push(line(dark ? CONNECT.roadDark : CONNECT.road, T('Main road', 'প্রধান সড়ক'), 2));
-        const total = km ? Object.values(km).reduce((a, b) => a + b, 0) : 0;
-        items.push(line(CONNECT.roadFlooded, `${T('Road', 'সড়ক')} ${what}${km ? `: ${N(total)} ${T('km', 'কিমি')}` : ''}`, 4));
+        const total = km ? ['1', '2', '3'].reduce((a, k) => a + (km[k] || 0), 0) : 0;
+        items.push(line(CONNECT.roadFlooded, `${T('Main road', 'প্রধান সড়ক')} ${what}: ${N(Math.round(total))} ${T('km', 'কিমি')}`, 4));
+      }
+      if (roads && ctl.show.rail) {
+        const dash = (color) => `repeating-linear-gradient(90deg, ${color} 0 5px, transparent 5px 8px)`;
+        items.push(line(dash(dark ? CONNECT.railDark : CONNECT.rail), T('Railway', 'রেলপথ'), 2));
+        items.push(line(dash(CONNECT.roadFlooded), `${T('Railway', 'রেলপথ')} ${what}: ${N(Math.round(km?.['4'] || 0))} ${T('km', 'কিমি')}`, 4));
       }
       const note = document.createElement('small');
-      note.textContent = T('Click a facility for its name. A site counts as flooded when its own pixel is.', 'নাম দেখতে প্রতিষ্ঠানে ক্লিক করুন। প্রতিষ্ঠানের নিজের পিক্সেল প্লাবিত হলে স্থানটি প্লাবিত ধরা হয়েছে।');
+      note.textContent = T('Click a facility for its name. A site counts as flooded when its own pixel is; bridges are never counted as under water.',
+        'নাম দেখতে প্রতিষ্ঠানে ক্লিক করুন। প্রতিষ্ঠানের নিজের পিক্সেল প্লাবিত হলে স্থানটি প্লাবিত ধরা হয়েছে; সেতু কখনো পানির নিচে গণ্য নয়।');
       items.push(note);
       box.replaceChildren(...items);
     };
+    if (roadsAvailable()) map.attributionControl.addAttribution('Roads and railways © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors (ODbL)');
     map.on('zoomend', () => ctl.redraw());
     document.addEventListener('site-theme', () => ctl.redraw());
     ctl.labels();
