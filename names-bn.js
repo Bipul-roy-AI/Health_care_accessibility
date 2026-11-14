@@ -17,4 +17,6 @@ window.NamesBn = {
   Rajbari: 'রাজবাড়ী', Rangamati: 'রাঙ্গামাটি', Satkhira: 'সাতক্ষীরা', Shariatpur: 'শরীয়তপুর', Sherpur: 'শেরপুর',
   Sirajganj: 'সিরাজগঞ্জ', Sunamganj: 'সুনামগঞ্জ', Tangail: 'টাঙ্গাইল', Thakurgaon: 'ঠাকুরগাঁও'
 };
+// Older spellings used in some source tables.
+Object.assign(window.NamesBn, { Barisal: window.NamesBn.Barishal, Chittagong: window.NamesBn.Chattogram });
 window.NamesBn.name = (english) => (document.documentElement.lang === 'bn' && window.NamesBn[english]) || english;

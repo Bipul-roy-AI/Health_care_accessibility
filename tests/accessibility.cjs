@@ -172,9 +172,11 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
     await page.selectOption('#a-level', 'union');
     await page.waitForFunction(() => document.querySelector('#access-map canvas') && !document.querySelector('#access-map.loading'), null, { timeout: 60000 });
 
-    // CSV export.
+    // CSV export from the map's Export button (the separate Downloads buttons were removed).
+    await page.selectOption('#a-level', 'upazila');
+    await page.waitForFunction((n) => document.querySelectorAll('#access-map path.leaflet-interactive').length === n && !document.querySelector('#access-map.loading'), upazilas.length, { timeout: 60000 });
     const pending = page.waitForEvent('download');
-    await page.click('#d-upazila');
+    await page.click('#a-export');
     const file = await pending;
     assert.equal(file.suggestedFilename(), 'bangladesh-health-access-upazila.csv');
     const text = fs.readFileSync(await file.path(), 'utf8');
