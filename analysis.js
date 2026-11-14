@@ -102,8 +102,55 @@
   });
   $('#baseline-level').addEventListener('change', renderMap);
   $('#baseline-metric').addEventListener('change', renderMap);
+  // Key findings: written from the saved national, division and upazila tables, so they follow any rebuilt baseline.
+  async function keyFindings(data) {
+    const list = $('#key-findings-list');
+    if (!list) return;
+    const pct = (a, b) => (b ? 100 * a / b : 0);
+    const place = (name) => (window.NamesBn ? window.NamesBn.name(name) : name);
+    // Bangla locative ("in Dhaka" -> ঢাকায়, "in Barisal" -> বরিশালে, "in Rajshahi" -> রাজশাহীতে); English names keep "-এ".
+    const inBn = (name) => { const w = place(name); if (!/[\u0980-\u09FF]$/.test(w)) return `${w}-এ`;
+      return /া$/.test(w) ? `${w}য়` : /[িীুূেৈোৌ]$/.test(w) ? `${w}তে` : `${w}ে`; };
+    const n1 = (v, d = 1) => Number(v).toLocaleString(bnUI() ? 'bn-BD' : 'en-GB', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const tier = (k) => data.national.find((r) => r.tier === k) || { active: 0, eligible_coordinates: 0 };
+    const active = data.national.reduce((s, r) => s + r.active, 0), eligible = data.national.reduce((s, r) => s + r.eligible_coordinates, 0);
+    const cc = tier('community'), un = tier('union'), uhc = tier('upazila'), sec = tier('secondary'), ter = tier('tertiary');
+    const items = [
+      T(`The registry lists ${number(active)} active facilities across the six care tiers. Community clinics make up ${n1(pct(cc.active, active))}% of them (${number(cc.active)}); there are ${number(un.active)} union-level facilities, ${number(uhc.active)} upazila health complexes, ${number(sec.active)} district or general hospitals and ${number(ter.active)} tertiary facilities.`,
+        `রেজিস্ট্রিতে ছয় সেবা-স্তরে ${number(active)}টি সক্রিয় প্রতিষ্ঠান। এর ${n1(pct(cc.active, active))}% কমিউনিটি ক্লিনিক (${number(cc.active)}টি); ইউনিয়ন-স্তরের প্রতিষ্ঠান ${number(un.active)}টি, উপজেলা স্বাস্থ্য কমপ্লেক্স ${number(uhc.active)}টি, জেলা বা জেনারেল হাসপাতাল ${number(sec.active)}টি ও টারশিয়ারি প্রতিষ্ঠান ${number(ter.active)}টি।`),
+      T(`Location data is uneven. ${n1(pct(eligible, active))}% of listings have a usable map location overall: ${n1(pct(uhc.eligible_coordinates, uhc.active))}% of upazila health complexes and ${n1(pct(cc.eligible_coordinates, cc.active))}% of community clinics, but only ${n1(pct(un.eligible_coordinates, un.active))}% of union-level facilities and ${n1(pct(ter.eligible_coordinates, ter.active))}% of tertiary facilities.`,
+        `অবস্থানের তথ্য অসম। সব মিলিয়ে ${n1(pct(eligible, active))}% তালিকার ব্যবহারযোগ্য অবস্থান আছে: উপজেলা স্বাস্থ্য কমপ্লেক্সের ${n1(pct(uhc.eligible_coordinates, uhc.active))}% ও কমিউনিটি ক্লিনিকের ${n1(pct(cc.eligible_coordinates, cc.active))}%, কিন্তু ইউনিয়ন-স্তরের প্রতিষ্ঠানের মাত্র ${n1(pct(un.eligible_coordinates, un.active))}% ও টারশিয়ারি প্রতিষ্ঠানের ${n1(pct(ter.eligible_coordinates, ter.active))}%।`)
+    ];
+    try {
+      const load = (level) => {
+        if (!areaCache.has(level)) areaCache.set(level, fetch(path + level + '_availability.csv').then((r) => { if (!r.ok) throw new Error('Area table unavailable'); return r.text(); })
+          .then((text) => window.HealthCharts.csv(text)).catch((e) => { areaCache.delete(level); throw e; }));
+        return areaCache.get(level);
+      };
+      const [div, up] = await Promise.all([load('division'), load('upazila_thana')]);
+      const range = (rows, key) => { const v = rows.filter((r) => numeric(r[key]) !== null).sort((a, b) => numeric(a[key]) - numeric(b[key])); return [v[0], v[v.length - 1]]; };
+      const rate = 'active_listings_per_100000_bbs_residents', cov = 'coordinate_availability_pct';
+      const [ccLow, ccHigh] = range(div.filter((r) => r.tier === 'community'), rate), [uhLow, uhHigh] = range(div.filter((r) => r.tier === 'upazila'), rate);
+      const [unLow, unHigh] = range(div.filter((r) => r.tier === 'union'), cov);
+      items.push(
+        T(`Supply per resident differs between divisions. Community clinics range from ${n1(ccLow[rate], 1)} per 100,000 residents in ${place(ccLow.area_name)} to ${n1(ccHigh[rate], 1)} in ${place(ccHigh.area_name)}; upazila health complexes from ${n1(uhLow[rate], 2)} (${place(uhLow.area_name)}) to ${n1(uhHigh[rate], 2)} (${place(uhHigh.area_name)}).${ccLow.area_name === uhLow.area_name ? ` ${place(ccLow.area_name)} has the fewest per resident in both.` : ''}`,
+          `জনপ্রতি সেবা বিভাগভেদে আলাদা। প্রতি ১,০০,০০০ জনে কমিউনিটি ক্লিনিক ${inBn(ccLow.area_name)} ${n1(ccLow[rate], 1)} থেকে ${inBn(ccHigh.area_name)} ${n1(ccHigh[rate], 1)}; উপজেলা স্বাস্থ্য কমপ্লেক্স ${n1(uhLow[rate], 2)} (${place(uhLow.area_name)}) থেকে ${n1(uhHigh[rate], 2)} (${place(uhHigh.area_name)})।${ccLow.area_name === uhLow.area_name ? ` দুটিতেই জনপ্রতি সবচেয়ে কম ${inBn(ccLow.area_name)}।` : ''}`),
+        T(`Union-level facilities are the hardest to map: their share with a usable location ranges from ${n1(unLow[cov], 1)}% in ${place(unLow.area_name)} to ${n1(unHigh[cov], 1)}% in ${place(unHigh.area_name)}, so maps of this tier show only a small part of it.`,
+          `ইউনিয়ন-স্তরের প্রতিষ্ঠানের অবস্থান সবচেয়ে কম জানা: ব্যবহারযোগ্য অবস্থানের অংশ ${inBn(unLow.area_name)} ${n1(unLow[cov], 1)}% থেকে ${inBn(unHigh.area_name)} ${n1(unHigh[cov], 1)}%, তাই এই স্তরের মানচিত্র এর অল্প অংশই দেখায়।`));
+      const upCC = up.filter((r) => r.tier === 'community'), none = upCC.filter((r) => numeric(r.active_listings_by_registry_name) === 0).length;
+      items.push(T(`${number(none)} of ${number(upCC.length)} upazilas and thanas have no community clinic listed under their name, including city-corporation thanas, where community clinics are not planned.`,
+        `${number(upCC.length)}টি উপজেলা ও থানার ${number(none)}টিতে নিজের নামে কোনো কমিউনিটি ক্লিনিক তালিকাভুক্ত নেই, এর মধ্যে সিটি কর্পোরেশনের থানাও আছে, যেখানে কমিউনিটি ক্লিনিকের পরিকল্পনা নেই।`));
+    } catch (_) { /* the national findings above still stand */ }
+    items.push(T('For how many people can reach this care, by distance, travel time and during floods, see the Access page.', 'দূরত্ব, যাতায়াতের সময় ও বন্যায় কতজন মানুষ এই সেবায় পৌঁছাতে পারেন, তা প্রবেশগম্যতা পৃষ্ঠায় দেখুন।'));
+    list.replaceChildren(...items.map((text, i) => {
+      const li = document.createElement('li'); li.textContent = text;
+      if (i === items.length - 1) { li.textContent = ''; const a = document.createElement('a'); a.href = './accessibility.html'; a.textContent = text; li.append(a); }
+      return li;
+    }));
+  }
   function show(data) {
     baseline = data;
+    keyFindings(data);
     $('#analysis-active').textContent = number(data.national.reduce((sum, r) => sum + r.active, 0));
     $('#analysis-points').textContent = number(data.national.reduce((sum, r) => sum + r.eligible_coordinates, 0));
     $('#analysis-areas').textContent = number(Object.values(data.levels).reduce((sum, r) => sum + r.features, 0));

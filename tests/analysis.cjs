@@ -25,6 +25,14 @@ const { chromium } = require('playwright');
     assert.equal(await page.title(), 'Availability · ShasthoPath');
     assert.equal(await page.locator('nav[aria-label="Main navigation"] [aria-current="page"]').textContent(), 'Availability');
     assert.equal(await page.locator('#analysis-active').textContent(), '20,206');
+    // Key findings are written from the data tables.
+    await page.waitForFunction(() => document.querySelectorAll('#key-findings-list li').length === 6);
+    const findings = await page.locator('#key-findings-list li').allTextContents();
+    assert.match(findings[0], /20,206 active facilities/);
+    assert.match(findings[1], /19\.9% of union-level facilities/);
+    assert.match(findings[2], /5\.8 per 100,000 residents in Dhaka to 12\.6 in Barisal/);
+    assert.equal(await page.getAttribute('#key-findings-list li:last-child a', 'href'), './accessibility.html');
+    assert.equal(await page.locator('.analysis-context, #interpretation').count(), 0);
     assert.equal(await page.locator('#analysis-areas').textContent(), '616');
     assert.equal(await page.locator('#analysis-maps').textContent(), '10');
     assert.equal(await page.locator('#analysis-national tr').count(), 6);
@@ -91,6 +99,6 @@ const { chromium } = require('playwright');
     assert(await page.locator('#baseline-figure').isHidden());
     assert(await page.locator('#baseline-level').isDisabled());
     assert.equal(await page.locator('#analysis-active').textContent(), '—');
-    console.log('PASS: Analysis navigation, source-backed figures, maps/CSV, division-only rates, mobile/tablet layout, failed data/image handling and no external requests');
+    console.log('PASS: Analysis navigation, source-backed figures, key findings from the data, maps/CSV, division-only rates, mobile/tablet layout, failed data/image handling and no external requests');
   } finally { await browser.close(); }
 })().catch((error) => { console.error(error); process.exitCode = 1; });
